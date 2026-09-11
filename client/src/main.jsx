@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./styles.css";
 
-const API = "http://localhost:8787";
+const API =
+  import.meta.env.VITE_API_URL ||
+  (window.location.hostname === "localhost"
+    ? "http://localhost:8787"
+    : "https://codementor-ai-qbdx.onrender.com");
 
 const LANGUAGES = {
   c: {
@@ -46,71 +50,41 @@ int main() {
   },
 };
 
-const LEVELS = [
-  "Beginner",
-  "Intermediate",
-  "Advanced",
-];
+const LEVELS = ["Beginner", "Intermediate", "Advanced"];
 
 function App() {
-  const [page, setPage] =
-    useState("home");
+  const [page, setPage] = useState("home");
 
-  const [language, setLanguage] =
-    useState("c");
+  const [language, setLanguage] = useState("c");
+  const [level, setLevel] = useState("Beginner");
 
-  const [level, setLevel] =
-    useState("Beginner");
+  const [teacherQuestion, setTeacherQuestion] = useState("");
+  const [teacherAnswer, setTeacherAnswer] = useState("");
+  const [teacherBusy, setTeacherBusy] = useState(false);
 
-  const [teacherQuestion, setTeacherQuestion] =
-    useState("");
+  const [codeTopic, setCodeTopic] = useState("");
+  const [generatedCode, setGeneratedCode] = useState("");
+  const [generatorBusy, setGeneratorBusy] = useState(false);
 
-  const [teacherAnswer, setTeacherAnswer] =
-    useState("");
+  const [code, setCode] = useState(LANGUAGES.c.starter);
+  const [stdin, setStdin] = useState("");
+  const [output, setOutput] = useState("");
+  const [running, setRunning] = useState(false);
 
-  const [teacherBusy, setTeacherBusy] =
-    useState(false);
-
-  const [codeTopic, setCodeTopic] =
-    useState("");
-
-  const [generatedCode, setGeneratedCode] =
-    useState("");
-
-  const [generatorBusy, setGeneratorBusy] =
-    useState(false);
-
-  const [code, setCode] =
-    useState(LANGUAGES.c.starter);
-
-  const [stdin, setStdin] =
-    useState("");
-
-  const [output, setOutput] =
-    useState("");
-
-  const [running, setRunning] =
-    useState(false);
-
-  const [copied, setCopied] =
-    useState(false);
+  const [copied, setCopied] = useState(false);
 
   function changeLanguage(value) {
     setLanguage(value);
 
     if (page === "lab") {
-      setCode(
-        LANGUAGES[value].starter
-      );
+      setCode(LANGUAGES[value].starter);
       setOutput("");
     }
   }
 
   async function askTeacher() {
     if (!teacherQuestion.trim()) {
-      setTeacherAnswer(
-        "Please enter a question first."
-      );
+      setTeacherAnswer("Please enter a question first.");
       return;
     }
 
@@ -118,30 +92,19 @@ function App() {
     setTeacherAnswer("");
 
     try {
-      const response = await fetch(
-        `${API}/api/ai/teach`,
-        {
-          method: "POST",
+      const response = await fetch(`${API}/api/ai/teach`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language: LANGUAGES[language].name,
+          level,
+          question: teacherQuestion,
+        }),
+      });
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify({
-            language:
-              LANGUAGES[language].name,
-
-            level,
-
-            question:
-              teacherQuestion,
-          }),
-        }
-      );
-
-      const text =
-        await response.text();
+      const text = await response.text();
 
       let data;
 
@@ -149,14 +112,13 @@ function App() {
         data = JSON.parse(text);
       } catch {
         throw new Error(
-          "Backend returned an invalid response. Make sure the backend is running on port 8787."
+          "Backend returned an invalid response."
         );
       }
 
       if (!response.ok) {
         throw new Error(
-          data.error ||
-            "AI Teacher request failed."
+          data.error || "AI Teacher request failed."
         );
       }
 
@@ -188,12 +150,9 @@ function App() {
         `${API}/api/ai/generate-code`,
         {
           method: "POST",
-
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
-
           body: JSON.stringify({
             language,
             level,
@@ -202,8 +161,7 @@ function App() {
         }
       );
 
-      const text =
-        await response.text();
+      const text = await response.text();
 
       let data;
 
@@ -211,14 +169,13 @@ function App() {
         data = JSON.parse(text);
       } catch {
         throw new Error(
-          "The backend returned an invalid response. Restart the backend and try again."
+          "The backend returned an invalid response."
         );
       }
 
       if (!response.ok) {
         throw new Error(
-          data.error ||
-            "Code generation failed."
+          data.error || "Code generation failed."
         );
       }
 
@@ -262,29 +219,21 @@ function App() {
 
   async function runCode() {
     if (!code.trim()) {
-      setOutput(
-        "Please enter some code."
-      );
+      setOutput("Please enter some code.");
       return;
     }
 
     setRunning(true);
-
-    setOutput(
-      "Running your program..."
-    );
+    setOutput("Running your program...");
 
     try {
       const response = await fetch(
         `${API}/api/code/run`,
         {
           method: "POST",
-
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
           },
-
           body: JSON.stringify({
             language,
             code,
@@ -293,8 +242,7 @@ function App() {
         }
       );
 
-      const text =
-        await response.text();
+      const text = await response.text();
 
       let data;
 
@@ -308,15 +256,9 @@ function App() {
 
       if (!response.ok) {
         throw new Error(
-          data.error ||
-            "Code execution failed."
+          data.error || "Code execution failed."
         );
       }
-
-      /*
-        ONLY show actual execution information.
-        No STATUS / TIME / MEMORY labels.
-      */
 
       let result = "";
 
@@ -340,16 +282,12 @@ function App() {
       }
 
       if (!result) {
-        if (
-          data.status ===
-          "Accepted"
-        ) {
+        if (data.status === "Accepted") {
           result =
             "Program executed successfully with no output.";
         } else {
           result =
-            data.status ||
-            "Program finished.";
+            data.status || "Program finished.";
         }
       }
 
@@ -375,7 +313,6 @@ function App() {
     return (
       <main className="home-page">
         <section className="hero">
-
           <div className="hero-badge">
             ✦ AI POWERED PROGRAMMING EDUCATION
           </div>
@@ -399,18 +336,14 @@ function App() {
 
           <div className="hero-buttons">
             <button
-              onClick={() =>
-                setPage("learn")
-              }
+              onClick={() => setPage("learn")}
               className="primary-button"
             >
               START LEARNING →
             </button>
 
             <button
-              onClick={() =>
-                setPage("generator")
-              }
+              onClick={() => setPage("generator")}
               className="secondary-button"
             >
               GENERATE CODE
@@ -419,7 +352,6 @@ function App() {
         </section>
 
         <section className="feature-grid">
-
           <div className="feature-card">
             <div className="feature-icon">
               AI
@@ -434,9 +366,7 @@ function App() {
             </p>
 
             <button
-              onClick={() =>
-                setPage("teacher")
-              }
+              onClick={() => setPage("teacher")}
             >
               OPEN TEACHER →
             </button>
@@ -455,9 +385,7 @@ function App() {
             </p>
 
             <button
-              onClick={() =>
-                setPage("generator")
-              }
+              onClick={() => setPage("generator")}
             >
               GENERATE →
             </button>
@@ -476,14 +404,11 @@ function App() {
             </p>
 
             <button
-              onClick={() =>
-                setPage("lab")
-              }
+              onClick={() => setPage("lab")}
             >
               OPEN LAB →
             </button>
           </div>
-
         </section>
       </main>
     );
@@ -492,7 +417,6 @@ function App() {
   function LearnPage() {
     return (
       <main className="page-container">
-
         <div className="page-heading">
           <span>LEARNING CENTER</span>
 
@@ -509,44 +433,42 @@ function App() {
         </div>
 
         <div className="language-grid">
+          {Object.entries(LANGUAGES).map(
+            ([key, item]) => (
+              <button
+                key={key}
+                className="language-card"
+                onClick={() => {
+                  setLanguage(key);
+                  setPage("teacher");
+                }}
+              >
+                <span className="language-symbol">
+                  {key === "python"
+                    ? "Py"
+                    : key === "javascript"
+                    ? "JS"
+                    : key === "cpp"
+                    ? "C++"
+                    : key === "java"
+                    ? "J"
+                    : "C"}
+                </span>
 
-          {Object.entries(
-            LANGUAGES
-          ).map(([key, item]) => (
-            <button
-              key={key}
-              className="language-card"
-              onClick={() => {
-                setLanguage(key);
-                setPage("teacher");
-              }}
-            >
-              <span className="language-symbol">
-                {key === "python"
-                  ? "Py"
-                  : key === "javascript"
-                  ? "JS"
-                  : key === "cpp"
-                  ? "C++"
-                  : key === "java"
-                  ? "J"
-                  : "C"}
-              </span>
+                <h3>{item.name}</h3>
 
-              <h3>{item.name}</h3>
+                <p>
+                  Learn concepts, syntax,
+                  problem solving and practical
+                  programming.
+                </p>
 
-              <p>
-                Learn concepts, syntax,
-                problem solving and practical
-                programming.
-              </p>
-
-              <span className="card-link">
-                START →
-              </span>
-            </button>
-          ))}
-
+                <span className="card-link">
+                  START →
+                </span>
+              </button>
+            )
+          )}
         </div>
       </main>
     );
@@ -555,7 +477,6 @@ function App() {
   function TeacherPage() {
     return (
       <main className="page-container">
-
         <div className="page-heading">
           <span>PERSONAL AI TEACHER</span>
 
@@ -567,46 +488,36 @@ function App() {
         </div>
 
         <section className="teacher-card">
-
           <div className="controls-row">
-
             <div>
-              <label>
-                LANGUAGE
-              </label>
+              <label>LANGUAGE</label>
 
               <select
                 value={language}
                 onChange={(e) =>
-                  changeLanguage(
-                    e.target.value
-                  )
+                  changeLanguage(e.target.value)
                 }
               >
-                {Object.entries(
-                  LANGUAGES
-                ).map(([key, item]) => (
-                  <option
-                    key={key}
-                    value={key}
-                  >
-                    {item.name}
-                  </option>
-                ))}
+                {Object.entries(LANGUAGES).map(
+                  ([key, item]) => (
+                    <option
+                      key={key}
+                      value={key}
+                    >
+                      {item.name}
+                    </option>
+                  )
+                )}
               </select>
             </div>
 
             <div>
-              <label>
-                LEVEL
-              </label>
+              <label>LEVEL</label>
 
               <select
                 value={level}
                 onChange={(e) =>
-                  setLevel(
-                    e.target.value
-                  )
+                  setLevel(e.target.value)
                 }
               >
                 {LEVELS.map((item) => (
@@ -619,7 +530,6 @@ function App() {
                 ))}
               </select>
             </div>
-
           </div>
 
           <label className="large-label">
@@ -658,7 +568,6 @@ function App() {
               </div>
             </div>
           )}
-
         </section>
       </main>
     );
@@ -667,7 +576,6 @@ function App() {
   function GeneratorPage() {
     return (
       <main className="page-container">
-
         <div className="page-heading">
           <span>AI CODE GENERATOR</span>
 
@@ -685,9 +593,7 @@ function App() {
         </div>
 
         <section className="generator-card">
-
           <div className="generator-top">
-
             <div className="generator-section">
               <label>
                 PROGRAMMING LANGUAGE
@@ -715,16 +621,12 @@ function App() {
             </div>
 
             <div className="level-control">
-              <label>
-                LEVEL
-              </label>
+              <label>LEVEL</label>
 
               <select
                 value={level}
                 onChange={(e) =>
-                  setLevel(
-                    e.target.value
-                  )
+                  setLevel(e.target.value)
                 }
               >
                 {LEVELS.map((item) => (
@@ -737,7 +639,6 @@ function App() {
                 ))}
               </select>
             </div>
-
           </div>
 
           <label className="large-label">
@@ -748,9 +649,7 @@ function App() {
             className="generator-input"
             value={codeTopic}
             onChange={(e) =>
-              setCodeTopic(
-                e.target.value
-              )
+              setCodeTopic(e.target.value)
             }
             placeholder="Enter your code topic, for example: Find the maximum number among 5 numbers"
           />
@@ -784,7 +683,6 @@ function App() {
 
           {generatedCode && (
             <div className="generated-code-card">
-
               <div className="generated-header">
                 <div>
                   <span>
@@ -792,15 +690,12 @@ function App() {
                   </span>
 
                   <h3>
-                    {LANGUAGES[language]
-                      .name}
+                    {LANGUAGES[language].name}
                   </h3>
                 </div>
 
                 <button
-                  onClick={
-                    copyGeneratedCode
-                  }
+                  onClick={copyGeneratedCode}
                   className="copy-button"
                 >
                   {copied
@@ -821,10 +716,8 @@ function App() {
               >
                 SEND TO CODE LAB →
               </button>
-
             </div>
           )}
-
         </section>
       </main>
     );
@@ -833,7 +726,6 @@ function App() {
   function LabPage() {
     return (
       <main className="page-container">
-
         <div className="page-heading">
           <span>REAL CODE EXECUTION</span>
 
@@ -850,20 +742,14 @@ function App() {
         </div>
 
         <section className="lab-card">
-
           <div className="lab-toolbar">
-
             <div>
-              <label>
-                LANGUAGE
-              </label>
+              <label>LANGUAGE</label>
 
               <select
                 value={language}
                 onChange={(e) =>
-                  changeLanguage(
-                    e.target.value
-                  )
+                  changeLanguage(e.target.value)
                 }
               >
                 {Object.entries(
@@ -888,15 +774,11 @@ function App() {
                 ? "RUNNING..."
                 : "▶ RUN CODE"}
             </button>
-
           </div>
 
           <div className="editor-wrapper">
-
             <div className="editor-header">
-              <span>
-                SOURCE CODE
-              </span>
+              <span>SOURCE CODE</span>
 
               <span>
                 {LANGUAGES[language].name}
@@ -911,21 +793,14 @@ function App() {
               }
               spellCheck="false"
             />
-
           </div>
 
           <div className="lab-bottom">
-
             <div className="input-panel">
-
               <div className="panel-header">
-                <span>
-                  PROGRAM INPUT
-                </span>
+                <span>PROGRAM INPUT</span>
 
-                <span>
-                  STDIN
-                </span>
+                <span>STDIN</span>
               </div>
 
               <textarea
@@ -937,30 +812,21 @@ function App() {
                 className="stdin-box"
                 spellCheck="false"
               />
-
             </div>
 
             <div className="output-panel">
-
               <div className="panel-header">
-                <span>
-                  PROGRAM OUTPUT
-                </span>
+                <span>PROGRAM OUTPUT</span>
 
-                <span>
-                  LIVE RESULT
-                </span>
+                <span>LIVE RESULT</span>
               </div>
 
               <pre className="output-box">
                 {output ||
                   "Program output will appear here..."}
               </pre>
-
             </div>
-
           </div>
-
         </section>
       </main>
     );
@@ -969,7 +835,6 @@ function App() {
   function PracticePage() {
     return (
       <main className="page-container">
-
         <div className="page-heading">
           <span>PROGRAMMING PRACTICE</span>
 
@@ -981,38 +846,32 @@ function App() {
         </div>
 
         <div className="practice-grid">
-
           {[
             {
               title:
                 "Find the Largest Number",
               level: "Beginner",
             },
-
             {
               title:
                 "Check Prime Number",
               level: "Beginner",
             },
-
             {
               title:
                 "Reverse an Array",
               level: "Intermediate",
             },
-
             {
               title:
                 "Palindrome Checker",
               level: "Intermediate",
             },
-
             {
               title:
                 "Sort Numbers",
               level: "Intermediate",
             },
-
             {
               title:
                 "Student Grade System",
@@ -1024,25 +883,22 @@ function App() {
               key={index}
             >
               <span>
-                CHALLENGE {String(
-                  index + 1
-                ).padStart(2, "0")}
+                CHALLENGE{" "}
+                {String(index + 1).padStart(
+                  2,
+                  "0"
+                )}
               </span>
 
-              <h3>
-                {item.title}
-              </h3>
+              <h3>{item.title}</h3>
 
               <p>
-                Difficulty:{" "}
-                {item.level}
+                Difficulty: {item.level}
               </p>
 
               <button
                 onClick={() => {
-                  setCodeTopic(
-                    item.title
-                  );
+                  setCodeTopic(item.title);
                   setPage("generator");
                 }}
               >
@@ -1050,9 +906,7 @@ function App() {
               </button>
             </div>
           ))}
-
         </div>
-
       </main>
     );
   }
@@ -1081,9 +935,7 @@ function App() {
 
   return (
     <div className="app-shell">
-
       <header className="top-nav">
-
         <button
           className="brand"
           onClick={() =>
@@ -1096,7 +948,6 @@ function App() {
         </button>
 
         <nav>
-
           <button
             className={
               page === "learn"
@@ -1161,22 +1012,20 @@ function App() {
           >
             Practice
           </button>
-
         </nav>
 
         <div className="search-box">
           <span>⌕</span>
+
           <input
             placeholder="Search concepts..."
           />
         </div>
-
       </header>
 
       {renderPage()}
 
       <footer className="footer">
-
         <div>
           ✦ CodeMentor AI
         </div>
@@ -1189,9 +1038,7 @@ function App() {
         <div>
           AI Programming Education
         </div>
-
       </footer>
-
     </div>
   );
 }
