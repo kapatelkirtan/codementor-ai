@@ -50,41 +50,248 @@ int main() {
   },
 };
 
-const LEVELS = ["Beginner", "Intermediate", "Advanced"];
+const LEVELS = [
+  "Beginner",
+  "Intermediate",
+  "Advanced",
+];
 
-function App() {
-  const [page, setPage] = useState("home");
+const PRACTICE_CHALLENGES = [
+  {
+    title: "Find the Largest Number",
+    level: "Beginner",
+  },
+  {
+    title: "Check Prime Number",
+    level: "Beginner",
+  },
+  {
+    title: "Reverse an Array",
+    level: "Intermediate",
+  },
+  {
+    title: "Palindrome Checker",
+    level: "Intermediate",
+  },
+  {
+    title: "Sort Numbers",
+    level: "Intermediate",
+  },
+  {
+    title: "Student Grade System",
+    level: "Advanced",
+  },
+];
 
-  const [language, setLanguage] = useState("c");
-  const [level, setLevel] = useState("Beginner");
+const EXAMPLES = [
+  "Find the maximum number among 5 numbers",
+  "Check whether a number is prime",
+  "Reverse a string",
+  "Sort an array",
+  "Check whether a string is palindrome",
+];
 
-  const [teacherQuestion, setTeacherQuestion] = useState("");
-  const [teacherAnswer, setTeacherAnswer] = useState("");
-  const [teacherBusy, setTeacherBusy] = useState(false);
+/* =========================================================
+   HOME PAGE
+========================================================= */
 
-  const [codeTopic, setCodeTopic] = useState("");
-  const [generatedCode, setGeneratedCode] = useState("");
-  const [generatorBusy, setGeneratorBusy] = useState(false);
+function HomePage({ setPage }) {
+  return (
+    <main className="home-page">
+      <section className="hero">
+        <div className="hero-badge">
+          ✦ AI POWERED PROGRAMMING EDUCATION
+        </div>
 
-  const [code, setCode] = useState(LANGUAGES.c.starter);
-  const [stdin, setStdin] = useState("");
-  const [output, setOutput] = useState("");
-  const [running, setRunning] = useState(false);
+        <h1>
+          Learn to Code.
+          <br />
+          <span>Build with</span>
+          <br />
+          Confidence.
+        </h1>
 
-  const [copied, setCopied] = useState(false);
+        <p>
+          Learn C, C++, Python, Java and
+          JavaScript with your personal AI
+          programming teacher.
+          <br />
+          Generate real programs, execute
+          code and practice programming.
+        </p>
+
+        <div className="hero-buttons">
+          <button
+            onClick={() => setPage("learn")}
+            className="primary-button"
+          >
+            START LEARNING →
+          </button>
+
+          <button
+            onClick={() => setPage("generator")}
+            className="secondary-button"
+          >
+            GENERATE CODE
+          </button>
+        </div>
+      </section>
+
+      <section className="feature-grid">
+        <div className="feature-card">
+          <div className="feature-icon">AI</div>
+
+          <h3>AI Teacher</h3>
+
+          <p>
+            Ask programming questions
+            and learn concepts step by
+            step.
+          </p>
+
+          <button
+            onClick={() => setPage("teacher")}
+          >
+            OPEN TEACHER →
+          </button>
+        </div>
+
+        <div className="feature-card">
+          <div className="feature-icon">
+            {"</>"}
+          </div>
+
+          <h3>Code Generator</h3>
+
+          <p>
+            Describe a programming problem
+            and generate a complete program.
+          </p>
+
+          <button
+            onClick={() => setPage("generator")}
+          >
+            GENERATE →
+          </button>
+        </div>
+
+        <div className="feature-card">
+          <div className="feature-icon">▶</div>
+
+          <h3>Code Lab</h3>
+
+          <p>
+            Run real C, C++, Python, Java
+            and JavaScript programs.
+          </p>
+
+          <button
+            onClick={() => setPage("lab")}
+          >
+            OPEN LAB →
+          </button>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+/* =========================================================
+   LEARN PAGE
+========================================================= */
+
+function LearnPage({
+  setPage,
+  setLanguage,
+}) {
+  return (
+    <main className="page-container">
+      <div className="page-heading">
+        <span>LEARNING CENTER</span>
+
+        <h2>
+          Learn Programming
+          <br />
+          <strong>Step by Step.</strong>
+        </h2>
+
+        <p>
+          Choose a language and build your
+          programming foundation.
+        </p>
+      </div>
+
+      <div className="language-grid">
+        {Object.entries(LANGUAGES).map(
+          ([key, item]) => (
+            <button
+              key={key}
+              className="language-card"
+              onClick={() => {
+                setLanguage(key);
+                setPage("teacher");
+              }}
+            >
+              <span className="language-symbol">
+                {key === "python"
+                  ? "Py"
+                  : key === "javascript"
+                  ? "JS"
+                  : key === "cpp"
+                  ? "C++"
+                  : key === "java"
+                  ? "J"
+                  : "C"}
+              </span>
+
+              <h3>{item.name}</h3>
+
+              <p>
+                Learn concepts, syntax,
+                problem solving and practical
+                programming.
+              </p>
+
+              <span className="card-link">
+                START →
+              </span>
+            </button>
+          )
+        )}
+      </div>
+    </main>
+  );
+}
+
+/* =========================================================
+   AI TEACHER PAGE
+========================================================= */
+
+function TeacherPage({
+  language,
+  setLanguage,
+  level,
+  setLevel,
+}) {
+  const [teacherQuestion, setTeacherQuestion] =
+    useState("");
+
+  const [teacherAnswer, setTeacherAnswer] =
+    useState("");
+
+  const [teacherBusy, setTeacherBusy] =
+    useState(false);
 
   function changeLanguage(value) {
     setLanguage(value);
-
-    if (page === "lab") {
-      setCode(LANGUAGES[value].starter);
-      setOutput("");
-    }
+    setTeacherAnswer("");
   }
 
   async function askTeacher() {
     if (!teacherQuestion.trim()) {
-      setTeacherAnswer("Please enter a question first.");
+      setTeacherAnswer(
+        "Please enter a question first."
+      );
       return;
     }
 
@@ -92,19 +299,26 @@ function App() {
     setTeacherAnswer("");
 
     try {
-      const response = await fetch(`${API}/api/ai/teach`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          language: LANGUAGES[language].name,
-          level,
-          question: teacherQuestion,
-        }),
-      });
+      const response = await fetch(
+        `${API}/api/ai/teach`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            language:
+              LANGUAGES[language].name,
+            level,
+            question:
+              teacherQuestion.trim(),
+          }),
+        }
+      );
 
-      const text = await response.text();
+      const text =
+        await response.text();
 
       let data;
 
@@ -118,12 +332,14 @@ function App() {
 
       if (!response.ok) {
         throw new Error(
-          data.error || "AI Teacher request failed."
+          data.error ||
+            "AI Teacher request failed."
         );
       }
 
       setTeacherAnswer(
-        data.answer || "No answer received."
+        data.answer ||
+          "No answer received."
       );
     } catch (error) {
       setTeacherAnswer(
@@ -133,6 +349,136 @@ function App() {
       setTeacherBusy(false);
     }
   }
+
+  return (
+    <main className="page-container">
+      <div className="page-heading">
+        <span>PERSONAL AI TEACHER</span>
+
+        <h2>
+          Ask Anything.
+          <br />
+          <strong>
+            Understand Everything.
+          </strong>
+        </h2>
+
+        <p>
+          Ask questions and learn
+          programming with AI.
+        </p>
+      </div>
+
+      <section className="teacher-card">
+        <div className="controls-row">
+          <div>
+            <label>LANGUAGE</label>
+
+            <select
+              value={language}
+              onChange={(e) =>
+                changeLanguage(
+                  e.target.value
+                )
+              }
+            >
+              {Object.entries(
+                LANGUAGES
+              ).map(([key, item]) => (
+                <option
+                  key={key}
+                  value={key}
+                >
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label>LEVEL</label>
+
+            <select
+              value={level}
+              onChange={(e) =>
+                setLevel(e.target.value)
+              }
+            >
+              {LEVELS.map((item) => (
+                <option
+                  key={item}
+                  value={item}
+                >
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <label className="large-label">
+          ASK YOUR PROGRAMMING QUESTION
+        </label>
+
+        <textarea
+          className="large-input"
+          value={teacherQuestion}
+          onChange={(e) =>
+            setTeacherQuestion(
+              e.target.value
+            )
+          }
+          placeholder="For example: Explain loops in C in very easy language."
+        />
+
+        <button
+          className="generate-button"
+          onClick={askTeacher}
+          disabled={teacherBusy}
+        >
+          {teacherBusy
+            ? "AI IS THINKING..."
+            : "✦ ASK AI TEACHER"}
+        </button>
+
+        {teacherAnswer && (
+          <div className="answer-card">
+            <div className="answer-title">
+              AI TEACHER
+            </div>
+
+            <div className="answer-content">
+              {teacherAnswer}
+            </div>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
+
+/* =========================================================
+   CODE GENERATOR PAGE
+========================================================= */
+
+function GeneratorPage({
+  language,
+  setLanguage,
+  level,
+  setLevel,
+  generatedCode,
+  setGeneratedCode,
+  setLabCode,
+  setPage,
+}) {
+  const [codeTopic, setCodeTopic] =
+    useState("");
+
+  const [generatorBusy, setGeneratorBusy] =
+    useState(false);
+
+  const [copied, setCopied] =
+    useState(false);
 
   async function generateCode() {
     if (!codeTopic.trim()) {
@@ -151,17 +497,19 @@ function App() {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
           body: JSON.stringify({
             language,
             level,
-            topic: codeTopic,
+            topic: codeTopic.trim(),
           }),
         }
       );
 
-      const text = await response.text();
+      const text =
+        await response.text();
 
       let data;
 
@@ -175,7 +523,8 @@ function App() {
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Code generation failed."
+          data.error ||
+            "Code generation failed."
         );
       }
 
@@ -212,19 +561,201 @@ function App() {
   function sendToLab() {
     if (!generatedCode) return;
 
-    setCode(generatedCode);
-    setOutput("");
+    setLabCode(generatedCode);
     setPage("lab");
   }
 
+  return (
+    <main className="page-container">
+      <div className="page-heading">
+        <span>AI CODE GENERATOR</span>
+
+        <h2>
+          Generate Any
+          <br />
+          <strong>Program.</strong>
+        </h2>
+
+        <p>
+          Describe what you want to build
+          and CodeMentor AI will generate
+          a complete working program.
+        </p>
+      </div>
+
+      <section className="generator-card">
+        <div className="generator-top">
+          <div className="generator-section">
+            <label>
+              PROGRAMMING LANGUAGE
+            </label>
+
+            <div className="generator-language-tabs">
+              {Object.entries(
+                LANGUAGES
+              ).map(([key, item]) => (
+                <button
+                  key={key}
+                  className={
+                    language === key
+                      ? "active"
+                      : ""
+                  }
+                  onClick={() =>
+                    setLanguage(key)
+                  }
+                >
+                  {item.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="level-control">
+            <label>LEVEL</label>
+
+            <select
+              value={level}
+              onChange={(e) =>
+                setLevel(e.target.value)
+              }
+            >
+              {LEVELS.map((item) => (
+                <option
+                  key={item}
+                  value={item}
+                >
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <label className="large-label">
+          ENTER YOUR CODE TOPIC
+        </label>
+
+        <textarea
+          className="generator-input"
+          value={codeTopic}
+          onChange={(e) =>
+            setCodeTopic(e.target.value)
+          }
+          placeholder="Enter your code topic, for example: Find the maximum number among 5 numbers"
+        />
+
+        <div className="examples-title">
+          QUICK EXAMPLES
+        </div>
+
+        <div className="example-buttons">
+          {EXAMPLES.map((example) => (
+            <button
+              key={example}
+              onClick={() =>
+                setCodeTopic(example)
+              }
+            >
+              {example}
+            </button>
+          ))}
+        </div>
+
+        <button
+          className="generate-button big"
+          onClick={generateCode}
+          disabled={generatorBusy}
+        >
+          {generatorBusy
+            ? "✦ GENERATING..."
+            : "✦ GENERATE CODE"}
+        </button>
+
+        {generatedCode && (
+          <div className="generated-code-card">
+            <div className="generated-header">
+              <div>
+                <span>
+                  GENERATED PROGRAM
+                </span>
+
+                <h3>
+                  {LANGUAGES[language].name}
+                </h3>
+              </div>
+
+              <button
+                onClick={
+                  copyGeneratedCode
+                }
+                className="copy-button"
+              >
+                {copied
+                  ? "COPIED ✓"
+                  : "COPY CODE"}
+              </button>
+            </div>
+
+            <pre className="generated-code">
+              <code>
+                {generatedCode}
+              </code>
+            </pre>
+
+            <button
+              className="send-lab-button"
+              onClick={sendToLab}
+            >
+              SEND TO CODE LAB →
+            </button>
+          </div>
+        )}
+      </section>
+    </main>
+  );
+}
+
+/* =========================================================
+   CODE LAB PAGE
+========================================================= */
+
+function LabPage({
+  language,
+  setLanguage,
+  labCode,
+  setLabCode,
+}) {
+  const [stdin, setStdin] =
+    useState("");
+
+  const [output, setOutput] =
+    useState("");
+
+  const [running, setRunning] =
+    useState(false);
+
+  function changeLanguage(value) {
+    setLanguage(value);
+    setLabCode(
+      LANGUAGES[value].starter
+    );
+    setOutput("");
+  }
+
   async function runCode() {
-    if (!code.trim()) {
-      setOutput("Please enter some code.");
+    if (!labCode.trim()) {
+      setOutput(
+        "Please enter some code."
+      );
       return;
     }
 
     setRunning(true);
-    setOutput("Running your program...");
+
+    setOutput(
+      "Running your program..."
+    );
 
     try {
       const response = await fetch(
@@ -232,17 +763,19 @@ function App() {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
           body: JSON.stringify({
             language,
-            code,
+            code: labCode,
             stdin,
           }),
         }
       );
 
-      const text = await response.text();
+      const text =
+        await response.text();
 
       let data;
 
@@ -256,14 +789,16 @@ function App() {
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Code execution failed."
+          data.error ||
+            "Code execution failed."
         );
       }
 
       let result = "";
 
       if (data.compileOutput?.trim()) {
-        result += data.compileOutput.trim();
+        result +=
+          data.compileOutput.trim();
       }
 
       if (data.stderr?.trim()) {
@@ -287,7 +822,8 @@ function App() {
             "Program executed successfully with no output.";
         } else {
           result =
-            data.status || "Program finished.";
+            data.status ||
+            "Program finished.";
         }
       }
 
@@ -301,583 +837,152 @@ function App() {
     }
   }
 
-  const examples = [
-    "Find the maximum number among 5 numbers",
-    "Check whether a number is prime",
-    "Reverse a string",
-    "Sort an array",
-    "Check whether a string is palindrome",
-  ];
+  return (
+    <main className="page-container">
+      <div className="page-heading">
+        <span>REAL CODE EXECUTION</span>
 
-  function HomePage() {
-    return (
-      <main className="home-page">
-        <section className="hero">
-          <div className="hero-badge">
-            ✦ AI POWERED PROGRAMMING EDUCATION
-          </div>
+        <h2>
+          Code Lab.
+          <br />
+          <strong>
+            Write. Run. Learn.
+          </strong>
+        </h2>
 
-          <h1>
-            Learn to Code.
-            <br />
-            <span>Build with</span>
-            <br />
-            Confidence.
-          </h1>
+        <p>
+          Execute your program using
+          Judge0.
+        </p>
+      </div>
 
-          <p>
-            Learn C, C++, Python, Java and
-            JavaScript with your personal AI
-            programming teacher.
-            <br />
-            Generate real programs, execute
-            code and practice programming.
-          </p>
+      <section className="lab-card">
+        <div className="lab-toolbar">
+          <div>
+            <label>LANGUAGE</label>
 
-          <div className="hero-buttons">
-            <button
-              onClick={() => setPage("learn")}
-              className="primary-button"
+            <select
+              value={language}
+              onChange={(e) =>
+                changeLanguage(
+                  e.target.value
+                )
+              }
             >
-              START LEARNING →
-            </button>
-
-            <button
-              onClick={() => setPage("generator")}
-              className="secondary-button"
-            >
-              GENERATE CODE
-            </button>
-          </div>
-        </section>
-
-        <section className="feature-grid">
-          <div className="feature-card">
-            <div className="feature-icon">
-              AI
-            </div>
-
-            <h3>AI Teacher</h3>
-
-            <p>
-              Ask programming questions
-              and learn concepts step by
-              step.
-            </p>
-
-            <button
-              onClick={() => setPage("teacher")}
-            >
-              OPEN TEACHER →
-            </button>
-          </div>
-
-          <div className="feature-card">
-            <div className="feature-icon">
-              {"</>"}
-            </div>
-
-            <h3>Code Generator</h3>
-
-            <p>
-              Describe a programming problem
-              and generate a complete program.
-            </p>
-
-            <button
-              onClick={() => setPage("generator")}
-            >
-              GENERATE →
-            </button>
-          </div>
-
-          <div className="feature-card">
-            <div className="feature-icon">
-              ▶
-            </div>
-
-            <h3>Code Lab</h3>
-
-            <p>
-              Run real C, C++, Python, Java
-              and JavaScript programs.
-            </p>
-
-            <button
-              onClick={() => setPage("lab")}
-            >
-              OPEN LAB →
-            </button>
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  function LearnPage() {
-    return (
-      <main className="page-container">
-        <div className="page-heading">
-          <span>LEARNING CENTER</span>
-
-          <h2>
-            Learn Programming
-            <br />
-            <strong>Step by Step.</strong>
-          </h2>
-
-          <p>
-            Choose a language and build your
-            programming foundation.
-          </p>
-        </div>
-
-        <div className="language-grid">
-          {Object.entries(LANGUAGES).map(
-            ([key, item]) => (
-              <button
-                key={key}
-                className="language-card"
-                onClick={() => {
-                  setLanguage(key);
-                  setPage("teacher");
-                }}
-              >
-                <span className="language-symbol">
-                  {key === "python"
-                    ? "Py"
-                    : key === "javascript"
-                    ? "JS"
-                    : key === "cpp"
-                    ? "C++"
-                    : key === "java"
-                    ? "J"
-                    : "C"}
-                </span>
-
-                <h3>{item.name}</h3>
-
-                <p>
-                  Learn concepts, syntax,
-                  problem solving and practical
-                  programming.
-                </p>
-
-                <span className="card-link">
-                  START →
-                </span>
-              </button>
-            )
-          )}
-        </div>
-      </main>
-    );
-  }
-
-  function TeacherPage() {
-    return (
-      <main className="page-container">
-        <div className="page-heading">
-          <span>PERSONAL AI TEACHER</span>
-
-          <h2>
-            Ask Anything.
-            <br />
-            <strong>Understand Everything.</strong>
-          </h2>
-        </div>
-
-        <section className="teacher-card">
-          <div className="controls-row">
-            <div>
-              <label>LANGUAGE</label>
-
-              <select
-                value={language}
-                onChange={(e) =>
-                  changeLanguage(e.target.value)
-                }
-              >
-                {Object.entries(LANGUAGES).map(
-                  ([key, item]) => (
-                    <option
-                      key={key}
-                      value={key}
-                    >
-                      {item.name}
-                    </option>
-                  )
-                )}
-              </select>
-            </div>
-
-            <div>
-              <label>LEVEL</label>
-
-              <select
-                value={level}
-                onChange={(e) =>
-                  setLevel(e.target.value)
-                }
-              >
-                {LEVELS.map((item) => (
-                  <option
-                    key={item}
-                    value={item}
-                  >
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <label className="large-label">
-            ASK YOUR PROGRAMMING QUESTION
-          </label>
-
-          <textarea
-            className="large-input"
-            value={teacherQuestion}
-            onChange={(e) =>
-              setTeacherQuestion(
-                e.target.value
-              )
-            }
-            placeholder="For example: Explain loops in C in very easy language."
-          />
-
-          <button
-            className="generate-button"
-            onClick={askTeacher}
-            disabled={teacherBusy}
-          >
-            {teacherBusy
-              ? "AI IS THINKING..."
-              : "✦ ASK AI TEACHER"}
-          </button>
-
-          {teacherAnswer && (
-            <div className="answer-card">
-              <div className="answer-title">
-                AI TEACHER
-              </div>
-
-              <div className="answer-content">
-                {teacherAnswer}
-              </div>
-            </div>
-          )}
-        </section>
-      </main>
-    );
-  }
-
-  function GeneratorPage() {
-    return (
-      <main className="page-container">
-        <div className="page-heading">
-          <span>AI CODE GENERATOR</span>
-
-          <h2>
-            Generate Any
-            <br />
-            <strong>Program.</strong>
-          </h2>
-
-          <p>
-            Describe what you want to build
-            and CodeMentor AI will generate
-            a complete working program.
-          </p>
-        </div>
-
-        <section className="generator-card">
-          <div className="generator-top">
-            <div className="generator-section">
-              <label>
-                PROGRAMMING LANGUAGE
-              </label>
-
-              <div className="generator-language-tabs">
-                {Object.entries(
-                  LANGUAGES
-                ).map(([key, item]) => (
-                  <button
-                    key={key}
-                    className={
-                      language === key
-                        ? "active"
-                        : ""
-                    }
-                    onClick={() =>
-                      setLanguage(key)
-                    }
-                  >
-                    {item.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="level-control">
-              <label>LEVEL</label>
-
-              <select
-                value={level}
-                onChange={(e) =>
-                  setLevel(e.target.value)
-                }
-              >
-                {LEVELS.map((item) => (
-                  <option
-                    key={item}
-                    value={item}
-                  >
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <label className="large-label">
-            ENTER YOUR CODE TOPIC
-          </label>
-
-          <textarea
-            className="generator-input"
-            value={codeTopic}
-            onChange={(e) =>
-              setCodeTopic(e.target.value)
-            }
-            placeholder="Enter your code topic, for example: Find the maximum number among 5 numbers"
-          />
-
-          <div className="examples-title">
-            QUICK EXAMPLES
-          </div>
-
-          <div className="example-buttons">
-            {examples.map((example) => (
-              <button
-                key={example}
-                onClick={() =>
-                  setCodeTopic(example)
-                }
-              >
-                {example}
-              </button>
-            ))}
-          </div>
-
-          <button
-            className="generate-button big"
-            onClick={generateCode}
-            disabled={generatorBusy}
-          >
-            {generatorBusy
-              ? "✦ GENERATING..."
-              : "✦ GENERATE CODE"}
-          </button>
-
-          {generatedCode && (
-            <div className="generated-code-card">
-              <div className="generated-header">
-                <div>
-                  <span>
-                    GENERATED PROGRAM
-                  </span>
-
-                  <h3>
-                    {LANGUAGES[language].name}
-                  </h3>
-                </div>
-
-                <button
-                  onClick={copyGeneratedCode}
-                  className="copy-button"
+              {Object.entries(
+                LANGUAGES
+              ).map(([key, item]) => (
+                <option
+                  key={key}
+                  value={key}
                 >
-                  {copied
-                    ? "COPIED ✓"
-                    : "COPY CODE"}
-                </button>
-              </div>
-
-              <pre className="generated-code">
-                <code>
-                  {generatedCode}
-                </code>
-              </pre>
-
-              <button
-                className="send-lab-button"
-                onClick={sendToLab}
-              >
-                SEND TO CODE LAB →
-              </button>
-            </div>
-          )}
-        </section>
-      </main>
-    );
-  }
-
-  function LabPage() {
-    return (
-      <main className="page-container">
-        <div className="page-heading">
-          <span>REAL CODE EXECUTION</span>
-
-          <h2>
-            Code Lab.
-            <br />
-            <strong>Write. Run. Learn.</strong>
-          </h2>
-
-          <p>
-            Execute your program using
-            Judge0.
-          </p>
-        </div>
-
-        <section className="lab-card">
-          <div className="lab-toolbar">
-            <div>
-              <label>LANGUAGE</label>
-
-              <select
-                value={language}
-                onChange={(e) =>
-                  changeLanguage(e.target.value)
-                }
-              >
-                {Object.entries(
-                  LANGUAGES
-                ).map(([key, item]) => (
-                  <option
-                    key={key}
-                    value={key}
-                  >
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              className="run-button"
-              onClick={runCode}
-              disabled={running}
-            >
-              {running
-                ? "RUNNING..."
-                : "▶ RUN CODE"}
-            </button>
+                  {item.name}
+                </option>
+              ))}
+            </select>
           </div>
 
-          <div className="editor-wrapper">
-            <div className="editor-header">
-              <span>SOURCE CODE</span>
+          <button
+            className="run-button"
+            onClick={runCode}
+            disabled={running}
+          >
+            {running
+              ? "RUNNING..."
+              : "▶ RUN CODE"}
+          </button>
+        </div>
 
+        <div className="editor-wrapper">
+          <div className="editor-header">
+            <span>SOURCE CODE</span>
+
+            <span>
+              {LANGUAGES[language].name}
+            </span>
+          </div>
+
+          <textarea
+            className="code-editor"
+            value={labCode}
+            onChange={(e) =>
+              setLabCode(e.target.value)
+            }
+            spellCheck="false"
+          />
+        </div>
+
+        <div className="lab-bottom">
+          <div className="input-panel">
+            <div className="panel-header">
               <span>
-                {LANGUAGES[language].name}
+                PROGRAM INPUT
               </span>
+
+              <span>STDIN</span>
             </div>
 
             <textarea
-              className="code-editor"
-              value={code}
+              value={stdin}
               onChange={(e) =>
-                setCode(e.target.value)
+                setStdin(e.target.value)
               }
+              placeholder="Enter input for your program..."
+              className="stdin-box"
               spellCheck="false"
             />
           </div>
 
-          <div className="lab-bottom">
-            <div className="input-panel">
-              <div className="panel-header">
-                <span>PROGRAM INPUT</span>
+          <div className="output-panel">
+            <div className="panel-header">
+              <span>
+                PROGRAM OUTPUT
+              </span>
 
-                <span>STDIN</span>
-              </div>
-
-              <textarea
-                value={stdin}
-                onChange={(e) =>
-                  setStdin(e.target.value)
-                }
-                placeholder="Enter input for your program..."
-                className="stdin-box"
-                spellCheck="false"
-              />
+              <span>LIVE RESULT</span>
             </div>
 
-            <div className="output-panel">
-              <div className="panel-header">
-                <span>PROGRAM OUTPUT</span>
-
-                <span>LIVE RESULT</span>
-              </div>
-
-              <pre className="output-box">
-                {output ||
-                  "Program output will appear here..."}
-              </pre>
-            </div>
+            <pre className="output-box">
+              {output ||
+                "Program output will appear here..."}
+            </pre>
           </div>
-        </section>
-      </main>
-    );
-  }
-
-  function PracticePage() {
-    return (
-      <main className="page-container">
-        <div className="page-heading">
-          <span>PROGRAMMING PRACTICE</span>
-
-          <h2>
-            Practice.
-            <br />
-            <strong>Build Your Skills.</strong>
-          </h2>
         </div>
+      </section>
+    </main>
+  );
+}
 
-        <div className="practice-grid">
-          {[
-            {
-              title:
-                "Find the Largest Number",
-              level: "Beginner",
-            },
-            {
-              title:
-                "Check Prime Number",
-              level: "Beginner",
-            },
-            {
-              title:
-                "Reverse an Array",
-              level: "Intermediate",
-            },
-            {
-              title:
-                "Palindrome Checker",
-              level: "Intermediate",
-            },
-            {
-              title:
-                "Sort Numbers",
-              level: "Intermediate",
-            },
-            {
-              title:
-                "Student Grade System",
-              level: "Advanced",
-            },
-          ].map((item, index) => (
+/* =========================================================
+   PRACTICE PAGE
+========================================================= */
+
+function PracticePage({
+  setCodeTopic,
+  setPage,
+}) {
+  return (
+    <main className="page-container">
+      <div className="page-heading">
+        <span>PROGRAMMING PRACTICE</span>
+
+        <h2>
+          Practice.
+          <br />
+          <strong>
+            Build Your Skills.
+          </strong>
+        </h2>
+
+        <p>
+          Solve programming challenges
+          with the help of AI.
+        </p>
+      </div>
+
+      <div className="practice-grid">
+        {PRACTICE_CHALLENGES.map(
+          (item, index) => (
             <div
               className="practice-card"
               key={index}
@@ -898,39 +1003,119 @@ function App() {
 
               <button
                 onClick={() => {
-                  setCodeTopic(item.title);
+                  setCodeTopic(
+                    item.title
+                  );
                   setPage("generator");
                 }}
               >
                 SOLVE WITH AI →
               </button>
             </div>
-          ))}
-        </div>
-      </main>
-    );
+          )
+        )}
+      </div>
+    </main>
+  );
+}
+
+/* =========================================================
+   MAIN APP
+========================================================= */
+
+function App() {
+  const [page, setPage] =
+    useState("home");
+
+  const [language, setLanguage] =
+    useState("c");
+
+  const [level, setLevel] =
+    useState("Beginner");
+
+  const [generatedCode, setGeneratedCode] =
+    useState("");
+
+  const [labCode, setLabCode] =
+    useState(LANGUAGES.c.starter);
+
+  const [practiceTopic, setPracticeTopic] =
+    useState("");
+
+  function openLab() {
+    setPage("lab");
   }
 
   function renderPage() {
-    if (page === "home")
-      return <HomePage />;
+    switch (page) {
+      case "home":
+        return (
+          <HomePage
+            setPage={setPage}
+          />
+        );
 
-    if (page === "learn")
-      return <LearnPage />;
+      case "learn":
+        return (
+          <LearnPage
+            setPage={setPage}
+            setLanguage={setLanguage}
+          />
+        );
 
-    if (page === "teacher")
-      return <TeacherPage />;
+      case "teacher":
+        return (
+          <TeacherPage
+            language={language}
+            setLanguage={setLanguage}
+            level={level}
+            setLevel={setLevel}
+          />
+        );
 
-    if (page === "generator")
-      return <GeneratorPage />;
+      case "generator":
+        return (
+          <GeneratorPage
+            language={language}
+            setLanguage={setLanguage}
+            level={level}
+            setLevel={setLevel}
+            generatedCode={generatedCode}
+            setGeneratedCode={
+              setGeneratedCode
+            }
+            setLabCode={setLabCode}
+            setPage={setPage}
+          />
+        );
 
-    if (page === "lab")
-      return <LabPage />;
+      case "lab":
+        return (
+          <LabPage
+            language={language}
+            setLanguage={setLanguage}
+            labCode={labCode}
+            setLabCode={setLabCode}
+          />
+        );
 
-    if (page === "practice")
-      return <PracticePage />;
+      case "practice":
+        return (
+          <PracticePage
+            setCodeTopic={
+              setPracticeTopic
+            }
+            setPage={setPage}
+          />
+        );
 
-    return <HomePage />;
+      default:
+        return (
+          <HomePage
+            setPage={setPage}
+          />
+        );
+    }
   }
 
   return (
@@ -993,9 +1178,7 @@ function App() {
                 ? "active"
                 : ""
             }
-            onClick={() =>
-              setPage("lab")
-            }
+            onClick={openLab}
           >
             Code Lab
           </button>
