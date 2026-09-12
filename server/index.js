@@ -6,6 +6,7 @@ const cors = require("cors");
 const app = express();
 
 const PORT = Number(process.env.PORT || 8787);
+
 const CLIENT_ORIGIN =
   process.env.CLIENT_ORIGIN || "http://localhost:5173";
 
@@ -22,7 +23,7 @@ app.use(
 );
 
 // ======================================================
-// GEMINI AI
+// GEMINI
 // ======================================================
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -34,7 +35,7 @@ const GEMINI_URL =
   `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 // ======================================================
-// SUPPORTED LANGUAGES
+// LANGUAGES
 // ======================================================
 
 const LANGUAGES = {
@@ -64,10 +65,6 @@ const LANGUAGES = {
   },
 };
 
-// ======================================================
-// LEVELS AND STYLES
-// ======================================================
-
 const LEVELS = [
   "Beginner",
   "Intermediate",
@@ -80,35 +77,75 @@ const STYLES = [
 ];
 
 // ======================================================
-// GEMINI SYSTEM PROMPT
+// AI SYSTEM PROMPT
 // ======================================================
 
 const SYSTEM_PROMPT = `
 You are CodeMentor AI, an expert programming teacher.
 
-You teach:
-- C
-- C++
-- Python
-- Java
-- JavaScript
+Teach C, C++, Python, Java and JavaScript accurately.
 
-Always follow the programming language and code style selected by the user.
+The learner may select:
+- Beginner
+- Intermediate
+- Advanced
 
-The learner may be a beginner, so use simple explanations and useful comments.
+The learner may also select:
+- Modern Standard
+- Legacy Turbo C
 
 IMPORTANT:
-When the user selects Legacy Turbo C for C or C++, you MUST generate
-classic legacy-style C/C++ source code. Do not silently replace it with
-modern standard syntax.
+
+When Legacy Turbo C is selected for C:
+
+The generated SOURCE CODE itself must look like classic Turbo C.
+
+It should use classic Turbo C conventions when appropriate, such as:
+
+#include <stdio.h>
+#include <conio.h>
+
+void main()
+{
+    clrscr();
+
+    ...
+
+    getch();
+}
+
+Do not automatically convert Legacy Turbo C C code into modern int main(void).
+
+When Legacy Turbo C is selected for C++, the generated SOURCE CODE should look like classic Turbo C++ educational code and may use:
+
+#include <iostream.h>
+#include <conio.h>
+
+void main()
+{
+    clrscr();
+
+    ...
+
+    getch();
+}
+
+When Modern Standard is selected:
+
+C must use standard modern C.
+C++ must use standard modern C++.
+Do not use conio.h, clrscr(), getch(), or void main().
+
+Python, Java and JavaScript do not have Turbo C syntax.
+For those languages, always generate normal valid code.
 
 Never claim that code was executed.
 
 Never invent actual execution results.
 
-Code execution is performed separately by Judge0.
+The Code Lab uses Judge0 for actual execution.
 
-Be accurate, practical, beginner-friendly and precise.
+Be practical, accurate and beginner-friendly.
 `;
 
 // ======================================================
@@ -120,29 +157,47 @@ COMMENTING REQUIREMENT:
 
 The learner is a beginner.
 
-Add useful beginner-friendly comments to important lines or statements.
+Add useful beginner-friendly comments to important source-code statements whenever the language permits it.
 
 Explain important:
 - declarations
-- variables
+- imports/includes
 - input
+- variables
 - assignments
 - calculations
 - conditions
 - loops
-- functions
-- classes
+- functions/classes
 - output
+- important return statements
 
 Keep comments short and useful.
 
-Use correct comment syntax for the selected language.
+Do not add meaningless comments to blank lines.
+
+Use correct comment syntax:
+
+Python:
+#
+
+C:
+//
+
+C++:
+//
+
+Java:
+//
+
+JavaScript:
+//
 
 The code must remain valid after comments are added.
 `;
 
 // ======================================================
-// CHECK GEMINI CONFIGURATION
+// REQUIRE GEMINI
 // ======================================================
 
 function requireAI() {
@@ -194,7 +249,7 @@ async function askAI(instruction) {
       ],
 
       generationConfig: {
-        temperature: 0.15,
+        temperature: 0.1,
       },
     }),
   });
@@ -218,14 +273,16 @@ async function askAI(instruction) {
       .join("") || "";
 
   if (!text.trim()) {
-    throw new Error("Gemini returned an empty response.");
+    throw new Error(
+      "Gemini returned an empty response."
+    );
   }
 
   return text.trim();
 }
 
 // ======================================================
-// EXTRACT CODE FROM GEMINI RESPONSE
+// CODE EXTRACTION
 // ======================================================
 
 function extractCode(text) {
@@ -233,29 +290,31 @@ function extractCode(text) {
     return "";
   }
 
-  // First try to find a Markdown code block.
   const matches = [
     ...text.matchAll(
       /```(?:[a-zA-Z0-9_+#.-]+)?\s*\n?([\s\S]*?)```/g
     ),
   ];
 
-  if (matches.length > 0) {
+  if (matches.length) {
     return matches[0][1].trim();
   }
 
-  // Try the === CODE === section.
-  const codeSection = text.match(
-    /===\s*CODE\s*===([\s\S]*?)(?====\s*HOW IT WORKS\s*===|$)/i
-  );
-
-  if (codeSection) {
-    return codeSection[1].trim();
-  }
-
   return text
+    .replace(/^===\s*CODE\s*===/i, "")
     .replace(/^Here is.*?:/i, "")
     .trim();
+}
+
+// ======================================================
+// REMOVE MARKDOWN CODE BLOCK
+// ======================================================
+
+function removeMarkdownCode(text) {
+  return text.replace(
+    /```[\s\S]*?```/g,
+    ""
+  );
 }
 
 // ======================================================
@@ -267,163 +326,319 @@ function cleanGeneratedExplanation(text) {
     return "";
   }
 
-  const withoutCode = text.replace(
-    /```[\s\S]*?```/g,
-    ""
-  );
+  const withoutCode =
+    removeMarkdownCode(text);
 
-  const markerIndex = withoutCode.search(
-    /===\s*HOW IT WORKS\s*===/i
-  );
+  const markerIndex =
+    withoutCode.search(
+      /===\s*HOW IT WORKS\s*===/i
+    );
 
   if (markerIndex >= 0) {
     return withoutCode
       .slice(markerIndex)
+      .replace(
+        /^===\s*HOW IT WORKS\s*===/i,
+        "HOW IT WORKS"
+      )
       .trim();
   }
 
   return withoutCode
-    .replace(/^===\s*CODE\s*===/i, "")
+    .replace(
+      /^===\s*CODE\s*===/i,
+      ""
+    )
     .trim();
 }
 
 // ======================================================
-// FORCE LEGACY TURBO C STYLE
+// FORCE LEGACY TURBO C SOURCE FORMAT
 // ======================================================
-//
-// Gemini normally follows the prompt, but sometimes it may
-// return modern C even when Legacy Turbo C is selected.
-//
-// This function guarantees that C/C++ legacy mode looks
-// like classic Turbo C-style source code.
 
-function enforceLegacyTurboStyle(
-  language,
-  code,
-  codeStyle
-) {
+function forceLegacyTurboC(code) {
+  let result = code.trim();
+
+  // Remove markdown if Gemini accidentally returned it.
+  result = result
+    .replace(/^```[a-zA-Z0-9_+#.-]*\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+
+  // ----------------------------------------------------
+  // C standard header -> Turbo C headers
+  // ----------------------------------------------------
+
   if (
-    codeStyle !== "Legacy Turbo C" ||
-    (language !== "C" && language !== "C++")
+    /#include\s*<stdio\.h>/i.test(result) &&
+    !/#include\s*<conio\.h>/i.test(result)
   ) {
-    return code;
+    result =
+      result.replace(
+        /#include\s*<stdio\.h>/i,
+        "#include <stdio.h>\n#include <conio.h>"
+      );
   }
 
-  let legacy = code.trim();
-
   // ----------------------------------------------------
-  // Add conio.h if it is missing.
+  // If stdio.h is missing but printf/scanf are used
   // ----------------------------------------------------
 
-  if (!/#include\s*[<"]conio\.h[>"]/.test(legacy)) {
-    const includeLines = [
-      ...legacy.matchAll(
-        /^\s*#include[^\n]*$/gm
-      ),
-    ];
+  if (
+    (/\bprintf\s*\(/.test(result) ||
+      /\bscanf\s*\(/.test(result)) &&
+    !/#include\s*<stdio\.h>/i.test(result)
+  ) {
+    result =
+      "#include <stdio.h>\n" + result;
+  }
 
-    if (includeLines.length > 0) {
-      const lastInclude =
-        includeLines[includeLines.length - 1];
+  // ----------------------------------------------------
+  // Add conio.h
+  // ----------------------------------------------------
 
-      const insertPosition =
-        lastInclude.index +
-        lastInclude[0].length;
+  if (!/#include\s*<conio\.h>/i.test(result)) {
+    const includeMatch =
+      result.match(
+        /^(?:#include[^\n]+\n)+/i
+      );
 
-      legacy =
-        legacy.slice(0, insertPosition) +
-        "\n#include <conio.h>" +
-        legacy.slice(insertPosition);
+    if (includeMatch) {
+      result =
+        includeMatch[0] +
+        "#include <conio.h>\n" +
+        result.slice(
+          includeMatch[0].length
+        );
     } else {
-      legacy =
-        `#include <conio.h>\n${legacy}`;
+      result =
+        "#include <conio.h>\n" +
+        result;
     }
   }
 
   // ----------------------------------------------------
-  // Convert modern main() to void main().
+  // Convert modern main to Turbo C main
   // ----------------------------------------------------
 
-  legacy = legacy.replace(
-    /\bint\s+main\s*\(\s*(?:void)?\s*\)/,
+  result = result.replace(
+    /\bint\s+main\s*\(\s*(?:void)?\s*\)/i,
+    "void main()"
+  );
+
+  result = result.replace(
+    /\bint\s+main\s*\(\s*int\s+argc\s*,[\s\S]*?\)/i,
+    "void main()"
+  );
+
+  result = result.replace(
+    /\bint\s+main\s*\(\s*\)/i,
     "void main()"
   );
 
   // ----------------------------------------------------
-  // Add clrscr() inside main.
+  // Add clrscr() after opening main brace
   // ----------------------------------------------------
 
-  if (!/\bclrscr\s*\(\s*\)\s*;/.test(legacy)) {
-    const mainMatch =
-      legacy.match(
-        /\bvoid\s+main\s*\(\s*\)\s*\{/
-      );
+  if (!/\bclrscr\s*\(\s*\)\s*;/i.test(result)) {
+    const mainPattern =
+      /void\s+main\s*\(\s*\)\s*\{/i;
 
-    if (
-      mainMatch &&
-      mainMatch.index !== undefined
-    ) {
-      const insertPosition =
-        mainMatch.index +
-        mainMatch[0].length;
-
-      legacy =
-        legacy.slice(0, insertPosition) +
-        "\n    clrscr();" +
-        legacy.slice(insertPosition);
+    if (mainPattern.test(result)) {
+      result =
+        result.replace(
+          mainPattern,
+          "void main()\n{\n    clrscr();"
+        );
     }
   }
 
   // ----------------------------------------------------
-  // Remove return 0 because void main() does not need it.
+  // Remove modern return 0 from main
   // ----------------------------------------------------
 
-  legacy = legacy.replace(
-    /^\s*return\s+0\s*;\s*$/gm,
+  result = result.replace(
+    /^\s*return\s+0\s*;\s*$/gmi,
     ""
   );
 
   // ----------------------------------------------------
-  // Add getch() before final }.
+  // Add getch() before final closing brace
   // ----------------------------------------------------
 
-  if (!/\bgetch\s*\(\s*\)\s*;/.test(legacy)) {
+  if (!/\bgetch\s*\(\s*\)\s*;/i.test(result)) {
     const lastBrace =
-      legacy.lastIndexOf("}");
+      result.lastIndexOf("}");
 
-    if (lastBrace >= 0) {
-      legacy =
-        legacy.slice(0, lastBrace) +
-        "\n    getch();" +
-        "\n" +
-        legacy.slice(lastBrace);
+    if (lastBrace !== -1) {
+      result =
+        result.slice(0, lastBrace) +
+        "\n    getch();\n" +
+        result.slice(lastBrace);
     }
   }
 
-  return legacy
+  return result
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
 // ======================================================
-// HEALTH CHECK
+// FORCE LEGACY TURBO C++ SOURCE FORMAT
 // ======================================================
 
-app.get("/api/health", (req, res) => {
-  res.json({
-    ok: true,
+function forceLegacyTurboCpp(code) {
+  let result = code.trim();
 
-    aiProvider: "Gemini",
+  result = result
+    .replace(/^```[a-zA-Z0-9_+#.-]*\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
 
-    aiConfigured:
-      Boolean(GEMINI_API_KEY),
+  // ----------------------------------------------------
+  // Add Turbo C++ console header
+  // ----------------------------------------------------
 
-    model: GEMINI_MODEL,
+  if (!/#include\s*<conio\.h>/i.test(result)) {
+    const includeMatch =
+      result.match(
+        /^(?:#include[^\n]+\n)+/i
+      );
 
-    judge0Configured:
-      Boolean(process.env.JUDGE0_URL),
-  });
-});
+    if (includeMatch) {
+      result =
+        includeMatch[0] +
+        "#include <conio.h>\n" +
+        result.slice(
+          includeMatch[0].length
+        );
+    } else {
+      result =
+        "#include <conio.h>\n" +
+        result;
+    }
+  }
+
+  // ----------------------------------------------------
+  // Convert modern iostream to classic Turbo C++ style
+  // ----------------------------------------------------
+
+  result = result.replace(
+    /#include\s*<iostream>/gi,
+    "#include <iostream.h>"
+  );
+
+  // ----------------------------------------------------
+  // Convert main
+  // ----------------------------------------------------
+
+  result = result.replace(
+    /\bint\s+main\s*\(\s*(?:void)?\s*\)/i,
+    "void main()"
+  );
+
+  result = result.replace(
+    /\bint\s+main\s*\(\s*\)/i,
+    "void main()"
+  );
+
+  // ----------------------------------------------------
+  // Add clrscr()
+  // ----------------------------------------------------
+
+  if (!/\bclrscr\s*\(\s*\)\s*;/i.test(result)) {
+    const mainPattern =
+      /void\s+main\s*\(\s*\)\s*\{/i;
+
+    if (mainPattern.test(result)) {
+      result =
+        result.replace(
+          mainPattern,
+          "void main()\n{\n    clrscr();"
+        );
+    }
+  }
+
+  // ----------------------------------------------------
+  // Remove return 0
+  // ----------------------------------------------------
+
+  result = result.replace(
+    /^\s*return\s+0\s*;\s*$/gmi,
+    ""
+  );
+
+  // ----------------------------------------------------
+  // Add getch()
+  // ----------------------------------------------------
+
+  if (!/\bgetch\s*\(\s*\)\s*;/i.test(result)) {
+    const lastBrace =
+      result.lastIndexOf("}");
+
+    if (lastBrace !== -1) {
+      result =
+        result.slice(0, lastBrace) +
+        "\n    getch();\n" +
+        result.slice(lastBrace);
+    }
+  }
+
+  return result
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+// ======================================================
+// FORCE SELECTED STYLE
+// ======================================================
+
+function applySelectedCodeStyle(
+  language,
+  code,
+  codeStyle
+) {
+  if (
+    codeStyle !== "Legacy Turbo C"
+  ) {
+    return code;
+  }
+
+  if (language === "C") {
+    return forceLegacyTurboC(code);
+  }
+
+  if (language === "C++") {
+    return forceLegacyTurboCpp(code);
+  }
+
+  // Turbo C is not applicable to these languages.
+  return code;
+}
+
+// ======================================================
+// HEALTH
+// ======================================================
+
+app.get(
+  "/api/health",
+  (req, res) => {
+    res.json({
+      ok: true,
+
+      aiProvider: "Gemini",
+
+      aiConfigured:
+        Boolean(GEMINI_API_KEY),
+
+      model:
+        GEMINI_MODEL,
+
+      judge0Configured:
+        Boolean(process.env.JUDGE0_URL),
+    });
+  }
+);
 
 // ======================================================
 // AI TEACHER
@@ -469,18 +684,17 @@ ${question.trim()}
 
 Teach the student clearly and accurately.
 
-If the student asks for a program,
-provide a complete runnable program.
+If the student asks for a program, provide a complete runnable program in the selected language.
 
 ${COMMENT_RULE}
 
-After the code, give a short beginner-friendly explanation.
+After code, give a short beginner-friendly explanation.
 
 Clearly label:
 EXAMPLE INPUT
 EXPECTED OUTPUT
 
-Do not claim that you executed the code.
+Do not claim you executed the code.
 `;
 
       const answer =
@@ -542,7 +756,7 @@ ${language || "Unknown"}
 Task:
 ${action || "Explain this code"}
 
-Analyze only the following code.
+Analyze only this code.
 
 Do not claim that you executed it.
 
@@ -556,7 +770,7 @@ Give an easy but accurate explanation.
 
 If there is an error:
 1. Identify the error.
-2. Explain why it occurs.
+2. Explain why it happens.
 3. Show corrected code when useful.
 `;
 
@@ -584,12 +798,7 @@ If there is an error:
 );
 
 // ======================================================
-// CODE GENERATOR
-// ======================================================
-//
-// Generates ONE language at a time.
-// No multi-language generation.
-//
+// ONE-LANGUAGE CODE GENERATOR
 // ======================================================
 
 app.post(
@@ -637,7 +846,7 @@ app.post(
       }
 
       // --------------------------------------------------
-      // Validate programming problem
+      // Validate topic
       // --------------------------------------------------
 
       if (
@@ -658,22 +867,23 @@ app.post(
         });
       }
 
-      // ==================================================
-      // C STYLE RULES
-      // ==================================================
+      // --------------------------------------------------
+      // STYLE INSTRUCTIONS
+      // --------------------------------------------------
 
       let styleRules = "";
 
       if (language === "C") {
-        if (codeStyle === "Legacy Turbo C") {
+        if (
+          codeStyle ===
+          "Legacy Turbo C"
+        ) {
           styleRules = `
-==================================================
-LEGACY TURBO C MODE
-==================================================
+LEGACY TURBO C MODE IS ACTIVE.
 
-THIS IS MANDATORY.
+This is extremely important.
 
-Generate classic Turbo C educational C code.
+Generate CLASSIC TURBO C SOURCE CODE.
 
 The displayed source MUST use:
 
@@ -684,171 +894,141 @@ void main()
 {
     clrscr();
 
-    // program logic
+    // program
 
     getch();
 }
 
-MANDATORY REQUIREMENTS:
+Prefer classic Turbo C educational syntax.
 
-1. Use:
-   #include <conio.h>
-
-2. Use:
-   void main()
-
-3. Use:
-   clrscr();
-
-4. Use:
-   getch();
-
-5. Use traditional C syntax suitable for old Turbo C.
-
-6. Use #define when useful.
-
-7. Do NOT use:
-   int main()
-
-8. Do NOT silently convert the program into modern standard C.
-
-9. Do NOT remove conio.h.
-
-10. Do NOT remove clrscr().
-
-11. Do NOT remove getch().
-
-The learner specifically selected Legacy Turbo C,
-so the generated DISPLAYED CODE must look like
-classic Turbo C code.
-
-The server will separately transform this code
-for modern Judge0 execution.
-`;
-        } else {
-          styleRules = `
-==================================================
-MODERN STANDARD C MODE
-==================================================
-
-Use modern standard C.
-
-Use:
+Do NOT use:
 
 int main(void)
 
-or:
+Do NOT use:
 
 int main()
 
-Use standard C headers.
+Do NOT remove conio.h.
 
-DO NOT use:
-- conio.h
-- clrscr()
-- getch()
-- void main()
-`;
-        }
-      }
+Do NOT remove clrscr().
 
-      // ==================================================
-      // C++ STYLE RULES
-      // ==================================================
+Do NOT remove getch().
 
-      else if (language === "C++") {
-        if (codeStyle === "Legacy Turbo C") {
-          styleRules = `
-==================================================
-LEGACY TURBO C++ MODE
-==================================================
+Do NOT generate only modern C and call it Turbo C.
 
-THIS IS MANDATORY.
-
-Generate classic Turbo C++ educational source code.
-
-Use traditional Turbo C++ style.
-
-When appropriate, use classic console constructs such as:
-
-#include <conio.h>
-void main()
-clrscr();
-getch();
-
-The displayed source must look like
-old Turbo C++ educational code.
-
-Do NOT silently replace the requested legacy style
-with purely modern C++.
-
-The server will separately transform the source
-for modern Judge0 execution.
+The final source code must visibly contain the classic Turbo C style.
 `;
         } else {
           styleRules = `
-==================================================
-MODERN STANDARD C++ MODE
-==================================================
-
-Use modern standard C++.
+MODERN STANDARD C MODE IS ACTIVE.
 
 Use:
 
-int main()
+#include <stdio.h>
 
-Use standard C++ headers.
+int main(void)
 
-DO NOT use:
-- conio.h
-- clrscr()
-- getch()
-- void main()
+Do not use:
+conio.h
+clrscr()
+getch()
+void main()
 `;
         }
       }
 
-      // ==================================================
-      // OTHER LANGUAGES
-      // ==================================================
+      if (language === "C++") {
+        if (
+          codeStyle ===
+          "Legacy Turbo C"
+        ) {
+          styleRules = `
+LEGACY TURBO C++ MODE IS ACTIVE.
 
-      else {
+Generate classic Turbo C++ educational source code.
+
+Use classic-style console programming where appropriate.
+
+The source should visibly contain:
+
+#include <conio.h>
+
+void main()
+{
+    clrscr();
+
+    ...
+
+    getch();
+}
+
+Do not use modern int main() when Legacy Turbo C++ is selected.
+
+Do not silently convert the result to modern C++.
+`;
+        } else {
+          styleRules = `
+MODERN STANDARD C++ MODE IS ACTIVE.
+
+Use standard modern C++.
+
+Use:
+
+#include <iostream>
+
+int main()
+
+Do not use:
+conio.h
+clrscr()
+getch()
+void main()
+`;
+        }
+      }
+
+      if (language === "Python") {
         styleRules = `
-==================================================
-${language} MODE
-==================================================
+Generate normal valid Python.
 
-Turbo C is only relevant to C and C++.
-
-For ${language}, generate normal valid ${language} syntax.
-
-Do NOT try to insert Turbo C constructs.
-
-PYTHON:
-- Use normal Python syntax.
-- Use standard input when required.
-
-JAVA:
-- Use public class Main.
-- Use Scanner or another standard Java input method when required.
-- Make the program directly runnable.
-
-JAVASCRIPT:
-- Use Node.js.
-- Use standard input when input is required.
-- Do not use prompt-sync.
-- Do not use external packages.
+Turbo C concepts do not apply to Python.
 `;
       }
 
-      // ==================================================
+      if (language === "Java") {
+        styleRules = `
+Generate normal valid Java.
+
+Use:
+
+public class Main
+
+Do not use Turbo C syntax.
+`;
+      }
+
+      if (language === "JavaScript") {
+        styleRules = `
+Generate normal Node.js JavaScript.
+
+Use standard input when input is required.
+
+Do not use:
+prompt-sync
+external npm packages
+browser-only prompt()
+
+Use built-in Node.js functionality.
+`;
+      }
+
+      // --------------------------------------------------
       // GEMINI GENERATION PROMPT
-      // ==================================================
+      // --------------------------------------------------
 
       const instruction = `
-You are generating code for CodeMentor AI.
-
-Generate ONE complete solution only.
+Generate ONE complete programming solution.
 
 ==================================================
 PROGRAMMING LANGUAGE
@@ -875,73 +1055,45 @@ PROGRAMMING PROBLEM
 ${topic.trim()}
 
 ==================================================
-COMMENT REQUIREMENT
-==================================================
-
-${COMMENT_RULE}
-
-==================================================
 STYLE REQUIREMENTS
 ==================================================
 
 ${styleRules}
 
 ==================================================
-GENERAL REQUIREMENTS
+COMMENT REQUIREMENTS
+==================================================
+
+${COMMENT_RULE}
+
+==================================================
+IMPORTANT GENERATION RULES
 ==================================================
 
 1. Generate ONLY ${language}.
 
 2. Do not generate another programming language.
 
-3. Solve exactly the requested programming problem.
+3. Solve exactly the requested problem.
 
 4. Make the program complete.
 
-5. Make it directly runnable.
+5. Make it appropriate for ${level} level.
 
-6. Use standard input when input is required.
+6. Use standard input for input-based programs.
 
-7. Use beginner-friendly logic appropriate for:
-   ${level}
+7. Include beginner-friendly comments.
 
-8. Add useful comments.
+8. Do not claim that the program was executed.
 
-9. Do not put explanations inside the code block.
+9. Do not invent actual execution results.
 
-10. Do not claim that the code was executed.
+10. Follow the selected code style exactly.
 
-11. Do not invent actual execution results.
+11. If Legacy Turbo C is selected for C or C++,
+the SOURCE CODE must visibly use classic Turbo C style.
 
-12. Follow the selected code style exactly.
-
-==================================================
-VERY IMPORTANT LEGACY RULE
-==================================================
-
-If:
-
-Language = C
-AND
-Selected code style = Legacy Turbo C
-
-then the displayed code MUST contain classic Turbo C style,
-including:
-
-#include <conio.h>
-void main()
-clrscr();
-getch();
-
-Do not return modern:
-
-int main()
-
-for Legacy Turbo C C code.
-
-==================================================
-RESPONSE FORMAT
-==================================================
+12. Do not return modern C code when Legacy Turbo C is selected.
 
 Return exactly this structure:
 
@@ -965,19 +1117,19 @@ Expected output for the example.
 
 === IMPORTANT POINTS ===
 
-Short beginner-friendly bullet points.
+Short bullet points.
 `;
 
-      // ==================================================
+      // --------------------------------------------------
       // ASK GEMINI
-      // ==================================================
+      // --------------------------------------------------
 
       const answer =
         await askAI(instruction);
 
-      // ==================================================
+      // --------------------------------------------------
       // EXTRACT CODE
-      // ==================================================
+      // --------------------------------------------------
 
       let code =
         extractCode(answer);
@@ -988,29 +1140,30 @@ Short beginner-friendly bullet points.
         );
       }
 
-      // ==================================================
-      // GUARANTEE LEGACY STYLE
-      // ==================================================
+      // --------------------------------------------------
+      // IMPORTANT:
+      // FORCE LEGACY STYLE AFTER GEMINI
+      // --------------------------------------------------
 
       code =
-        enforceLegacyTurboStyle(
+        applySelectedCodeStyle(
           language,
           code,
           codeStyle
         );
 
-      // ==================================================
+      // --------------------------------------------------
       // EXPLANATION
-      // ==================================================
+      // --------------------------------------------------
 
       const explanation =
         cleanGeneratedExplanation(
           answer
         );
 
-      // ==================================================
-      // RESPONSE
-      // ==================================================
+      // --------------------------------------------------
+      // RETURN RESULT
+      // --------------------------------------------------
 
       res.json({
         code,
@@ -1037,7 +1190,7 @@ Short beginner-friendly bullet points.
 );
 
 // ======================================================
-// JUDGE0
+// JUDGE0 HEADERS
 // ======================================================
 
 function judgeHeaders() {
@@ -1046,12 +1199,16 @@ function judgeHeaders() {
       "application/json",
   };
 
-  if (process.env.JUDGE0_API_KEY) {
+  if (
+    process.env.JUDGE0_API_KEY
+  ) {
     headers["X-Auth-Token"] =
       process.env.JUDGE0_API_KEY;
   }
 
-  if (process.env.JUDGE0_AUTH_USER) {
+  if (
+    process.env.JUDGE0_AUTH_USER
+  ) {
     headers["X-Auth-User"] =
       process.env.JUDGE0_AUTH_USER;
   }
@@ -1068,8 +1225,10 @@ async function judgeFetch(
   options = {}
 ) {
   const base =
-    (process.env.JUDGE0_URL || "")
-      .replace(/\/$/, "");
+    (
+      process.env.JUDGE0_URL ||
+      ""
+    ).replace(/\/$/, "");
 
   if (!base) {
     throw new Error(
@@ -1092,24 +1251,18 @@ async function judgeFetch(
 }
 
 // ======================================================
-// PREPARE LEGACY TURBO C FOR JUDGE0
+// TURBO C COMPATIBILITY FOR JUDGE0
 // ======================================================
+//
+// IMPORTANT:
+//
+// The user sees classic Turbo C source code.
 //
 // Judge0 uses modern GCC/G++.
 //
-// Turbo C's:
-// - conio.h
-// - clrscr()
-// - getch()
-// - void main()
+// Therefore only the COPY sent to Judge0 is converted.
 //
-// are not directly supported by modern GCC/G++.
-//
-// Therefore:
-// DISPLAYED CODE = original legacy code
-//
-// JUDGE0 CODE = temporary compatible copy
-//
+// The displayed generated code remains Turbo C style.
 // ======================================================
 
 function prepareLegacyTurboCode(
@@ -1118,9 +1271,15 @@ function prepareLegacyTurboCode(
   codeStyle
 ) {
   if (
-    codeStyle !== "Legacy Turbo C" ||
-    (language !== "C" &&
-      language !== "C++")
+    codeStyle !==
+      "Legacy Turbo C"
+  ) {
+    return code;
+  }
+
+  if (
+    language !== "C" &&
+    language !== "C++"
   ) {
     return code;
   }
@@ -1133,7 +1292,7 @@ function prepareLegacyTurboCode(
 
   runnable =
     runnable.replace(
-      /^\s*#include\s*[<"]conio\.h[>"]\s*\r?\n?/gim,
+      /^\s*#include\s*<conio\.h>\s*\r?\n?/gim,
       ""
     );
 
@@ -1143,7 +1302,7 @@ function prepareLegacyTurboCode(
 
   runnable =
     runnable.replace(
-      /\bclrscr\s*\(\s*\)\s*;?/g,
+      /\bclrscr\s*\(\s*\)\s*;?/gi,
       ""
     );
 
@@ -1153,7 +1312,7 @@ function prepareLegacyTurboCode(
 
   runnable =
     runnable.replace(
-      /\bgetch\s*\(\s*\)\s*;?/g,
+      /\bgetch\s*\(\s*\)\s*;?/gi,
       ""
     );
 
@@ -1163,19 +1322,16 @@ function prepareLegacyTurboCode(
 
   runnable =
     runnable.replace(
-      /\bvoid\s+main\s*\(\s*\)/,
+      /\bvoid\s+main\s*\(\s*\)/i,
       "int main()"
     );
 
   // ----------------------------------------------------
-  // Add return 0
+  // Add return 0 before final brace
   // ----------------------------------------------------
 
   if (
-    /\bint\s+main\s*\(/.test(
-      runnable
-    ) &&
-    !/\breturn\s+0\s*;/.test(
+    !/\breturn\s+0\s*;/i.test(
       runnable
     )
   ) {
@@ -1189,10 +1345,32 @@ function prepareLegacyTurboCode(
           lastBrace
         ) +
         "\n    return 0;\n" +
-        runnable.slice(
-          lastBrace
-        );
+        runnable.slice(lastBrace);
     }
+  }
+
+  // ----------------------------------------------------
+  // Turbo C++ compatibility
+  // ----------------------------------------------------
+
+  if (language === "C++") {
+    runnable =
+      runnable.replace(
+        /#include\s*<iostream\.h>/gi,
+        "#include <iostream>"
+      );
+
+    runnable =
+      runnable.replace(
+        /\bclrscr\s*\(\s*\)\s*;?/gi,
+        ""
+      );
+
+    runnable =
+      runnable.replace(
+        /\bgetch\s*\(\s*\)\s*;?/gi,
+        ""
+      );
   }
 
   return runnable.trim();
@@ -1232,20 +1410,12 @@ async function runJudge0(
     );
   }
 
-  // ----------------------------------------------------
-  // Prepare code
-  // ----------------------------------------------------
-
   const sourceCode =
     prepareLegacyTurboCode(
       language,
       code,
       codeStyle
     );
-
-  // ----------------------------------------------------
-  // Submit to Judge0
-  // ----------------------------------------------------
 
   const submit =
     await judgeFetch(
@@ -1263,20 +1433,15 @@ async function runJudge0(
           stdin:
             stdin || "",
 
-          cpu_time_limit:
-            3,
+          cpu_time_limit: 3,
 
-          wall_time_limit:
-            5,
+          wall_time_limit: 5,
 
-          memory_limit:
-            128000,
+          memory_limit: 128000,
 
-          max_processes_and_or_threads:
-            30,
+          max_processes_and_or_threads: 30,
 
-          max_file_size:
-            1024,
+          max_file_size: 1024,
         }),
       }
     );
@@ -1293,11 +1458,9 @@ async function runJudge0(
     );
   }
 
-  const resultData =
-    await submit.json();
-
-  const token =
-    resultData.token;
+  const {
+    token,
+  } = await submit.json();
 
   if (!token) {
     throw new Error(
@@ -1306,7 +1469,7 @@ async function runJudge0(
   }
 
   // ----------------------------------------------------
-  // Poll for result
+  // Poll Judge0
   // ----------------------------------------------------
 
   for (
@@ -1341,11 +1504,6 @@ async function runJudge0(
     const data =
       await result.json();
 
-    // Status IDs:
-    // 1 = In Queue
-    // 2 = Processing
-    // >2 = Finished
-
     if (
       data.status?.id > 2
     ) {
@@ -1359,7 +1517,7 @@ async function runJudge0(
 }
 
 // ======================================================
-// CODE EXECUTION API
+// CODE EXECUTION ROUTE
 // ======================================================
 
 app.post(
@@ -1378,8 +1536,7 @@ app.post(
         typeof code !== "string"
       ) {
         return res.status(400).json({
-          error:
-            "Code is required.",
+          error: "Code is required.",
         });
       }
 
@@ -1387,16 +1544,13 @@ app.post(
         await runJudge0(
           language,
           code,
-          typeof stdin === "string"
+          typeof stdin ===
+            "string"
             ? stdin
             : "",
           codeStyle ||
             "Modern Standard"
         );
-
-      // ------------------------------------------------
-      // Return ONLY REAL Judge0 results.
-      // ------------------------------------------------
 
       res.json({
         status:
@@ -1441,7 +1595,7 @@ app.post(
 );
 
 // ======================================================
-// START SERVER
+// SERVER
 // ======================================================
 
 app.listen(
@@ -1466,9 +1620,10 @@ app.listen(
     );
 
     console.log(
-      `Judge0 configured: ${Boolean(
-        process.env.JUDGE0_URL
-      )}`
+      `Judge0 URL: ${
+        process.env.JUDGE0_URL ||
+        "Not configured"
+      }`
     );
   }
 );
