@@ -20,10 +20,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* =====================================================
-   GLOBAL
-===================================================== */
-
 * {
   box-sizing: border-box;
 }
@@ -93,19 +89,30 @@ button:disabled {
 
   display: flex;
   align-items: center;
-  gap: 20px;
 
-  min-height: 82px;
+  gap: 14px;
+
+  min-height: 84px;
 
   padding:
-    0 28px;
+    10px 22px;
 
   background:
-    rgba(5, 8, 17, 0.94);
+    rgba(
+      5,
+      8,
+      17,
+      0.97
+    );
 
   border-bottom:
     1px solid
-    rgba(255, 255, 255, 0.08);
+    rgba(
+      255,
+      255,
+      255,
+      0.08
+    );
 
   backdrop-filter:
     blur(18px);
@@ -117,43 +124,70 @@ button:disabled {
 
   gap: 7px;
 
-  min-width: max-content;
+  flex:
+    0 0 auto;
 
-  font-weight: 800;
+  min-width:
+    max-content;
 
-  cursor: pointer;
+  font-weight:
+    800;
+
+  cursor:
+    pointer;
 }
 
 .brand-code-icon {
-  color: #2fe8ff;
+  color:
+    #2fe8ff;
 
-  font-weight: 900;
-  font-size: 20px;
+  font-size:
+    20px;
+
+  font-weight:
+    900;
 }
 
 .brand-name {
-  font-size: 19px;
+  font-size:
+    19px;
 
   letter-spacing:
     -0.02em;
 }
 
 .brand-ai {
-  color: #8e79ff;
-  font-weight: 800;
+  color:
+    #8e79ff;
+
+  font-weight:
+    800;
 }
 
 .main-nav {
-  display: flex;
-  align-items: center;
+  display:
+    flex;
 
-  gap: 5px;
+  align-items:
+    center;
 
-  flex: 1;
+  justify-content:
+    center;
 
-  overflow-x: auto;
+  flex-wrap:
+    wrap;
 
-  scrollbar-width: thin;
+  gap:
+    4px;
+
+  flex:
+    1;
+
+  min-width:
+    0;
+
+  overflow:
+    visible;
 }
 
 .nav-button {
@@ -161,40 +195,62 @@ button:disabled {
     0 0 auto;
 
   padding:
-    12px 14px;
+    10px 10px;
 
   border:
     1px solid transparent;
 
-  border-radius: 12px;
+  border-radius:
+    11px;
 
   background:
     transparent;
 
-  color: #9da7c3;
+  color:
+    #9da7c3;
 
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
+  font-size:
+    13px;
+
+  font-weight:
+    650;
+
+  white-space:
+    nowrap;
 }
 
 .nav-button:hover {
-  color: #ffffff;
+  color:
+    #ffffff;
 
   background:
-    rgba(255, 255, 255, 0.05);
+    rgba(
+      255,
+      255,
+      255,
+      0.05
+    );
 }
 
 .nav-button.active {
-  color: #ffffff;
+  color:
+    #ffffff;
 
   background:
-    rgba(255, 255, 255, 0.06);
+    rgba(
+      255,
+      255,
+      255,
+      0.06
+    );
 
   border-color:
-    rgba(255, 255, 255, 0.08);
+    rgba(
+      255,
+      255,
+      255,
+      0.08
+    );
 }
 
 .header-action {
@@ -202,16 +258,19 @@ button:disabled {
     0 0 auto;
 
   padding:
-    15px 22px;
+    13px 17px;
 
   border:
     none;
 
   border-radius:
-    15px;
+    14px;
 
   color:
-    white;
+    #ffffff;
+
+  font-size:
+    13px;
 
   font-weight:
     800;
@@ -221,15 +280,6 @@ button:disabled {
       135deg,
       #26dcef,
       #7762ff
-    );
-
-  box-shadow:
-    0 12px 30px
-    rgba(
-      77,
-      104,
-      255,
-      0.18
     );
 }
 
@@ -248,12 +298,12 @@ button:disabled {
     0 auto;
 
   padding:
-    54px 0 80px;
+    50px 0 75px;
 }
 
 .page-header {
   margin-bottom:
-    32px;
+    30px;
 }
 
 .eyebrow {
@@ -299,7 +349,7 @@ button:disabled {
     800px;
 
   margin:
-    18px 0 0;
+    17px 0 0;
 
   color:
     #9ca7c2;
@@ -317,12 +367,12 @@ button:disabled {
 
 .home-page {
   padding-top:
-    62px;
+    58px;
 }
 
 .hero-section {
   padding:
-    62px 28px 55px;
+    60px 20px 52px;
 
   text-align:
     center;
@@ -333,7 +383,7 @@ button:disabled {
     inline-flex;
 
   padding:
-    10px 14px;
+    9px 14px;
 
   border:
     1px solid
@@ -365,7 +415,7 @@ button:disabled {
     800;
 
   letter-spacing:
-    0.12em;
+    0.11em;
 }
 
 .hero-section h1 {
@@ -379,7 +429,7 @@ button:disabled {
     clamp(
       44px,
       7vw,
-      86px
+      82px
     );
 
   line-height:
@@ -409,10 +459,10 @@ button:disabled {
 
 .hero-section p {
   max-width:
-    820px;
+    810px;
 
   margin:
-    25px auto 0;
+    24px auto 0;
 
   color:
     #a5aec4;
@@ -439,6 +489,72 @@ button:disabled {
 
   margin-top:
     30px;
+}
+
+/* =====================================================
+   CARDS
+===================================================== */
+
+.content-card {
+  margin-top:
+    18px;
+
+  padding:
+    26px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.075
+    );
+
+  border-radius:
+    22px;
+
+  background:
+    linear-gradient(
+      160deg,
+      rgba(
+        19,
+        23,
+        36,
+        0.95
+      ),
+      rgba(
+        12,
+        15,
+        26,
+        0.95
+      )
+    );
+
+  box-shadow:
+    0 22px 50px
+    rgba(
+      0,
+      0,
+      0,
+      0.18
+    );
+}
+
+.content-card h2 {
+  margin:
+    0 0 17px;
+
+  font-size:
+    22px;
+}
+
+.section-description {
+  color:
+    #97a2bd;
+
+  line-height:
+    1.7;
 }
 
 /* =====================================================
@@ -470,7 +586,7 @@ button:disabled {
     none;
 
   color:
-    white;
+    #ffffff;
 
   background:
     linear-gradient(
@@ -512,9 +628,15 @@ button:disabled {
 }
 
 .primary-button:hover,
-.secondary-button:hover {
+.secondary-button:hover,
+.copy-button:hover {
   transform:
     translateY(-2px);
+}
+
+.full-width {
+  width:
+    100%;
 }
 
 /* =====================================================
@@ -540,7 +662,7 @@ button:disabled {
 
 .feature-card {
   min-height:
-    190px;
+    185px;
 
   padding:
     22px;
@@ -609,76 +731,7 @@ button:disabled {
 }
 
 /* =====================================================
-   CONTENT CARDS
-===================================================== */
-
-.content-card {
-  margin-top:
-    18px;
-
-  padding:
-    26px;
-
-  border:
-    1px solid
-    rgba(
-      255,
-      255,
-      255,
-      0.075
-    );
-
-  border-radius:
-    22px;
-
-  background:
-    linear-gradient(
-      160deg,
-      rgba(
-        19,
-        23,
-        36,
-        0.94
-      ),
-      rgba(
-        12,
-        15,
-        26,
-        0.94
-      )
-    );
-
-  box-shadow:
-    0 22px 50px
-    rgba(
-      0,
-      0,
-      0,
-      0.18
-    );
-}
-
-.content-card h2 {
-  margin:
-    0 0 17px;
-
-  font-size:
-    22px;
-}
-
-.section-description {
-  margin:
-    0 0 22px;
-
-  color:
-    #97a2bd;
-
-  line-height:
-    1.7;
-}
-
-/* =====================================================
-   LEVEL BUTTONS
+   CHOICE BUTTONS
 ===================================================== */
 
 .button-row {
@@ -724,33 +777,11 @@ button:disabled {
 
   font-weight:
     800;
-
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.choice-button:hover {
-  color:
-    white;
-
-  border-color:
-    rgba(
-      255,
-      255,
-      255,
-      0.16
-    );
-
-  transform:
-    translateY(-1px);
 }
 
 .choice-button.active {
   color:
-    white;
+    #ffffff;
 
   border-color:
     rgba(
@@ -840,33 +871,11 @@ button:disabled {
 
   font-weight:
     800;
-
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.language-button:hover {
-  color:
-    white;
-
-  border-color:
-    rgba(
-      255,
-      255,
-      255,
-      0.16
-    );
-
-  transform:
-    translateY(-1px);
 }
 
 .language-button.active {
   color:
-    white;
+    #ffffff;
 
   border-color:
     rgba(
@@ -906,7 +915,7 @@ button:disabled {
 }
 
 /* =====================================================
-   STYLE BUTTONS
+   CODE STYLE
 ===================================================== */
 
 .style-grid {
@@ -968,7 +977,7 @@ button:disabled {
 
 .style-button.active {
   color:
-    white;
+    #ffffff;
 
   border-color:
     rgba(
@@ -1005,7 +1014,7 @@ button:disabled {
 }
 
 /* =====================================================
-   FORM
+   FORMS
 ===================================================== */
 
 .form-group {
@@ -1073,10 +1082,6 @@ textarea {
 
   line-height:
     1.6;
-
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
 }
 
 textarea:focus {
@@ -1109,7 +1114,7 @@ textarea::placeholder {
 }
 
 /* =====================================================
-   TOPICS
+   TOPIC GRID
 ===================================================== */
 
 .topic-grid {
@@ -1128,7 +1133,7 @@ textarea::placeholder {
 
 .topic-card {
   min-height:
-    106px;
+    105px;
 
   padding:
     17px;
@@ -1162,7 +1167,7 @@ textarea::placeholder {
     block;
 
   color:
-    white;
+    #ffffff;
 
   font-size:
     15px;
@@ -1186,9 +1191,6 @@ textarea::placeholder {
 }
 
 .topic-button {
-  cursor:
-    pointer;
-
   color:
     inherit;
 
@@ -1267,7 +1269,7 @@ textarea::placeholder {
 
 .mode-button.active {
   color:
-    white;
+    #ffffff;
 
   border-color:
     rgba(
@@ -1287,7 +1289,7 @@ textarea::placeholder {
 }
 
 /* =====================================================
-   SELECTION SUMMARY
+   SUMMARY
 ===================================================== */
 
 .selection-summary {
@@ -1354,11 +1356,6 @@ textarea::placeholder {
       255,
       0.65
     );
-}
-
-.result-summary {
-  margin-top:
-    20px;
 }
 
 /* =====================================================
@@ -1504,11 +1501,69 @@ textarea::placeholder {
 
   color:
     #ffb8c4;
+
+  white-space:
+    pre-wrap;
 }
 
 .runner-status {
   color:
     #6eebff;
+
+  font-weight:
+    900;
+
+  letter-spacing:
+    0.06em;
+}
+
+/* =====================================================
+   COPY BUTTON
+===================================================== */
+
+.copy-action-row {
+  display:
+    flex;
+
+  justify-content:
+    flex-end;
+
+  margin-top:
+    15px;
+}
+
+.copy-button {
+  min-height:
+    46px;
+
+  padding:
+    11px 17px;
+
+  border:
+    1px solid
+    rgba(
+      75,
+      226,
+      255,
+      0.24
+    );
+
+  border-radius:
+    12px;
+
+  color:
+    #73e7ff;
+
+  background:
+    rgba(
+      55,
+      224,
+      255,
+      0.06
+    );
+
+  font-size:
+    12px;
 
   font-weight:
     900;
@@ -1548,7 +1603,7 @@ textarea::placeholder {
 
 .algorithm-editor {
   min-height:
-    460px;
+    470px;
 }
 
 .input-editor {
@@ -1581,10 +1636,6 @@ textarea::placeholder {
   min-height:
     190px;
 }
-
-/* =====================================================
-   ALGORITHM PAPER
-===================================================== */
 
 .algorithm-paper {
   max-width:
@@ -1624,20 +1675,11 @@ textarea::placeholder {
         0.015
       )
     );
-
-  box-shadow:
-    0 22px 45px
-    rgba(
-      0,
-      0,
-      0,
-      0.16
-    );
 }
 
 .algorithm-paper-title {
   margin-bottom:
-    23px;
+    21px;
 
   color:
     #5fe7ff;
@@ -1650,133 +1692,6 @@ textarea::placeholder {
 
   letter-spacing:
     0.17em;
-}
-
-.algorithm-paper::before {
-  content:
-    "";
-
-  display:
-    block;
-
-  margin-bottom:
-    22px;
-
-  border-top:
-    1px dashed
-    rgba(
-      255,
-      255,
-      255,
-      0.1
-    );
-}
-
-/* =====================================================
-   ALGORITHM LEARNING
-===================================================== */
-
-.algorithm-learning-card {
-  overflow:
-    hidden;
-}
-
-.section-title-row {
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    space-between;
-
-  gap:
-    20px;
-}
-
-.algorithm-mark {
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  min-width:
-    64px;
-
-  height:
-    64px;
-
-  border-radius:
-    18px;
-
-  color:
-    #76e7ff;
-
-  background:
-    rgba(
-      40,
-      221,
-      255,
-      0.07
-    );
-
-  border:
-    1px solid
-    rgba(
-      40,
-      221,
-      255,
-      0.16
-    );
-
-  font-size:
-    12px;
-
-  font-weight:
-    900;
-
-  letter-spacing:
-    0.1em;
-}
-
-/* =====================================================
-   CHECKBOX
-===================================================== */
-
-.checkbox-row {
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  gap:
-    10px;
-
-  margin:
-    18px 0;
-
-  color:
-    #a3aec5;
-
-  cursor:
-    pointer;
-}
-
-.checkbox-row input {
-  width:
-    18px;
-
-  height:
-    18px;
-
-  accent-color:
-    #51e4ff;
 }
 
 /* =====================================================
@@ -1882,33 +1797,9 @@ textarea::placeholder {
     1.65;
 }
 
-/* =====================================================
-   ACTIONS
-===================================================== */
-
-.action-row {
-  display:
-    flex;
-
-  flex-wrap:
-    wrap;
-
-  gap:
-    12px;
-
+.runner-auto-summary {
   margin-top:
-    22px;
-}
-
-.helper-text {
-  margin:
-    15px 0 0;
-
-  color:
-    #8390a9;
-
-  line-height:
-    1.6;
+    0;
 }
 
 /* =====================================================
@@ -1968,25 +1859,47 @@ textarea::placeholder {
 }
 
 /* =====================================================
-   RESPONSIVE
+   RESPONSIVE HEADER
 ===================================================== */
 
 @media (
-  max-width: 1150px
+  max-width: 1100px
 ) {
   .site-header {
-    gap:
-      12px;
+    align-items:
+      flex-start;
+
+    flex-wrap:
+      wrap;
 
     padding:
-      0 16px;
+      12px 16px;
+  }
+
+  .main-nav {
+    order:
+      3;
+
+    width:
+      100%;
+
+    justify-content:
+      flex-start;
   }
 
   .header-action {
     display:
       none;
   }
+}
 
+/* =====================================================
+   RESPONSIVE CONTENT
+===================================================== */
+
+@media (
+  max-width: 1150px
+) {
   .feature-grid {
     grid-template-columns:
       repeat(
@@ -2015,25 +1928,6 @@ textarea::placeholder {
 @media (
   max-width: 820px
 ) {
-  .site-header {
-    align-items:
-      flex-start;
-
-    padding:
-      14px;
-
-    flex-wrap:
-      wrap;
-  }
-
-  .main-nav {
-    order:
-      3;
-
-    width:
-      100%;
-  }
-
   .page-shell {
     width:
       min(
@@ -2058,11 +1952,6 @@ textarea::placeholder {
       );
   }
 
-  .style-grid {
-    grid-template-columns:
-      1fr;
-  }
-
   .topic-grid {
     grid-template-columns:
       repeat(
@@ -2079,6 +1968,11 @@ textarea::placeholder {
       );
   }
 
+  .style-grid {
+    grid-template-columns:
+      1fr;
+  }
+
   .content-card {
     padding:
       19px;
@@ -2088,11 +1982,6 @@ textarea::placeholder {
 @media (
   max-width: 560px
 ) {
-  .brand-name {
-    font-size:
-      17px;
-  }
-
   .page-header h1 {
     font-size:
       34px;
@@ -2144,5 +2033,15 @@ textarea::placeholder {
   .runner-warning {
     flex-direction:
       column;
+  }
+
+  .copy-action-row {
+    justify-content:
+      stretch;
+  }
+
+  .copy-button {
+    width:
+      100%;
   }
 }

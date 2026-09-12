@@ -46,7 +46,7 @@ const STYLES = [
 ];
 
 // ======================================================
-// BRAND ICON
+// ICON
 // ======================================================
 
 function CodeIcon() {
@@ -54,6 +54,117 @@ function CodeIcon() {
     <span className="brand-code-icon">
       {"</>"}
     </span>
+  );
+}
+
+// ======================================================
+// HEADER
+// ======================================================
+
+function SiteHeader({
+  page,
+  navigate,
+}) {
+  const navigationItems = [
+    {
+      key: "home",
+      label: "Home",
+    },
+    {
+      key: "learn",
+      label: "Learn",
+    },
+    {
+      key: "teacher",
+      label: "AI Teacher",
+    },
+    {
+      key: "generator",
+      label: "Code Generator",
+    },
+    {
+      key: "lab",
+      label: "Code Lab",
+    },
+    {
+      key: "practice",
+      label: "Practice",
+    },
+    {
+      key:
+        "algorithm-generator",
+      label:
+        "Algorithm Generator",
+    },
+    {
+      key:
+        "algorithm-runner",
+      label:
+        "Algorithm Code Runner",
+    },
+  ];
+
+  return (
+    <header className="site-header">
+      <div
+        className="brand"
+        onClick={() =>
+          navigate(
+            "home"
+          )
+        }
+      >
+        <CodeIcon />
+
+        <span className="brand-name">
+          CodeMentor
+        </span>
+
+        <span className="brand-ai">
+          AI
+        </span>
+      </div>
+
+      <nav className="main-nav">
+        {navigationItems.map(
+          (item) => (
+            <button
+              key={
+                item.key
+              }
+              type="button"
+              className={
+                page ===
+                item.key
+                  ? "nav-button active"
+                  : "nav-button"
+              }
+              onClick={() =>
+                navigate(
+                  item.key
+                )
+              }
+            >
+              {
+                item.label
+              }
+            </button>
+          )
+        )}
+      </nav>
+
+      <button
+        type="button"
+        className="header-action"
+        onClick={() =>
+          navigate(
+            "generator"
+          )
+        }
+      >
+        GENERATE CODE
+      </button>
+    </header>
   );
 }
 
@@ -68,17 +179,15 @@ function PageHeader({
 }) {
   return (
     <div className="page-header">
-      {eyebrow && (
-        <div className="eyebrow">
-          {eyebrow}
-        </div>
-      )}
+      <div className="eyebrow">
+        {eyebrow}
+      </div>
 
       <h1>{title}</h1>
 
-      {description && (
-        <p>{description}</p>
-      )}
+      <p>
+        {description}
+      </p>
     </div>
   );
 }
@@ -172,13 +281,17 @@ function LanguageButtons({
             }
           >
             <span className="language-symbol">
-              {item === "C"
+              {item ===
+              "C"
                 ? "C"
-                : item === "C++"
+                : item ===
+                    "C++"
                 ? "C++"
-                : item === "Python"
+                : item ===
+                    "Python"
                 ? "Py"
-                : item === "Java"
+                : item ===
+                    "Java"
                 ? "Ja"
                 : "JS"}
             </span>
@@ -209,12 +322,15 @@ function StyleButtons({
             key={item}
             type="button"
             className={
-              codeStyle === item
+              codeStyle ===
+              item
                 ? "style-button active"
                 : "style-button"
             }
             onClick={() =>
-              setCodeStyle(item)
+              setCodeStyle(
+                item
+              )
             }
           >
             <span className="style-icon">
@@ -256,6 +372,61 @@ function ResultPanel({
 }
 
 // ======================================================
+// COPY BUTTON
+// ======================================================
+
+function CopyButton({
+  text,
+  defaultLabel,
+}) {
+  const [
+    copied,
+    setCopied,
+  ] = useState(false);
+
+  async function copyText() {
+    if (!text) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(
+        text
+      );
+
+      setCopied(true);
+
+      window.setTimeout(
+        () =>
+          setCopied(
+            false
+          ),
+        1800
+      );
+    } catch (error) {
+      console.error(
+        "Copy failed:",
+        error
+      );
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      className="copy-button"
+      onClick={
+        copyText
+      }
+    >
+      {copied
+        ? "COPIED ✓"
+        : defaultLabel}
+    </button>
+  );
+}
+
+// ======================================================
 // HOME
 // ======================================================
 
@@ -278,11 +449,9 @@ function HomePage({
         </h1>
 
         <p>
-          Learn programming, understand
-          algorithms, generate code,
-          practice problems and run
-          programs in one beginner-friendly
-          platform.
+          Learn programming, algorithms,
+          generate code, practice and run
+          programs in one platform.
         </p>
 
         <div className="hero-actions">
@@ -335,9 +504,8 @@ function HomePage({
           </h3>
 
           <p>
-            Ask programming and algorithm
-            questions and learn in simple
-            language.
+            Learn programming and algorithms
+            with simple explanations.
           </p>
         </div>
 
@@ -351,8 +519,8 @@ function HomePage({
           </h3>
 
           <p>
-            Learn programming and
-            algorithms step-by-step.
+            Study concepts and algorithms
+            step-by-step.
           </p>
         </div>
 
@@ -366,8 +534,8 @@ function HomePage({
           </h3>
 
           <p>
-            Practice programming and
-            algorithm problems.
+            Practice programming and algorithm
+            problems.
           </p>
         </div>
 
@@ -381,8 +549,7 @@ function HomePage({
           </h3>
 
           <p>
-            Generate easy,
-            exam-ready algorithms.
+            Generate exam-ready algorithm notes.
           </p>
         </div>
 
@@ -396,8 +563,7 @@ function HomePage({
           </h3>
 
           <p>
-            Run algorithm programs using
-            real Judge0 execution.
+            Run algorithm programs independently.
           </p>
         </div>
       </section>
@@ -406,7 +572,7 @@ function HomePage({
 }
 
 // ======================================================
-// LEARN PAGE
+// LEARN
 // ======================================================
 
 function LearnPage({
@@ -418,7 +584,7 @@ function LearnPage({
   algorithmLoading,
   askAlgorithm,
 }) {
-  const programmingTopics = [
+  const topics = [
     "Variables",
     "Loops",
     "Conditions",
@@ -447,12 +613,12 @@ function LearnPage({
       <PageHeader
         eyebrow="LEARN"
         title="Learn Programming & Algorithms"
-        description="Understand difficult concepts using simple explanations."
+        description="Understand difficult topics in simple language."
       />
 
       <section className="content-card">
         <h2>
-          Programming Learning Level
+          Learning Level
         </h2>
 
         <LevelButtons
@@ -467,11 +633,11 @@ function LearnPage({
         </div>
 
         <h2>
-          Core Programming Topics
+          Programming Topics
         </h2>
 
         <div className="topic-grid">
-          {programmingTopics.map(
+          {topics.map(
             (topic) => (
               <div
                 className="topic-card"
@@ -484,7 +650,7 @@ function LearnPage({
                 <span>
                   Learn{" "}
                   {topic.toLowerCase()}
-                  with easy examples.
+                  easily.
                 </span>
               </div>
             )
@@ -492,27 +658,18 @@ function LearnPage({
         </div>
       </section>
 
-      <section className="content-card algorithm-learning-card">
-        <div className="section-title-row">
-          <div>
-            <div className="eyebrow">
-              ALGORITHM LEARNING
-            </div>
-
-            <h2>
-              Learn Algorithms Easily
-            </h2>
-          </div>
-
-          <div className="algorithm-mark">
-            ALGO
-          </div>
+      <section className="content-card">
+        <div className="eyebrow">
+          ALGORITHM LEARNING
         </div>
 
+        <h2>
+          Learn Algorithms Easily
+        </h2>
+
         <p className="section-description">
-          Select an algorithm to learn
-          its meaning, idea, variables,
-          steps, example and complexity.
+          Select an algorithm to get an
+          easy explanation.
         </p>
 
         <div className="topic-grid">
@@ -561,7 +718,7 @@ function LearnPage({
                 event.target.value
               )
             }
-            placeholder="Example: Explain Binary Search in very easy language"
+            placeholder="Example: Explain binary search in very easy language"
             rows={5}
           />
         </div>
@@ -622,7 +779,7 @@ function TeacherPage({
       <PageHeader
         eyebrow="AI TEACHER"
         title="Learn With Your AI Teacher"
-        description="Ask programming or algorithm questions and receive simple explanations."
+        description="Ask programming or algorithm questions."
       />
 
       <section className="content-card">
@@ -630,9 +787,9 @@ function TeacherPage({
           <button
             type="button"
             className={
-              algorithmMode
-                ? "mode-button"
-                : "mode-button active"
+              !algorithmMode
+                ? "mode-button active"
+                : "mode-button"
             }
             onClick={() =>
               setAlgorithmMode(
@@ -703,14 +860,13 @@ function TeacherPage({
               event
             ) =>
               setTeacherQuestion(
-                event.target
-                  .value
+                event.target.value
               )
             }
             placeholder={
               algorithmMode
-                ? "Example: Explain Binary Search in very easy language"
-                : "Example: Explain arrays in C with a simple example"
+                ? "Example: Explain binary search in very easy language"
+                : "Example: Explain arrays in C"
             }
             rows={8}
           />
@@ -765,16 +921,19 @@ function GeneratorPage({
   topic,
   setTopic,
   generatedCode,
-  generatedExplanation,
   generating,
   generateCode,
 }) {
+  const showCodeStyle =
+    language === "C" ||
+    language === "C++";
+
   return (
     <main className="page-shell">
       <PageHeader
         eyebrow="CODE GENERATOR"
         title="Generate Programming Code"
-        description="Generate complete programs one language at a time."
+        description="Generate clean, complete programs one language at a time."
       />
 
       <section className="content-card">
@@ -792,36 +951,45 @@ function GeneratorPage({
         </h2>
 
         <LanguageButtons
-          language={language}
+          language={
+            language
+          }
           setLanguage={
             setLanguage
           }
         />
 
-        <h2 className="top-gap">
-          Code Generation Style
-        </h2>
+        {showCodeStyle && (
+          <>
+            <h2 className="top-gap">
+              Code Generation Style
+            </h2>
 
-        <StyleButtons
-          codeStyle={
-            codeStyle
-          }
-          setCodeStyle={
-            setCodeStyle
-          }
-        />
+            <StyleButtons
+              codeStyle={
+                codeStyle
+              }
+              setCodeStyle={
+                setCodeStyle
+              }
+            />
+          </>
+        )}
 
         <div className="selection-summary">
           <span className="summary-dot" />
           {language}
-          <span>
-            •
-          </span>
+          <span>•</span>
           {level}
-          <span>
-            •
-          </span>
-          {codeStyle}
+
+          {showCodeStyle && (
+            <>
+              <span>
+                •
+              </span>
+              {codeStyle}
+            </>
+          )}
         </div>
 
         <div className="form-group">
@@ -835,11 +1003,10 @@ function GeneratorPage({
               event
             ) =>
               setTopic(
-                event.target
-                  .value
+                event.target.value
               )
             }
-            placeholder="Example: Write a program to find an element in an array"
+            placeholder="Example: Find maximum value from an array"
             rows={8}
           />
         </div>
@@ -860,20 +1027,7 @@ function GeneratorPage({
         </button>
 
         {generatedCode && (
-          <>
-            <div className="selection-summary result-summary">
-              <span className="summary-dot" />
-              {language}
-              <span>
-                •
-              </span>
-              {level}
-              <span>
-                •
-              </span>
-              {codeStyle}
-            </div>
-
+          <div className="generated-code-section">
             <ResultPanel
               title="GENERATED CODE"
             >
@@ -882,20 +1036,17 @@ function GeneratorPage({
                   generatedCode
                 }
               </pre>
-            </ResultPanel>
 
-            {generatedExplanation && (
-              <ResultPanel
-                title="EXPLANATION"
-              >
-                <div className="ai-text">
-                  {
-                    generatedExplanation
+              <div className="copy-action-row">
+                <CopyButton
+                  text={
+                    generatedCode
                   }
-                </div>
-              </ResultPanel>
-            )}
-          </>
+                  defaultLabel="COPY CODE"
+                />
+              </div>
+            </ResultPanel>
+          </div>
         )}
       </section>
     </main>
@@ -925,7 +1076,7 @@ function LabPage({
       <PageHeader
         eyebrow="CODE LAB"
         title="Run & Test Your Code"
-        description="Run your normal programming code with real execution."
+        description="Run normal programming code with real execution."
       />
 
       <section className="content-card">
@@ -966,11 +1117,10 @@ function LabPage({
             event
           ) =>
             setLabCode(
-              event.target
-                .value
+              event.target.value
             )
           }
-          placeholder="Paste or write your code here..."
+          placeholder="Write or paste code here..."
           spellCheck={false}
         />
 
@@ -985,8 +1135,7 @@ function LabPage({
             event
           ) =>
             setLabInput(
-              event.target
-                .value
+              event.target.value
             )
           }
           placeholder="Enter program input here..."
@@ -1101,7 +1250,7 @@ function PracticePage({
       <PageHeader
         eyebrow="PRACTICE"
         title="Practice Programming & Algorithms"
-        description="Practice problems and learn from your mistakes."
+        description="Practice problems and improve your answers."
       />
 
       <section className="content-card">
@@ -1127,8 +1276,7 @@ function PracticePage({
               event
             ) =>
               setPracticeQuestion(
-                event.target
-                  .value
+                event.target.value
               )
             }
             placeholder="Enter a programming or algorithm problem..."
@@ -1150,7 +1298,9 @@ function PracticePage({
           {algorithms.map(
             (algorithm) => (
               <button
-                key={algorithm}
+                key={
+                  algorithm
+                }
                 type="button"
                 className="topic-card topic-button"
                 onClick={() =>
@@ -1160,7 +1310,9 @@ function PracticePage({
                 }
               >
                 <strong>
-                  {algorithm}
+                  {
+                    algorithm
+                  }
                 </strong>
 
                 <span>
@@ -1196,11 +1348,10 @@ function PracticePage({
               event
             ) =>
               setPracticeAnswer(
-                event.target
-                  .value
+                event.target.value
               )
             }
-            placeholder="Write your answer or algorithm steps here..."
+            placeholder="Write your answer here..."
             rows={7}
           />
         </div>
@@ -1242,7 +1393,7 @@ function AlgorithmGeneratorPage({
       <PageHeader
         eyebrow="ALGORITHM GENERATOR"
         title="Generate Easy, Exam-Ready Algorithms"
-        description="Write an algorithm problem or instructions and generate a clean algorithm."
+        description="Generate a clean algorithm in a simple college exam format."
       />
 
       <section className="content-card algorithm-generator-card">
@@ -1272,8 +1423,7 @@ function AlgorithmGeneratorPage({
               event
             ) =>
               setAlgorithmTopic(
-                event.target
-                  .value
+                event.target.value
               )
             }
             placeholder="Enter algorithm or problem here..."
@@ -1309,6 +1459,15 @@ function AlgorithmGeneratorPage({
                 generatedAlgorithm
               }
             </pre>
+
+            <div className="copy-action-row">
+              <CopyButton
+                text={
+                  generatedAlgorithm
+                }
+                defaultLabel="COPY ALGORITHM"
+              />
+            </div>
           </div>
         </section>
       )}
@@ -1321,10 +1480,6 @@ function AlgorithmGeneratorPage({
 // ======================================================
 
 function AlgorithmRunnerPage({
-  language,
-  setLanguage,
-  codeStyle,
-  setCodeStyle,
   algorithmCode,
   setAlgorithmCode,
   algorithmInput,
@@ -1339,7 +1494,7 @@ function AlgorithmRunnerPage({
       <PageHeader
         eyebrow="ALGORITHM CODE RUNNER"
         title="Run Algorithm Programs"
-        description="A completely separate environment for running algorithm-related programs."
+        description="A completely separate runner for algorithm program code."
       />
 
       <section className="runner-warning">
@@ -1353,38 +1508,19 @@ function AlgorithmRunnerPage({
           </strong>
 
           <p>
-            This runner is separate from
-            Code Generator and Code Lab.
+            The runner automatically detects the
+            programming language from your code.
+            No language or code-style selection is
+            required.
           </p>
         </div>
       </section>
 
       <section className="content-card">
-        <h2>
-          Programming Language
-        </h2>
-
-        <LanguageButtons
-          language={
-            language
-          }
-          setLanguage={
-            setLanguage
-          }
-        />
-
-        <h2 className="top-gap">
-          Code Style
-        </h2>
-
-        <StyleButtons
-          codeStyle={
-            codeStyle
-          }
-          setCodeStyle={
-            setCodeStyle
-          }
-        />
+        <div className="selection-summary runner-auto-summary">
+          <span className="summary-dot" />
+          Automatic language detection enabled
+        </div>
 
         <div className="editor-label">
           ALGORITHM PROGRAM CODE
@@ -1399,11 +1535,20 @@ function AlgorithmRunnerPage({
             event
           ) =>
             setAlgorithmCode(
-              event.target
-                .value
+              event.target.value
             )
           }
-          placeholder={`Paste your algorithm program here...`}
+          placeholder={`Paste algorithm program code here...
+
+C:
+#include <stdio.h>
+
+int main(void)
+{
+    return 0;
+}
+
+C++, Python, Java and JavaScript are also supported.`}
           spellCheck={false}
         />
 
@@ -1420,8 +1565,7 @@ function AlgorithmRunnerPage({
             event
           ) =>
             setAlgorithmInput(
-              event.target
-                .value
+              event.target.value
             )
           }
           placeholder="Enter input for your algorithm program..."
@@ -1462,6 +1606,18 @@ function AlgorithmRunnerPage({
           <ResultPanel
             title="ALGORITHM EXECUTION RESULT"
           >
+            {runnerResult.detectedLanguage && (
+              <div className="selection-summary">
+                <span className="summary-dot" />
+
+                Detected:
+                {" "}
+                {
+                  runnerResult.detectedLanguage
+                }
+              </div>
+            )}
+
             <div className="runner-status">
               {
                 runnerResult.status
@@ -1534,7 +1690,7 @@ function Footer() {
 
 function App() {
   // ----------------------------------------------------
-  // NAVIGATION
+  // Navigation
   // ----------------------------------------------------
 
   const [
@@ -1545,7 +1701,7 @@ function App() {
   );
 
   // ----------------------------------------------------
-  // NORMAL LEVEL
+  // General level
   // ----------------------------------------------------
 
   const [
@@ -1556,7 +1712,7 @@ function App() {
   );
 
   // ----------------------------------------------------
-  // LANGUAGE
+  // Language
   // ----------------------------------------------------
 
   const [
@@ -1567,7 +1723,7 @@ function App() {
   );
 
   // ----------------------------------------------------
-  // CODE STYLE
+  // Code style
   // ----------------------------------------------------
 
   const [
@@ -1578,23 +1734,29 @@ function App() {
   );
 
   // ----------------------------------------------------
-  // AI TEACHER
+  // AI Teacher
   // ----------------------------------------------------
 
   const [
     teacherQuestion,
     setTeacherQuestion,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     teacherAnswer,
     setTeacherAnswer,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     teacherLoading,
     setTeacherLoading,
-  ] = useState(false);
+  ] = useState(
+    false
+  );
 
   const [
     algorithmMode,
@@ -1604,100 +1766,121 @@ function App() {
   );
 
   // ----------------------------------------------------
-  // ALGORITHM LEARNING
+  // Algorithm Learning
   // ----------------------------------------------------
 
   const [
     algorithmTopic,
     setAlgorithmTopic,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     algorithmAnswer,
     setAlgorithmAnswer,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     algorithmLoading,
     setAlgorithmLoading,
-  ] = useState(false);
+  ] = useState(
+    false
+  );
 
   // ----------------------------------------------------
-  // CODE GENERATOR
+  // Code Generator
   // ----------------------------------------------------
 
   const [
     topic,
     setTopic,
   ] = useState(
-    "Write a program to find an element in an array"
+    "Find maximum value from an array"
   );
 
   const [
     generatedCode,
     setGeneratedCode,
-  ] = useState("");
-
-  const [
-    generatedExplanation,
-    setGeneratedExplanation,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     generating,
     setGenerating,
-  ] = useState(false);
+  ] = useState(
+    false
+  );
 
   // ----------------------------------------------------
-  // CODE LAB
+  // Code Lab
   // ----------------------------------------------------
 
   const [
     labCode,
     setLabCode,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     labInput,
     setLabInput,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     labResult,
     setLabResult,
-  ] = useState(null);
+  ] = useState(
+    null
+  );
 
   const [
     labRunning,
     setLabRunning,
-  ] = useState(false);
+  ] = useState(
+    false
+  );
 
   // ----------------------------------------------------
-  // PRACTICE
+  // Practice
   // ----------------------------------------------------
 
   const [
     practiceQuestion,
     setPracticeQuestion,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     practiceAnswer,
     setPracticeAnswer,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     practiceResult,
     setPracticeResult,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     practiceLoading,
     setPracticeLoading,
-  ] = useState(false);
+  ] = useState(
+    false
+  );
 
   // ----------------------------------------------------
-  // ALGORITHM GENERATOR
+  // Algorithm Generator
   // ----------------------------------------------------
 
   const [
@@ -1710,36 +1893,48 @@ function App() {
   const [
     generatedAlgorithm,
     setGeneratedAlgorithm,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     algorithmGenerating,
     setAlgorithmGenerating,
-  ] = useState(false);
+  ] = useState(
+    false
+  );
 
   // ----------------------------------------------------
-  // ALGORITHM CODE RUNNER
+  // Algorithm Runner
   // ----------------------------------------------------
 
   const [
     algorithmCode,
     setAlgorithmCode,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     algorithmInput,
     setAlgorithmInput,
-  ] = useState("");
+  ] = useState(
+    ""
+  );
 
   const [
     runnerResult,
     setRunnerResult,
-  ] = useState(null);
+  ] = useState(
+    null
+  );
 
   const [
     runnerRunning,
     setRunnerRunning,
-  ] = useState(false);
+  ] = useState(
+    false
+  );
 
   // ====================================================
   // NAVIGATION
@@ -1782,7 +1977,8 @@ function App() {
         await fetch(
           `${API}/api/ai/teach`,
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
@@ -1831,15 +2027,15 @@ function App() {
   // ====================================================
 
   async function askAlgorithm(
-    customTopic,
+    selectedTopic,
     mode
   ) {
-    const selectedTopic =
+    const cleanTopic =
       String(
-        customTopic || ""
+        selectedTopic || ""
       ).trim();
 
-    if (!selectedTopic) {
+    if (!cleanTopic) {
       return;
     }
 
@@ -1856,7 +2052,8 @@ function App() {
         await fetch(
           `${API}/api/ai/algorithm`,
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
@@ -1866,7 +2063,7 @@ function App() {
             body:
               JSON.stringify({
                 topic:
-                  selectedTopic,
+                  cleanTopic,
                 level,
                 mode,
               }),
@@ -1881,7 +2078,7 @@ function App() {
       ) {
         throw new Error(
           data.error ||
-            "Algorithm learning failed."
+            "Algorithm request failed."
         );
       }
 
@@ -1918,16 +2115,13 @@ function App() {
       ""
     );
 
-    setGeneratedExplanation(
-      ""
-    );
-
     try {
       const response =
         await fetch(
           `${API}/api/ai/generate-code`,
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
@@ -1959,11 +2153,6 @@ function App() {
 
       setGeneratedCode(
         data.code || ""
-      );
-
-      setGeneratedExplanation(
-        data.explanation ||
-          ""
       );
     } catch (error) {
       setGeneratedCode(
@@ -2000,7 +2189,8 @@ function App() {
         await fetch(
           `${API}/api/code/run`,
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
@@ -2088,7 +2278,8 @@ function App() {
         await fetch(
           `${API}/api/ai/algorithm`,
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
@@ -2118,12 +2309,12 @@ function App() {
         );
       }
 
-      setPracticeResult(
-        data.answer || ""
-      );
-
       setPracticeQuestion(
         algorithm
+      );
+
+      setPracticeResult(
+        data.answer || ""
       );
     } catch (error) {
       setPracticeResult(
@@ -2153,7 +2344,8 @@ function App() {
         await fetch(
           `${API}/api/ai/algorithm`,
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
@@ -2224,7 +2416,8 @@ function App() {
         await fetch(
           `${API}/api/ai/generate-algorithm`,
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
@@ -2289,9 +2482,10 @@ function App() {
     try {
       const response =
         await fetch(
-          `${API}/api/code/run`,
+          `${API}/api/algorithm/run`,
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
@@ -2300,12 +2494,10 @@ function App() {
 
             body:
               JSON.stringify({
-                language,
                 code:
                   algorithmCode,
                 stdin:
                   algorithmInput,
-                codeStyle,
               }),
           }
         );
@@ -2329,10 +2521,10 @@ function App() {
       setRunnerResult({
         status:
           "ERROR",
-        stdout:
-          "",
         stderr:
           error.message,
+        stdout:
+          "",
         compileOutput:
           "",
         message:
@@ -2358,56 +2550,6 @@ function App() {
       null
     );
   }
-
-  // ====================================================
-  // NAVIGATION ITEMS
-  // ====================================================
-
-  const navigationItems = [
-    {
-      key: "home",
-      label: "Home",
-    },
-
-    {
-      key: "learn",
-      label: "Learn",
-    },
-
-    {
-      key: "teacher",
-      label: "AI Teacher",
-    },
-
-    {
-      key: "generator",
-      label: "Code Generator",
-    },
-
-    {
-      key: "lab",
-      label: "Code Lab",
-    },
-
-    {
-      key: "practice",
-      label: "Practice",
-    },
-
-    {
-      key:
-        "algorithm-generator",
-      label:
-        "Algorithm Generator",
-    },
-
-    {
-      key:
-        "algorithm-runner",
-      label:
-        "Algorithm Code Runner",
-    },
-  ];
 
   // ====================================================
   // PAGE
@@ -2513,9 +2655,6 @@ function App() {
           }
           generatedCode={
             generatedCode
-          }
-          generatedExplanation={
-            generatedExplanation
           }
           generating={
             generating
@@ -2638,18 +2777,6 @@ function App() {
     case "algorithm-runner":
       currentPage = (
         <AlgorithmRunnerPage
-          language={
-            language
-          }
-          setLanguage={
-            setLanguage
-          }
-          codeStyle={
-            codeStyle
-          }
-          setCodeStyle={
-            setCodeStyle
-          }
           algorithmCode={
             algorithmCode
           }
@@ -2686,75 +2813,18 @@ function App() {
           }
         />
       );
-      break;
   }
-
-  // ====================================================
-  // APP UI
-  // ====================================================
 
   return (
     <div className="app">
-      <header className="site-header">
-        <div
-          className="brand"
-          onClick={() =>
-            navigate(
-              "home"
-            )
-          }
-        >
-          <CodeIcon />
-
-          <span className="brand-name">
-            CodeMentor
-          </span>
-
-          <span className="brand-ai">
-            AI
-          </span>
-        </div>
-
-        <nav className="main-nav">
-          {navigationItems.map(
-            (item) => (
-              <button
-                key={
-                  item.key
-                }
-                type="button"
-                className={
-                  page ===
-                  item.key
-                    ? "nav-button active"
-                    : "nav-button"
-                }
-                onClick={() =>
-                  navigate(
-                    item.key
-                  )
-                }
-              >
-                {
-                  item.label
-                }
-              </button>
-            )
-          )}
-        </nav>
-
-        <button
-          type="button"
-          className="header-action"
-          onClick={() =>
-            navigate(
-              "generator"
-            )
-          }
-        >
-          GENERATE CODE
-        </button>
-      </header>
+      <SiteHeader
+        page={
+          page
+        }
+        navigate={
+          navigate
+        }
+      />
 
       <div className="page-content">
         {
