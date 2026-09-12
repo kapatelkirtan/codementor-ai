@@ -1,4 +1,13 @@
-node_modules/
+﻿node_modules/
 .env
+.env.*
+!.env.example
 dist/
 .vite/
+
+# Local backups and diagnostic files
+*.backup
+*.backup2
+*.log
+*.before-*
+server/index-algorithm-backup.js
