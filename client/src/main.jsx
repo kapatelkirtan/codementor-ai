@@ -4,7 +4,7 @@ import "./styles.css";
 
 const API =
   import.meta.env.VITE_API_URL ||
-  "http://localhost:8787";
+  "https://codementor-ai-backend-b276.onrender.com";
 
 // ============================================================
 // LANGUAGES
