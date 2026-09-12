@@ -6,13 +6,8 @@ const cors = require("cors");
 const app = express();
 
 const PORT = Number(process.env.PORT || 8787);
-
 const CLIENT_ORIGIN =
   process.env.CLIENT_ORIGIN || "http://localhost:5173";
-
-// ======================================================
-// CORS
-// ======================================================
 
 app.use(
   cors({
@@ -20,33 +15,24 @@ app.use(
   })
 );
 
-// ======================================================
-// JSON
-// ======================================================
-
 app.use(
   express.json({
     limit: "512kb",
   })
 );
 
-// ======================================================
-// GEMINI
-// ======================================================
+// ============================================================
+// CONFIGURATION
+// ============================================================
 
-const GEMINI_API_KEY =
-  process.env.GEMINI_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 const GEMINI_MODEL =
-  process.env.GEMINI_MODEL ||
-  "gemini-3.5-flash-lite";
+  process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
 const GEMINI_URL =
-  `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-
-// ======================================================
-// LANGUAGES
-// ======================================================
+  `https://generativelanguage.googleapis.com/v1beta/models/` +
+  `${GEMINI_MODEL}:generateContent`;
 
 const LANGUAGES = {
   C: {
@@ -75,10 +61,6 @@ const LANGUAGES = {
   },
 };
 
-// ======================================================
-// LEVELS
-// ======================================================
-
 const LEVELS = [
   "Beginner",
   "Intermediate",
@@ -91,149 +73,49 @@ const ALGORITHM_LEVELS = [
   "Advance",
 ];
 
-const STYLES = [
+const CODE_STYLES = [
   "Modern Standard",
   "Legacy Turbo C",
 ];
 
-// ======================================================
+// ============================================================
 // AI SYSTEM PROMPT
-// ======================================================
+// ============================================================
 
 const SYSTEM_PROMPT = `
-You are CodeMentor AI, an expert programming and
-algorithm teacher.
+You are CodeMentor AI, an expert programming teacher.
 
-Supported programming languages:
+Teach C, C++, Python, Java and JavaScript accurately.
 
-C
-C++
-Python
-Java
-JavaScript
+Always use easy beginner-friendly language when teaching.
 
-==================================================
-PROGRAMMING TEACHER
-==================================================
+The website has these features:
+1. AI Teacher
+2. Code Generator
+3. Algorithm Learning
+4. Algorithm Generator
+5. Code Lab
+6. Algorithm Code Runner
+7. Programming Practice
+8. Algorithm Practice
 
-Explain programming concepts clearly and simply.
+IMPORTANT:
 
-==================================================
-ALGORITHM TEACHER
-==================================================
+Never claim that code was actually executed unless the execution
+result is provided by the real Judge0 execution service.
 
-When teaching algorithms:
+Never invent execution results.
 
-- Explain the meaning.
-- Explain the purpose.
-- Explain the simple idea.
-- Explain variables.
-- Explain steps.
-- Give a small example.
-- Explain complexity when useful.
-- Give important exam points.
-- Use very easy language for beginners.
+The Code Lab and Algorithm Code Runner use Judge0.
 
-==================================================
-ALGORITHM GENERATOR
-==================================================
+============================================================
+LEGACY TURBO C
+============================================================
 
-When generating an algorithm, generate ONLY the
-algorithm.
-
-The output should resemble a college algorithm
-notebook/exam format.
+When Legacy Turbo C is selected for C, the VISIBLE SOURCE CODE
+must look like classic educational Turbo C source.
 
 Preferred structure:
-
-Algorithm: <algorithm name>
-
-Algorithm:
-
-<ALGORITHM-NAME>(parameters)
-- Short one-line description.
-
-Variables:
-
-(i) VARIABLE : Meaning
-(ii) VARIABLE : Meaning
-(iii) VARIABLE : Meaning
-
-Steps:
-
-Step-1: [Short description]
-
-<compact pseudocode or algorithm statements>
-
-Step-2: [Short description]
-
-...
-
-Step-last: [Finish]
-
-RETURN
-
-Use simple notation such as:
-
-IF ... THEN
-END IF
-
-FOR ... DO
-END FOR
-
-WHILE ... DO
-END WHILE
-
-ARR[i] <- VALUE
-
-RETURN
-FINISH
-
-Do not automatically add long sections such as:
-Purpose
-Example
-Expected Result
-Time Complexity
-Space Complexity
-Important Points
-
-unless the user specifically asks for them.
-
-Keep the generated algorithm concise and exam-ready.
-
-==================================================
-CODE GENERATOR
-==================================================
-
-When generating code, return ONLY the complete
-program source code.
-
-Do NOT return:
-
-- explanation
-- how it works
-- example input
-- expected output
-- important points
-- headings
-- Markdown code fences
-- text before the code
-- text after the code
-
-For C, C++, Java and JavaScript:
-include useful beginner-friendly comments.
-
-For Python:
-DO NOT include comments.
-
-==================================================
-LEGACY TURBO C
-==================================================
-
-When Legacy Turbo C is selected for C, the displayed
-source must visibly use classic Turbo C style.
-
-Use:
 
 #include <stdio.h>
 #include <conio.h>
@@ -242,21 +124,28 @@ void main()
 {
     clrscr();
 
-    ...
+    /* program */
 
     getch();
 }
 
-Do not use int main(void) or int main().
+For C Legacy Turbo C:
+- Use void main()
+- Use #include <conio.h>
+- Use clrscr();
+- Use getch();
+- Use classic educational syntax
+- Use #define where appropriate
+- Do not silently produce modern int main()
 
-==================================================
+============================================================
 LEGACY TURBO C++
-==================================================
+============================================================
 
-When Legacy Turbo C is selected for C++, the displayed
-source must visibly use classic Turbo C++ style.
+When Legacy Turbo C is selected for C++, the visible source code
+must look like classic Turbo C++ educational source.
 
-Use:
+Preferred structure:
 
 #include <iostream.h>
 #include <conio.h>
@@ -265,49 +154,126 @@ void main()
 {
     clrscr();
 
-    ...
+    /* program */
 
     getch();
 }
 
-Do not use modern int main().
+For C++ Legacy Turbo C:
+- Use void main()
+- Use #include <conio.h>
+- Use #include <iostream.h> when appropriate
+- Use clrscr();
+- Use getch();
+- Use classic educational syntax
+- Use #define where appropriate
 
-==================================================
-MODERN C / C++
-==================================================
+============================================================
+MODERN C
+============================================================
 
-Modern Standard C and C++ must not use:
+Modern C must use normal standard C.
 
+Use:
+#include <stdio.h>
+int main(void)
+
+Do not use:
 conio.h
 clrscr()
 getch()
 void main()
 
-==================================================
+============================================================
+MODERN C++
+============================================================
+
+Modern C++ must use normal standard C++.
+
+Use:
+#include <iostream>
+int main()
+
+Do not use:
+conio.h
+clrscr()
+getch()
+void main()
+iostream.h
+
+============================================================
 OTHER LANGUAGES
-==================================================
+============================================================
 
 Python:
-normal valid Python with NO comments.
+Use normal valid Python.
 
 Java:
-normal valid Java with useful comments.
+Use normal valid Java and public class Main.
 
 JavaScript:
-normal Node.js JavaScript with useful comments.
+Use Node.js.
+Use standard input when input is required.
+Do not use external packages.
 
-==================================================
-EXECUTION
-==================================================
+============================================================
+GENERAL
+============================================================
 
-Never invent compiler output.
+Generated code must be complete.
 
-Judge0 performs actual execution.
+Use standard input for input-based programs.
+
+Do not invent real execution output.
+
+Be accurate, practical and educational.
 `;
 
-// ======================================================
-// AI CHECK
-// ======================================================
+// ============================================================
+// COMMENT RULES
+// ============================================================
+
+const COMMENT_RULE = `
+COMMENT RULES FOR C/C++/JAVA/JAVASCRIPT:
+
+Add useful beginner-friendly comments to important statements.
+
+Comments should explain important:
+- includes/imports
+- declarations
+- variables
+- input
+- assignments
+- calculations
+- conditions
+- loops
+- functions/classes
+- output
+- important return statements
+
+Comments must be short.
+
+Do not add meaningless comments.
+
+Keep the program valid.
+`;
+
+const PYTHON_NO_COMMENT_RULE = `
+PYTHON COMMENT RULE:
+
+Generate Python code WITHOUT comments.
+
+Do not add:
+#
+triple-quoted explanation blocks
+long explanatory strings
+
+Return clean executable Python only.
+`;
+
+// ============================================================
+// AI HELPERS
+// ============================================================
 
 function requireAI() {
   if (!GEMINI_API_KEY) {
@@ -321,56 +287,44 @@ function requireAI() {
   }
 }
 
-// ======================================================
-// GEMINI REQUEST
-// ======================================================
-
 async function askAI(instruction) {
   requireAI();
 
-  const response = await fetch(
-    GEMINI_URL,
-    {
-      method: "POST",
+  const response = await fetch(GEMINI_URL, {
+    method: "POST",
 
-      headers: {
-        "Content-Type":
-          "application/json",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": GEMINI_API_KEY,
+    },
 
-        "x-goog-api-key":
-          GEMINI_API_KEY,
+    body: JSON.stringify({
+      systemInstruction: {
+        parts: [
+          {
+            text: SYSTEM_PROMPT,
+          },
+        ],
       },
 
-      body: JSON.stringify({
-        systemInstruction: {
+      contents: [
+        {
+          role: "user",
           parts: [
             {
-              text: SYSTEM_PROMPT,
+              text: instruction,
             },
           ],
         },
+      ],
 
-        contents: [
-          {
-            role: "user",
+      generationConfig: {
+        temperature: 0.1,
+      },
+    }),
+  });
 
-            parts: [
-              {
-                text: instruction,
-              },
-            ],
-          },
-        ],
-
-        generationConfig: {
-          temperature: 0.15,
-        },
-      }),
-    }
-  );
-
-  const data =
-    await response.json();
+  const data = await response.json();
 
   if (!response.ok) {
     const error = new Error(
@@ -378,310 +332,112 @@ async function askAI(instruction) {
         `Gemini API request failed (${response.status}).`
     );
 
-    error.status =
-      response.status;
+    error.status = response.status;
 
     throw error;
   }
 
   const text =
     data?.candidates?.[0]?.content?.parts
-      ?.map(
-        (part) =>
-          part.text || ""
-      )
+      ?.map((part) => part.text || "")
       .join("") || "";
 
   if (!text.trim()) {
-    throw new Error(
-      "Gemini returned an empty response."
-    );
+    throw new Error("Gemini returned an empty response.");
   }
 
   return text.trim();
 }
 
-// ======================================================
-// CLEAN MARKDOWN
-// ======================================================
+// ============================================================
+// TEXT / CODE CLEANING
+// ============================================================
 
-function removeMarkdownCode(text) {
-  return String(text || "")
-    .replace(
-      /```[a-zA-Z0-9_+#.-]*\s*/g,
-      ""
-    )
-    .replace(
-      /```/g,
-      ""
-    )
+function cleanSourceCode(code) {
+  return String(code || "")
+    .replace(/^```[a-zA-Z0-9_+#.-]*\s*/i, "")
+    .replace(/\s*```$/i, "")
     .trim();
 }
 
-// ======================================================
-// EXTRACT CODE
-// ======================================================
-
-function extractCode(text) {
+function extractFirstCodeBlock(text) {
   if (!text) {
     return "";
   }
 
-  const source =
-    String(text);
+  const match = text.match(
+    /```(?:[a-zA-Z0-9_+#.-]+)?\s*([\s\S]*?)```/i
+  );
 
-  const fencedMatch =
-    source.match(
-      /```(?:[a-zA-Z0-9_+#.-]+)?\s*([\s\S]*?)```/
-    );
-
-  if (fencedMatch) {
-    return fencedMatch[1].trim();
+  if (match?.[1]) {
+    return match[1].trim();
   }
 
-  const codeMarker =
-    source.match(
-      /===\s*CODE\s*===([\s\S]*?)(?:===\s*HOW IT WORKS\s*===|===\s*EXPLANATION\s*===|$)/i
-    );
+  return cleanSourceCode(text);
+}
 
-  if (codeMarker) {
-    return removeMarkdownCode(
-      codeMarker[1]
-    );
+function cleanAlgorithmResponse(text) {
+  if (!text) {
+    return "";
   }
 
-  return removeMarkdownCode(
-    source
-  )
-    .replace(
-      /^===\s*CODE\s*===/i,
-      ""
-    )
-    .trim();
-}
+  let result = String(text);
 
-// ======================================================
-// CLEAN SOURCE
-// ======================================================
+  result = result.replace(
+    /^```[a-zA-Z0-9_+#.-]*\s*/gim,
+    ""
+  );
 
-function cleanSourceCode(code) {
-  return removeMarkdownCode(
-    code
-  )
-    .replace(
-      /^===\s*CODE\s*===/i,
-      ""
-    )
-    .trim();
-}
+  result = result.replace(/```/g, "");
 
-// ======================================================
-// MAIN CONVERSION
-// ======================================================
+  result = result.replace(
+    /^===\s*ALGORITHM\s*===\s*$/gim,
+    ""
+  );
 
-function convertMainToVoidMain(
-  code
-) {
-  let result = code;
-
-  result =
-    result.replace(
-      /\bint\s+main\s*\(\s*void\s*\)/i,
-      "void main()"
-    );
-
-  result =
-    result.replace(
-      /\bint\s+main\s*\(\s*\)/i,
-      "void main()"
-    );
-
-  result =
-    result.replace(
-      /\bint\s+main\s*\(\s*int[\s\S]*?\)/i,
-      "void main()"
-    );
+  result = result.trim();
 
   return result;
 }
 
-// ======================================================
-// ADD TURBO STATEMENTS
-// ======================================================
+// ============================================================
+// FORCE LEGACY TURBO C
+// ============================================================
 
-function addLegacyMainStatements(
-  code
-) {
-  let result =
-    code;
+function forceLegacyTurboC(code) {
+  let result = cleanSourceCode(code);
 
-  const mainMatch =
-    /void\s+main\s*\(\s*\)\s*\{/i.exec(
-      result
-    );
+  // Remove conio first so it can be re-added cleanly.
+  result = result.replace(
+    /^\s*#include\s*<conio\.h>\s*\r?\n?/gim,
+    ""
+  );
 
-  if (!mainMatch) {
-    return result;
-  }
-
-  const openBrace =
-    result.indexOf(
-      "{",
-      mainMatch.index
-    );
-
-  if (openBrace === -1) {
-    return result;
-  }
-
-  let depth = 0;
-  let closeBrace = -1;
-
-  for (
-    let i = openBrace;
-    i < result.length;
-    i++
-  ) {
-    if (
-      result[i] === "{"
-    ) {
-      depth++;
-    }
-
-    if (
-      result[i] === "}"
-    ) {
-      depth--;
-
-      if (depth === 0) {
-        closeBrace = i;
-        break;
-      }
-    }
-  }
-
-  if (
-    closeBrace === -1
-  ) {
-    return result;
-  }
-
-  let body =
-    result.slice(
-      openBrace + 1,
-      closeBrace
-    );
-
-  body =
-    body.replace(
-      /^\s*return\s+[0-9]+\s*;\s*$/gim,
-      ""
-    );
-
-  if (
-    !/\bclrscr\s*\(\s*\)\s*;/i.test(
-      body
-    )
-  ) {
-    body =
-      "\n    clrscr();\n" +
-      body.trimStart();
-  }
-
-  if (
-    !/\bgetch\s*\(\s*\)\s*;/i.test(
-      body
-    )
-  ) {
-    body =
-      body.trimEnd() +
-      "\n\n    getch();\n";
-  }
-
-  result =
-    result.slice(
-      0,
-      openBrace + 1
-    ) +
-    body +
-    result.slice(
-      closeBrace
-    );
-
-  return result;
-}
-
-// ======================================================
-// FORCE LEGACY C
-// ======================================================
-
-function forceLegacyTurboC(
-  code
-) {
-  let result =
-    cleanSourceCode(code);
-
-  result =
-    result.replace(
-      /^\s*#include\s*<conio\.h>\s*\r?\n?/gim,
-      ""
-    );
-
+  // Ensure stdio.h where needed.
   const usesStdio =
-    /\bprintf\s*\(/i.test(
-      result
-    ) ||
-    /\bscanf\s*\(/i.test(
-      result
-    ) ||
-    /\bfprintf\s*\(/i.test(
-      result
-    ) ||
-    /\bfscanf\s*\(/i.test(
-      result
-    );
+    /\bprintf\s*\(/i.test(result) ||
+    /\bscanf\s*\(/i.test(result) ||
+    /\bfprintf\s*\(/i.test(result) ||
+    /\bfscanf\s*\(/i.test(result);
 
   if (
     usesStdio &&
-    !/#include\s*<stdio\.h>/i.test(
-      result
-    )
+    !/#include\s*<stdio\.h>/i.test(result)
   ) {
-    result =
-      "#include <stdio.h>\n" +
-      result;
+    result = `#include <stdio.h>\n${result}`;
   }
 
-  if (
-    !/#include\s*<conio\.h>/i.test(
-      result
-    )
-  ) {
-    const includes = [
-      ...result.matchAll(
-        /^#include[^\r\n]*(?:\r?\n|$)/gim
-      ),
-    ];
+  // Add conio.h.
+  if (!/#include\s*<conio\.h>/i.test(result)) {
+    const includeBlock = result.match(
+      /^(?:\s*#include[^\n]*\r?\n)+/i
+    );
 
-    if (includes.length) {
-      const last =
-        includes[
-          includes.length - 1
-        ];
-
-      const insertAt =
-        last.index +
-        last[0].length;
-
+    if (includeBlock) {
       result =
-        result.slice(
-          0,
-          insertAt
-        ) +
+        includeBlock[0] +
         "#include <conio.h>\n" +
-        result.slice(
-          insertAt
-        );
+        result.slice(includeBlock[0].length);
     } else {
       result =
         "#include <conio.h>\n" +
@@ -689,98 +445,104 @@ function forceLegacyTurboC(
     }
   }
 
-  result =
-    convertMainToVoidMain(
-      result
-    );
+  // Convert main.
+  result = result.replace(
+    /\bint\s+main\s*\(\s*(?:void)?\s*\)/i,
+    "void main()"
+  );
 
-  result =
-    addLegacyMainStatements(
-      result
-    );
+  result = result.replace(
+    /\bint\s+main\s*\(\s*int\s+argc\s*,[\s\S]*?\)/i,
+    "void main()"
+  );
+
+  result = result.replace(
+    /(?<!\w)main\s*\(\s*(?:void)?\s*\)/i,
+    "void main()"
+  );
+
+  // Ensure clrscr().
+  if (!/\bclrscr\s*\(\s*\)\s*;/i.test(result)) {
+    const mainPattern =
+      /void\s+main\s*\(\s*\)\s*\{/i;
+
+    if (mainPattern.test(result)) {
+      result = result.replace(
+        mainPattern,
+        "void main()\n{\n    clrscr();"
+      );
+    }
+  }
+
+  // Remove return 0.
+  result = result.replace(
+    /^\s*return\s+0\s*;\s*$/gim,
+    ""
+  );
+
+  // Ensure getch().
+  if (!/\bgetch\s*\(\s*\)\s*;/i.test(result)) {
+    const lastBrace = result.lastIndexOf("}");
+
+    if (lastBrace !== -1) {
+      result =
+        result.slice(0, lastBrace) +
+        "\n    getch();\n" +
+        result.slice(lastBrace);
+    }
+  }
 
   return result
-    .replace(
-      /\n{3,}/g,
-      "\n\n"
-    )
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
-// ======================================================
-// FORCE LEGACY C++
-// ======================================================
+// ============================================================
+// FORCE LEGACY TURBO C++
+// ============================================================
 
-function forceLegacyTurboCpp(
-  code
-) {
-  let result =
-    cleanSourceCode(code);
+function forceLegacyTurboCpp(code) {
+  let result = cleanSourceCode(code);
 
-  result =
-    result.replace(
-      /#include\s*<iostream>/gi,
-      "#include <iostream.h>"
-    );
+  // Modern iostream -> old iostream.h.
+  result = result.replace(
+    /#include\s*<iostream>/gi,
+    "#include <iostream.h>"
+  );
 
-  result =
-    result.replace(
-      /^\s*#include\s*<conio\.h>\s*\r?\n?/gim,
-      ""
-    );
-
+  // Add iostream.h when cin/cout are used.
   const usesIO =
-    /\bcout\s*<</i.test(
-      result
-    ) ||
-    /\bcin\s*>>/i.test(
-      result
-    ) ||
-    /\bendl\b/i.test(
-      result
-    );
+    /\bcin\s*>>/i.test(result) ||
+    /\bcout\s*<</i.test(result) ||
+    /\bstd::cin\b/i.test(result) ||
+    /\bstd::cout\b/i.test(result);
 
   if (
     usesIO &&
-    !/#include\s*<iostream\.h>/i.test(
-      result
-    )
+    !/#include\s*<iostream\.h>/i.test(result)
   ) {
     result =
       "#include <iostream.h>\n" +
       result;
   }
 
-  if (
-    !/#include\s*<conio\.h>/i.test(
-      result
-    )
-  ) {
-    const includes = [
-      ...result.matchAll(
-        /^#include[^\r\n]*(?:\r?\n|$)/gim
-      ),
-    ];
+  // Remove modern conio header first.
+  result = result.replace(
+    /^\s*#include\s*<conio\.h>\s*\r?\n?/gim,
+    ""
+  );
 
-    if (includes.length) {
-      const last =
-        includes[
-          includes.length - 1
-        ];
+  // Add conio.
+  if (!/#include\s*<conio\.h>/i.test(result)) {
+    const includeBlock = result.match(
+      /^(?:\s*#include[^\n]*\r?\n)+/i
+    );
 
-      const insertAt =
-        last.index +
-        last[0].length;
-
+    if (includeBlock) {
       result =
-        result.slice(
-          0,
-          insertAt
-        ) +
+        includeBlock[0] +
         "#include <conio.h>\n" +
-        result.slice(
-          insertAt
-        );
+        result.slice(includeBlock[0].length);
     } else {
       result =
         "#include <conio.h>\n" +
@@ -788,207 +550,391 @@ function forceLegacyTurboCpp(
     }
   }
 
-  result =
-    convertMainToVoidMain(
-      result
-    );
+  // Convert main.
+  result = result.replace(
+    /\bint\s+main\s*\(\s*(?:void)?\s*\)/i,
+    "void main()"
+  );
 
-  result =
-    addLegacyMainStatements(
-      result
-    );
+  result = result.replace(
+    /\bint\s+main\s*\(\s*\)/i,
+    "void main()"
+  );
+
+  result = result.replace(
+    /(?<!\w)main\s*\(\s*(?:void)?\s*\)/i,
+    "void main()"
+  );
+
+  // Ensure clrscr.
+  if (!/\bclrscr\s*\(\s*\)\s*;/i.test(result)) {
+    const mainPattern =
+      /void\s+main\s*\(\s*\)\s*\{/i;
+
+    if (mainPattern.test(result)) {
+      result = result.replace(
+        mainPattern,
+        "void main()\n{\n    clrscr();"
+      );
+    }
+  }
+
+  // Remove return 0.
+  result = result.replace(
+    /^\s*return\s+0\s*;\s*$/gim,
+    ""
+  );
+
+  // Ensure getch.
+  if (!/\bgetch\s*\(\s*\)\s*;/i.test(result)) {
+    const lastBrace = result.lastIndexOf("}");
+
+    if (lastBrace !== -1) {
+      result =
+        result.slice(0, lastBrace) +
+        "\n    getch();\n" +
+        result.slice(lastBrace);
+    }
+  }
 
   return result
-    .replace(
-      /\n{3,}/g,
-      "\n\n"
-    )
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
-// ======================================================
-// APPLY STYLE
-// ======================================================
+// ============================================================
+// APPLY CODE GENERATION STYLE
+// ============================================================
 
-function applySelectedCodeStyle(
+function applyCodeGenerationStyle(
   language,
   code,
   codeStyle
 ) {
-  const cleaned =
-    cleanSourceCode(code);
+  const cleaned = cleanSourceCode(code);
 
   if (
-    codeStyle !==
-    "Legacy Turbo C"
+    codeStyle !== "Legacy Turbo C"
   ) {
     return cleaned;
   }
 
-  if (
-    language === "C"
-  ) {
-    return forceLegacyTurboC(
-      cleaned
-    );
+  if (language === "C") {
+    return forceLegacyTurboC(cleaned);
   }
 
-  if (
-    language === "C++"
-  ) {
-    return forceLegacyTurboCpp(
-      cleaned
-    );
+  if (language === "C++") {
+    return forceLegacyTurboCpp(cleaned);
   }
 
   return cleaned;
 }
 
-// ======================================================
-// AUTOMATIC LANGUAGE DETECTION
-// ======================================================
-//
-// Algorithm Code Runner intentionally has NO language
-// selector in the UI.
-//
-// The server detects the language from the source code.
-// ======================================================
+// ============================================================
+// AUTO LANGUAGE DETECTION
+// ============================================================
 
-function detectLanguage(code) {
-  const source =
-    String(code || "").trim();
+function detectCodeLanguage(code) {
+  const source = String(code || "").trim();
 
-  // ----------------------------------------------------
-  // JavaScript
-  // ----------------------------------------------------
-
-  if (
-    /require\s*\(\s*['"](?:fs|readline)['"]\s*\)/i.test(
-      source
-    ) ||
-    /\bconsole\.log\s*\(/i.test(
-      source
-    ) ||
-    /\bprocess\.stdin\b/i.test(
-      source
-    ) ||
-    /\bconst\s+\w+\s*=/.test(
-      source
-    ) ||
-    /\blet\s+\w+\s*=/.test(
-      source
-    )
-  ) {
-    return "JavaScript";
+  if (!source) {
+    throw new Error(
+      "Code is required."
+    );
   }
 
-  // ----------------------------------------------------
-  // Java
-  // ----------------------------------------------------
-
-  if (
-    /\bpublic\s+class\s+\w+/i.test(
-      source
-    ) ||
-    /\bpublic\s+static\s+void\s+main\s*\(/i.test(
-      source
-    ) ||
-    /\bSystem\.out\.(?:print|println)\s*\(/i.test(
-      source
-    ) ||
-    /\bimport\s+java\./i.test(
-      source
-    )
-  ) {
-    return "Java";
-  }
-
-  // ----------------------------------------------------
-  // Python
-  // ----------------------------------------------------
-
-  if (
-    /^#!/m.test(source) &&
-    /python/i.test(source)
-  ) {
-    return "Python";
-  }
-
-  if (
-    /\bdef\s+\w+\s*\(/i.test(
-      source
-    ) ||
-    /\bprint\s*\(/i.test(
-      source
-    ) ||
-    /\binput\s*\(/i.test(
-      source
-    ) ||
-    /\bimport\s+\w+/i.test(
-      source
-    )
-  ) {
-    return "Python";
-  }
-
-  // ----------------------------------------------------
+  // ----------------------------------------------------------
   // C++
-  // ----------------------------------------------------
+  // ----------------------------------------------------------
 
+  const cppSignals = [
+    /#include\s*<iostream(\.h)?>/i,
+    /\busing\s+namespace\s+std\b/i,
+    /\bstd::/i,
+    /\bcout\s*<</i,
+    /\bcin\s*>>/i,
+    /\bvector\s*</i,
+    /\bstring\s+\w+\s*;/i,
+  ];
+
+  const cppScore = cppSignals.filter(
+    (regex) => regex.test(source)
+  ).length;
+
+  // ----------------------------------------------------------
+  // C
+  // ----------------------------------------------------------
+
+  const cSignals = [
+    /#include\s*<stdio\.h>/i,
+    /\bprintf\s*\(/i,
+    /\bscanf\s*\(/i,
+    /\bmalloc\s*\(/i,
+    /\bfree\s*\(/i,
+  ];
+
+  const cScore = cSignals.filter(
+    (regex) => regex.test(source)
+  ).length;
+
+  // Legacy C++ must win over C when iostream.h exists.
   if (
-    /#include\s*<iostream(?:\.h)?>/i.test(
-      source
-    ) ||
-    /\busing\s+namespace\s+std\s*;/i.test(
-      source
-    ) ||
-    /\bcout\s*<</i.test(
-      source
-    ) ||
-    /\bcin\s*>>/i.test(
-      source
-    ) ||
-    /\bstd::(cout|cin|vector|string)\b/i.test(
-      source
-    )
+    /#include\s*<iostream\.h>/i.test(source) ||
+    /\busing\s+namespace\s+std\b/i.test(source) ||
+    /\bcout\s*<</i.test(source) ||
+    /\bcin\s*>>/i.test(source)
   ) {
     return "C++";
   }
 
-  // ----------------------------------------------------
-  // C
-  // ----------------------------------------------------
-
+  // C legacy or normal.
   if (
-    /#include\s*<stdio\.h>/i.test(
-      source
-    ) ||
-    /#include\s*<conio\.h>/i.test(
-      source
-    ) ||
-    /\bprintf\s*\(/i.test(
-      source
-    ) ||
-    /\bscanf\s*\(/i.test(
-      source
-    ) ||
-    /\bvoid\s+main\s*\(/i.test(
-      source
-    ) ||
-    /\bint\s+main\s*\(/i.test(
-      source
-    )
+    /#include\s*<stdio\.h>/i.test(source) ||
+    /\bprintf\s*\(/i.test(source) ||
+    /\bscanf\s*\(/i.test(source)
   ) {
     return "C";
   }
 
-  // Default.
-  return "C";
+  // ----------------------------------------------------------
+  // Java
+  // ----------------------------------------------------------
+
+  const javaSignals = [
+    /\bpublic\s+class\s+[A-Za-z_]\w*/i,
+    /\bclass\s+Main\b/i,
+    /\bpublic\s+static\s+void\s+main\s*\(/i,
+    /\bSystem\.out\.(println|print)\s*\(/i,
+    /\bimport\s+java\./i,
+    /\bScanner\s+\w+/i,
+  ];
+
+  const javaScore = javaSignals.filter(
+    (regex) => regex.test(source)
+  ).length;
+
+  if (javaScore >= 2) {
+    return "Java";
+  }
+
+  // ----------------------------------------------------------
+  // JavaScript
+  // ----------------------------------------------------------
+
+  const jsSignals = [
+    /\bconsole\.(log|error|warn)\s*\(/i,
+    /\bprocess\.stdin\b/i,
+    /\brequire\s*\(\s*["']node:/i,
+    /\brequire\s*\(\s*["'][^"']+["']\s*\)/i,
+    /\b(?:const|let|var)\s+[A-Za-z_$]\w*\s*=/i,
+    /=>/i,
+    /\bfunction\s+[A-Za-z_$]\w*\s*\(/i,
+  ];
+
+  const jsScore = jsSignals.filter(
+    (regex) => regex.test(source)
+  ).length;
+
+  // ----------------------------------------------------------
+  // Python
+  // ----------------------------------------------------------
+
+  const pythonSignals = [
+    /\bdef\s+[A-Za-z_]\w*\s*\(/i,
+    /\bimport\s+[A-Za-z_]\w*/i,
+    /\bfrom\s+[A-Za-z_]\w*\s+import\b/i,
+    /\bprint\s*\(/i,
+    /\binput\s*\(/i,
+    /^\s*for\s+.+\s+in\s+.+:/m,
+    /^\s*if\s+.+:/m,
+    /^\s*elif\s+.+:/m,
+    /^\s*else\s*:/m,
+  ];
+
+  const pythonScore = pythonSignals.filter(
+    (regex) => regex.test(source)
+  ).length;
+
+  // Strong JavaScript cases.
+  if (
+    /\bconsole\.(log|error|warn)\s*\(/i.test(source) ||
+    /\bprocess\.stdin\b/i.test(source)
+  ) {
+    return "JavaScript";
+  }
+
+  // Strong Python cases.
+  if (
+    /\bdef\s+[A-Za-z_]\w*\s*\(/i.test(source) ||
+    /^\s*for\s+.+\s+in\s+.+:/m.test(source) ||
+    /^\s*if\s+.+:/m.test(source)
+  ) {
+    return "Python";
+  }
+
+  const scores = [
+    {
+      language: "C++",
+      score: cppScore,
+    },
+    {
+      language: "C",
+      score: cScore,
+    },
+    {
+      language: "Java",
+      score: javaScore,
+    },
+    {
+      language: "JavaScript",
+      score: jsScore,
+    },
+    {
+      language: "Python",
+      score: pythonScore,
+    },
+  ];
+
+  scores.sort(
+    (a, b) => b.score - a.score
+  );
+
+  if (
+    scores[0].score > 0
+  ) {
+    return scores[0].language;
+  }
+
+  throw new Error(
+    "Unable to automatically detect the programming language. Please enter valid C, C++, Python, Java or JavaScript code."
+  );
 }
 
-// ======================================================
+// ============================================================
+// AUTO CODE STYLE DETECTION
+// ============================================================
+
+function detectCodeStyle(
+  language,
+  code
+) {
+  const source = String(code || "");
+
+  if (
+    language === "C" ||
+    language === "C++"
+  ) {
+    const legacyMarkers = [
+      /#include\s*<conio\.h>/i,
+      /\bclrscr\s*\(\s*\)/i,
+      /\bgetch\s*\(\s*\)/i,
+      /\bvoid\s+main\s*\(/i,
+      /#include\s*<iostream\.h>/i,
+    ];
+
+    const isLegacy =
+      legacyMarkers.some(
+        (regex) => regex.test(source)
+      );
+
+    return isLegacy
+      ? "Legacy Turbo C"
+      : "Modern Standard";
+  }
+
+  return "Modern Standard";
+}
+
+// ============================================================
+// LEGACY CODE -> JUDGE0 COMPATIBLE CODE
+// ============================================================
+
+function prepareLegacyTurboCode(
+  language,
+  code,
+  codeStyle
+) {
+  if (
+    codeStyle !==
+      "Legacy Turbo C" ||
+    (language !== "C" &&
+      language !== "C++")
+  ) {
+    return code;
+  }
+
+  let runnable = String(code || "");
+
+  // Remove conio.
+  runnable = runnable.replace(
+    /^\s*#include\s*<conio\.h>\s*\r?\n?/gim,
+    ""
+  );
+
+  // C++ iostream.h -> iostream.
+  if (language === "C++") {
+    runnable = runnable.replace(
+      /#include\s*<iostream\.h>/gi,
+      "#include <iostream>"
+    );
+  }
+
+  // Remove clrscr.
+  runnable = runnable.replace(
+    /\bclrscr\s*\(\s*\)\s*;?/gi,
+    ""
+  );
+
+  // Remove getch.
+  runnable = runnable.replace(
+    /\bgetch\s*\(\s*\)\s*;?/gi,
+    ""
+  );
+
+  // void main() -> int main()
+  runnable = runnable.replace(
+    /\bvoid\s+main\s*\(\s*\)/i,
+    "int main()"
+  );
+
+  // Remove accidental duplicate return values.
+  runnable = runnable.replace(
+    /^\s*return\s+0\s*;\s*$/gim,
+    ""
+  );
+
+  // Ensure return 0 at end of main.
+  const lastBrace =
+    runnable.lastIndexOf("}");
+
+  if (
+    lastBrace !== -1 &&
+    language === "C"
+  ) {
+    runnable =
+      runnable.slice(0, lastBrace) +
+      "\n    return 0;\n" +
+      runnable.slice(lastBrace);
+  }
+
+  if (
+    lastBrace !== -1 &&
+    language === "C++"
+  ) {
+    runnable =
+      runnable.slice(0, lastBrace) +
+      "\n    return 0;\n" +
+      runnable.slice(lastBrace);
+  }
+
+  return runnable
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+// ============================================================
 // HEALTH
-// ======================================================
+// ============================================================
 
 app.get(
   "/api/health",
@@ -997,32 +943,25 @@ app.get(
       ok: true,
       aiProvider: "Gemini",
       aiConfigured:
-        Boolean(
-          GEMINI_API_KEY
-        ),
-      model:
-        GEMINI_MODEL,
+        Boolean(GEMINI_API_KEY),
+      model: GEMINI_MODEL,
       judge0Configured:
-        Boolean(
-          process.env.JUDGE0_URL
-        ),
-      legacyTurboCFix:
-        true,
-      algorithmSystem:
-        true,
-      algorithmGenerator:
-        true,
-      algorithmCodeRunner:
-        true,
-      algorithmRunnerAutoDetect:
-        true,
+        Boolean(process.env.JUDGE0_URL),
+
+      features: {
+        legacyTurboC: true,
+        algorithmSystem: true,
+        algorithmGenerator: true,
+        algorithmCodeRunner: true,
+        automaticCodeDetection: true,
+      },
     });
   }
 );
 
-// ======================================================
+// ============================================================
 // AI TEACHER
-// ======================================================
+// ============================================================
 
 app.post(
   "/api/ai/teach",
@@ -1032,80 +971,54 @@ app.post(
         language,
         level,
         question,
-        algorithmMode,
       } = req.body;
 
       if (
         !question ||
-        typeof question !==
-          "string" ||
+        typeof question !== "string" ||
         !question.trim()
       ) {
         return res.status(400).json({
           error:
-            "Enter a question.",
+            "Enter a programming question.",
         });
       }
 
-      if (
-        question.length >
-        6000
-      ) {
+      if (question.length > 6000) {
         return res.status(400).json({
           error:
-            "Question is too long.",
+            "Question is too long. Maximum 6000 characters.",
         });
       }
 
       const instruction = `
-Learning level:
+Programming language:
+${language || "General programming"}
+
+Learner level:
 ${level || "Beginner"}
-
-Language:
-${language || "General"}
-
-Algorithm Teacher:
-${
-  algorithmMode
-    ? "YES"
-    : "NO"
-}
 
 Student question:
 ${question.trim()}
 
-${
-  algorithmMode
-    ? `
-Teach this algorithm/topic in very easy language.
+Teach the student clearly.
 
-Include:
+Use very easy language.
 
-ALGORITHM NAME
-WHAT IS IT?
-WHY IS IT USED?
-SIMPLE IDEA
-VARIABLES
-STEPS
-EXAMPLE
-TIME COMPLEXITY
-SPACE COMPLEXITY
-IMPORTANT EXAM POINTS
+If the student asks for code:
+- provide complete valid code
+- use the requested language
+- add useful comments except for Python
+- explain the code after it
+- show example input where useful
+- show EXPECTED OUTPUT, not fake actual output
 
-Use short and clear explanations.
-`
-    : `
-Teach the programming topic clearly and simply.
-`
-}
-
-Do not claim that you executed any program.
+Never claim that you executed the code.
 `;
 
-      const answer =
-        await askAI(
-          instruction
-        );
+      const answer = await askAI(
+        instruction
+      );
 
       res.json({
         answer,
@@ -1121,140 +1034,80 @@ Do not claim that you executed any program.
       ).json({
         error:
           error.message ||
-          "AI Teacher request failed.",
+          "Gemini AI request failed.",
       });
     }
   }
 );
 
-// ======================================================
-// ALGORITHM LEARNING / PRACTICE
-// ======================================================
+// ============================================================
+// AI ALGORITHM TEACHER
+// ============================================================
 
 app.post(
   "/api/ai/algorithm",
   async (req, res) => {
     try {
       const {
-        topic,
         level,
-        mode,
-        userAnswer,
+        question,
       } = req.body;
 
       if (
-        !topic ||
-        typeof topic !==
-          "string" ||
-        !topic.trim()
+        !question ||
+        typeof question !== "string" ||
+        !question.trim()
       ) {
         return res.status(400).json({
           error:
-            "Enter an algorithm topic.",
+            "Enter an algorithm topic or question.",
         });
       }
 
-      const validModes = [
-        "teach",
-        "explain",
-        "practice",
-      ];
-
-      if (
-        !validModes.includes(
-          mode
-        )
-      ) {
+      if (question.length > 6000) {
         return res.status(400).json({
           error:
-            "Invalid algorithm mode.",
+            "Algorithm question is too long.",
         });
       }
 
-      let instruction = "";
+      const instruction = `
+This is an ALGORITHM LEARNING question.
 
-      if (
-        mode === "teach"
-      ) {
-        instruction = `
-Teach this algorithm to a
-${level || "Beginner"} student:
+Learner level:
+${level || "Beginner"}
 
-${topic.trim()}
+Student question:
+${question.trim()}
 
-Use extremely easy language.
+Teach the algorithm or data-structure topic
+in very easy beginner-friendly language.
 
 Explain:
-1. What it means
-2. Why it is used
-3. Simple idea
-4. Variables
-5. Steps
-6. Example
-7. Time complexity
-8. Space complexity
-9. Important exam points
+1. Meaning
+2. Purpose
+3. Main idea
+4. Variables when useful
+5. Simple steps
+6. Small example when useful
+7. Time complexity when appropriate
+8. Exam points when useful
+
+Do not make the explanation unnecessarily complicated.
+
+Do not claim that you executed anything.
 `;
-      }
 
-      if (
-        mode === "explain"
-      ) {
-        instruction = `
-Explain this algorithm in very easy language:
-
-${topic.trim()}
-
-Learning level:
-${level || "Beginner"}
-
-Give a small example.
-`;
-      }
-
-      if (
-        mode === "practice"
-      ) {
-        instruction = `
-Create an algorithm practice question about:
-
-${topic.trim()}
-
-Learning level:
-${level || "Beginner"}
-
-Give:
-
-PRACTICE QUESTION
-INPUT
-TASK
-HINT
-
-Student answer:
-
-${userAnswer || "No answer supplied."}
-
-If a student answer exists, evaluate it and explain
-what is correct and what needs improvement.
-`;
-      }
-
-      const answer =
-        await askAI(
-          instruction
-        );
+      const answer = await askAI(
+        instruction
+      );
 
       res.json({
         answer,
-        topic:
-          topic.trim(),
-        level:
-          level || "Beginner",
-        mode,
       });
     } catch (error) {
       console.error(
-        "Algorithm AI Error:",
+        "Algorithm Teacher Error:",
         error
       );
 
@@ -1263,143 +1116,76 @@ what is correct and what needs improvement.
       ).json({
         error:
           error.message ||
-          "Algorithm request failed.",
+          "Algorithm teaching failed.",
       });
     }
   }
 );
 
-// ======================================================
-// ALGORITHM GENERATOR
-// ======================================================
+// ============================================================
+// AI CODE ANALYSIS
+// ============================================================
 
 app.post(
-  "/api/ai/generate-algorithm",
+  "/api/ai/code",
   async (req, res) => {
     try {
       const {
-        topic,
-        level,
+        action,
+        language,
+        code,
       } = req.body;
 
       if (
-        !topic ||
-        typeof topic !==
-          "string" ||
-        !topic.trim()
+        !code ||
+        typeof code !== "string"
       ) {
         return res.status(400).json({
           error:
-            "Enter an algorithm problem or instructions.",
+            "Code is required.",
         });
       }
 
-      const selectedLevel =
-        ALGORITHM_LEVELS.includes(
-          level
-        )
-          ? level
-          : "Beginner";
+      if (code.length > 20000) {
+        return res.status(400).json({
+          error:
+            "Code is too large.",
+        });
+      }
 
       const instruction = `
-Generate an exam-ready algorithm.
+Programming language:
+${language || "Unknown"}
 
-Learning level:
-${selectedLevel}
+Task:
+${action || "Explain this code"}
 
-Algorithm problem / instructions:
-${topic.trim()}
+Analyze only this code.
 
-IMPORTANT:
+Do not claim that you executed it.
 
-Generate ONLY the algorithm.
+CODE:
 
-Do not generate C, C++, Python, Java or JavaScript.
+${code}
 
-Do not generate a programming-language program.
+Explain it in easy beginner-friendly language.
 
-Do not write a long explanation.
-
-Follow this exact overall style:
-
-Algorithm: <algorithm name>
-
-Algorithm:
-
-<ALGORITHM-NAME>(parameters)
-- One short description.
-
-Variables:
-
-(i) VARIABLE : Meaning
-(ii) VARIABLE : Meaning
-(iii) VARIABLE : Meaning
-(iv) VARIABLE : Meaning
-
-Steps:
-
-Step-1: [Short description]
-
-<algorithm statements / pseudocode>
-
-Step-2: [Short description]
-
-<algorithm statements / pseudocode>
-
-Step-last: [Finish]
-
-RETURN
-
-Important rules:
-
-- Keep it short.
-- Make it exam-ready.
-- Use easy language.
-- Clearly explain variables.
-- Use numbered steps.
-- Use compact pseudocode.
-- Use notation such as IF, THEN, FOR, DO,
-  END IF, END FOR, RETURN and FINISH.
-- Do not automatically add long Purpose,
-  Example, Expected Result, Complexity or
-  Important Points sections.
-- Add only information necessary for the requested
-  algorithm.
+If there is an error:
+1. Identify it.
+2. Explain why it happens.
+3. Show corrected code when useful.
 `;
 
-      const answer =
-        await askAI(
-          instruction
-        );
-
-      let algorithm =
-        String(
-          answer || ""
-        )
-          .replace(
-            /```[a-zA-Z0-9_+#.-]*\s*/g,
-            ""
-          )
-          .replace(
-            /```/g,
-            ""
-          )
-          .trim();
-
-      algorithm =
-        algorithm.replace(
-          /^===\s*ALGORITHM\s*===/i,
-          ""
-        ).trim();
+      const answer = await askAI(
+        instruction
+      );
 
       res.json({
-        algorithm,
-        level:
-          selectedLevel,
+        answer,
       });
     } catch (error) {
       console.error(
-        "Algorithm Generator Error:",
+        "AI Code Error:",
         error
       );
 
@@ -1408,15 +1194,15 @@ Important rules:
       ).json({
         error:
           error.message ||
-          "Algorithm generation failed.",
+          "Code analysis failed.",
       });
     }
   }
 );
 
-// ======================================================
+// ============================================================
 // CODE GENERATOR
-// ======================================================
+// ============================================================
 
 app.post(
   "/api/ai/generate-code",
@@ -1429,43 +1215,20 @@ app.post(
         topic,
       } = req.body;
 
-      if (
-        !LANGUAGES[language]
-      ) {
+      if (!LANGUAGES[language]) {
         return res.status(400).json({
           error:
             "Choose a supported programming language.",
         });
       }
 
-      if (
-        !LEVELS.includes(
-          level
-        )
-      ) {
+      if (!LEVELS.includes(level)) {
         return res.status(400).json({
           error:
             "Choose a valid learning level.",
         });
       }
 
-      // C/C++ need a style.
-      if (
-        (
-          language === "C" ||
-          language === "C++"
-        ) &&
-        !STYLES.includes(
-          codeStyle
-        )
-      ) {
-        return res.status(400).json({
-          error:
-            "Choose a valid C/C++ code style.",
-        });
-      }
-
-      // Non-C/C++ ignore code style.
       const effectiveStyle =
         language === "C" ||
         language === "C++"
@@ -1473,39 +1236,51 @@ app.post(
           : "Modern Standard";
 
       if (
-        !topic ||
-        typeof topic !==
-          "string" ||
-        !topic.trim()
+        !CODE_STYLES.includes(
+          effectiveStyle
+        )
       ) {
         return res.status(400).json({
           error:
-            "Enter a programming problem.",
+            "Choose a valid code style.",
         });
       }
 
       if (
-        topic.length >
-        6000
+        !topic ||
+        typeof topic !== "string" ||
+        !topic.trim()
       ) {
+        return res.status(400).json({
+          error:
+            "Enter a programming problem or topic.",
+        });
+      }
+
+      if (topic.length > 6000) {
         return res.status(400).json({
           error:
             "Programming request is too long.",
         });
       }
 
-      let styleRules = "";
+      let styleInstructions = "";
 
-      if (
-        language === "C"
-      ) {
+      // --------------------------------------------------------
+      // C
+      // --------------------------------------------------------
+
+      if (language === "C") {
         if (
           effectiveStyle ===
           "Legacy Turbo C"
         ) {
-          styleRules = `
-Use classic Turbo C source structure:
+          styleInstructions = `
+LEGACY TURBO C SOURCE REQUIREMENTS:
 
+Generate visible classic Turbo C educational code.
+
+Use:
 #include <stdio.h>
 #include <conio.h>
 
@@ -1513,23 +1288,32 @@ void main()
 {
     clrscr();
 
-    // program
-
+    ...
+    
     getch();
 }
 
-The source MUST visibly contain:
-conio.h
-void main()
-clrscr()
-getch()
+Important:
+- Use void main()
+- Use conio.h
+- Use clrscr()
+- Use getch()
+- Use #define where appropriate
+- Use a clear program-title comment
+- Use useful comments before important sections
+- Make the structure resemble a college handwritten programming practical
+
+Do NOT use int main(void).
+Do NOT silently generate modern standard C.
 `;
         } else {
-          styleRules = `
-Use Modern Standard C.
+          styleInstructions = `
+MODERN STANDARD C REQUIREMENTS:
 
-Use standard headers and:
+Use standard modern C.
 
+Use:
+#include <stdio.h>
 int main(void)
 
 Do not use:
@@ -1541,15 +1325,21 @@ void main()
         }
       }
 
-      if (
-        language === "C++"
-      ) {
+      // --------------------------------------------------------
+      // C++
+      // --------------------------------------------------------
+
+      if (language === "C++") {
         if (
           effectiveStyle ===
           "Legacy Turbo C"
         ) {
-          styleRules = `
-Use classic Turbo C++ source structure:
+          styleInstructions = `
+LEGACY TURBO C++ SOURCE REQUIREMENTS:
+
+Generate visible classic Turbo C++ educational code.
+
+Use classic style such as:
 
 #include <iostream.h>
 #include <conio.h>
@@ -1558,20 +1348,30 @@ void main()
 {
     clrscr();
 
-    // program
+    ...
 
     getch();
 }
 
-The source MUST visibly contain:
-conio.h
-void main()
-clrscr()
-getch()
+Important:
+- Use void main()
+- Use conio.h
+- Use clrscr()
+- Use getch()
+- Use iostream.h where appropriate
+- Use #define where appropriate
+- Add a clear program-title comment
+- Add useful comments before important sections
+- Make it resemble a traditional college practical notebook program
+
+Do NOT use modern int main().
+Do NOT silently return modern C++.
 `;
         } else {
-          styleRules = `
-Use Modern Standard C++.
+          styleInstructions = `
+MODERN STANDARD C++ REQUIREMENTS:
+
+Use standard modern C++.
 
 Use:
 #include <iostream>
@@ -1582,148 +1382,168 @@ conio.h
 clrscr()
 getch()
 void main()
+iostream.h
 `;
         }
       }
 
-      if (
-        language === "Python"
-      ) {
-        styleRules = `
-Generate normal valid Python.
+      // --------------------------------------------------------
+      // Python
+      // --------------------------------------------------------
+
+      if (language === "Python") {
+        styleInstructions = `
+PYTHON REQUIREMENTS:
+
+Use normal valid Python.
 
 IMPORTANT:
-Do NOT include Python comments.
-No lines beginning with #.
+Generate NO comments.
+
+Return only clean runnable Python source.
+
+Do not add explanatory text.
 `;
       }
 
-      if (
-        language === "Java"
-      ) {
-        styleRules = `
-Generate normal valid Java.
+      // --------------------------------------------------------
+      // Java
+      // --------------------------------------------------------
 
-Include useful beginner-friendly comments.
+      if (language === "Java") {
+        styleInstructions = `
+JAVA REQUIREMENTS:
+
+Use normal valid Java.
 
 Use:
-
 public class Main
+
+Use standard Java input such as Scanner when required.
+
+Add useful comments.
+
+Do not use Turbo C syntax.
 `;
       }
+
+      // --------------------------------------------------------
+      // JavaScript
+      // --------------------------------------------------------
 
       if (
         language === "JavaScript"
       ) {
-        styleRules = `
-Generate normal Node.js JavaScript.
+        styleInstructions = `
+JAVASCRIPT REQUIREMENTS:
 
-Include useful beginner-friendly comments.
+Use Node.js.
 
 Use standard input when required.
-Do not use external packages.
+
+Do not use:
+prompt()
+prompt-sync
+external npm packages
+
+Use Node.js built-ins only.
+
+Add useful comments.
 `;
       }
 
-      const commentRules =
+      const commentInstructions =
         language === "Python"
-          ? `
-PYTHON COMMENT RULE:
-
-DO NOT write comments.
-
-Return executable Python code only.
-`
-          : `
-COMMENTS:
-
-Include useful beginner-friendly comments
-inside the ${language} program.
-
-Do not write any explanation outside the code.
-`;
+          ? PYTHON_NO_COMMENT_RULE
+          : COMMENT_RULE;
 
       const instruction = `
-Generate ONE complete ${language} program.
+Generate ONE complete working program.
 
-Learning level:
+==================================================
+LANGUAGE
+==================================================
+
+${language}
+
+==================================================
+LEVEL
+==================================================
+
 ${level}
 
-Code style:
+==================================================
+CODE STYLE
+==================================================
+
 ${effectiveStyle}
 
-Programming problem:
+==================================================
+PROGRAMMING PROBLEM
+==================================================
+
 ${topic.trim()}
 
-Style requirements:
-${styleRules}
+==================================================
+STYLE REQUIREMENTS
+==================================================
 
-${commentRules}
+${styleInstructions}
 
-VERY IMPORTANT OUTPUT RULE:
+==================================================
+COMMENT REQUIREMENTS
+==================================================
 
-Return ONLY the complete program source code.
+${commentInstructions}
 
-Do NOT return:
+==================================================
+IMPORTANT RULES
+==================================================
 
-- explanation
-- how it works
-- example input
-- expected output
-- important points
-- headings
-- Markdown code fences
-- text before the code
-- text after the code
+1. Generate ONLY ${language}.
+2. Solve exactly the requested problem.
+3. Generate a complete program.
+4. Use standard input where input is required.
+5. Make it appropriate for ${level}.
+6. Keep the syntax valid.
+7. Do not generate pseudocode.
+8. Do not generate explanations outside the code.
+9. Do not generate example input/output.
+10. Do not generate headings outside the program.
+11. Do not add Markdown fences.
+12. Python must contain no comments.
+13. C/C++/Java/JavaScript should contain useful comments.
+14. C/C++ Legacy Turbo C must visibly use the requested old style.
+15. Do not claim that the program was executed.
 
-The response must contain ONLY valid ${language}
-source code.
+Return ONLY the COMPLETE SOURCE CODE.
 `;
 
-      const answer =
-        await askAI(
-          instruction
-        );
+      const answer = await askAI(
+        instruction
+      );
 
       let code =
-        extractCode(answer);
+        extractFirstCodeBlock(answer);
 
       if (!code) {
         throw new Error(
-          "Gemini did not return code."
+          "Gemini did not return program code."
         );
       }
 
       code =
-        applySelectedCodeStyle(
+        applyCodeGenerationStyle(
           language,
           code,
           effectiveStyle
         );
 
-      // Extra Python cleanup.
-      if (
-        language ===
-        "Python"
-      ) {
-        code =
-          code.replace(
-            /^\s*#.*$/gm,
-            ""
-          )
-          .replace(
-            /\n{3,}/g,
-            "\n\n"
-          )
-          .trim();
-      }
-
       res.json({
         code,
         language,
         level,
-        codeStyle:
-          effectiveStyle,
+        codeStyle: effectiveStyle,
       });
     } catch (error) {
       console.error(
@@ -1742,26 +1562,248 @@ source code.
   }
 );
 
-// ======================================================
-// JUDGE0 HEADERS
-// ======================================================
+// ============================================================
+// ALGORITHM GENERATOR
+// ============================================================
+
+app.post(
+  "/api/ai/generate-algorithm",
+  async (req, res) => {
+    try {
+      const {
+        topic,
+        level,
+      } = req.body;
+
+      if (
+        !topic ||
+        typeof topic !== "string" ||
+        !topic.trim()
+      ) {
+        return res.status(400).json({
+          error:
+            "Enter an algorithm problem or instruction.",
+        });
+      }
+
+      if (!ALGORITHM_LEVELS.includes(level)) {
+        return res.status(400).json({
+          error:
+            "Choose a valid algorithm learning level.",
+        });
+      }
+
+      if (topic.length > 6000) {
+        return res.status(400).json({
+          error:
+            "Algorithm request is too long.",
+        });
+      }
+
+      const instruction = `
+You are generating an exam-ready COLLEGE ALGORITHM.
+
+Learner level:
+${level}
+
+Student request:
+${topic.trim()}
+
+IMPORTANT:
+
+Generate ONLY the algorithm.
+
+Do NOT generate:
+- programming-language code
+- C code
+- C++ code
+- Python code
+- Java code
+- JavaScript code
+- long explanations
+- example input
+- example output
+- time complexity
+- space complexity
+- important points
+unless explicitly requested by the student's input.
+
+The output must be compact and suitable for writing in a college notebook/exam.
+
+Use this structure:
+
+Algorithm: <topic>
+
+Algorithm:
+
+<ALGORITHM-NAME>(...)
+
+- One short sentence describing what it does.
+
+Variables:
+
+(i) NAME : Meaning
+(ii) NAME : Meaning
+(iii) NAME : Meaning
+
+Steps:
+
+Step-1: [Short action]
+
+PSEUDOCODE / ALGORITHM STATEMENTS
+
+Step-2: [Short action]
+
+RETURN
+
+Use simple algorithm notation such as:
+
+IF
+THEN
+END IF
+FOR
+DO
+END FOR
+WHILE
+END WHILE
+RETURN
+FINISH
+ARR[i] <- VALUE
+
+Use numbered steps.
+
+Keep it concise.
+
+Do not use Markdown code fences.
+
+Do not wrap the answer in long prose.
+`;
+
+      const answer = await askAI(
+        instruction
+      );
+
+      const algorithm =
+        cleanAlgorithmResponse(
+          answer
+        );
+
+      if (!algorithm) {
+        throw new Error(
+          "Gemini returned an empty algorithm."
+        );
+      }
+
+      res.json({
+        algorithm,
+        level,
+      });
+    } catch (error) {
+      console.error(
+        "Algorithm Generation Error:",
+        error
+      );
+
+      res.status(
+        error.status || 500
+      ).json({
+        error:
+          error.message ||
+          "Algorithm generation failed.",
+      });
+    }
+  }
+);
+
+// ============================================================
+// ALGORITHM PRACTICE
+// ============================================================
+
+app.post(
+  "/api/ai/algorithm-practice",
+  async (req, res) => {
+    try {
+      const {
+        level,
+        topic,
+        studentAnswer,
+      } = req.body;
+
+      if (
+        !topic ||
+        typeof topic !== "string"
+      ) {
+        return res.status(400).json({
+          error:
+            "Algorithm topic is required.",
+        });
+      }
+
+      const instruction = `
+This is algorithm practice evaluation.
+
+Learning level:
+${level || "Beginner"}
+
+Algorithm topic:
+${topic}
+
+Student answer:
+${studentAnswer || "(No answer provided)"}
+
+Evaluate the student's answer.
+
+Use easy language.
+
+Return:
+1. Correct / Needs Improvement
+2. What is correct
+3. What is wrong or missing
+4. Correct algorithm structure when useful
+5. One short suggestion
+
+Do not claim actual program execution.
+`;
+
+      const answer = await askAI(
+        instruction
+      );
+
+      res.json({
+        answer,
+      });
+    } catch (error) {
+      console.error(
+        "Algorithm Practice Error:",
+        error
+      );
+
+      res.status(
+        error.status || 500
+      ).json({
+        error:
+          error.message ||
+          "Algorithm practice failed.",
+      });
+    }
+  }
+);
+
+// ============================================================
+// JUDGE0
+// ============================================================
 
 function judgeHeaders() {
   const headers = {
-    "Content-Type":
-      "application/json",
+    "Content-Type": "application/json",
   };
 
-  if (
-    process.env.JUDGE0_API_KEY
-  ) {
+  if (process.env.JUDGE0_API_KEY) {
     headers["X-Auth-Token"] =
       process.env.JUDGE0_API_KEY;
   }
 
-  if (
-    process.env.JUDGE0_AUTH_USER
-  ) {
+  if (process.env.JUDGE0_AUTH_USER) {
     headers["X-Auth-User"] =
       process.env.JUDGE0_AUTH_USER;
   }
@@ -1769,21 +1811,13 @@ function judgeHeaders() {
   return headers;
 }
 
-// ======================================================
-// JUDGE0 FETCH
-// ======================================================
-
 async function judgeFetch(
   path,
   options = {}
 ) {
   const base = (
-    process.env.JUDGE0_URL ||
-    ""
-  ).replace(
-    /\/$/,
-    ""
-  );
+    process.env.JUDGE0_URL || ""
+  ).replace(/\/$/, "");
 
   if (!base) {
     throw new Error(
@@ -1804,102 +1838,6 @@ async function judgeFetch(
   );
 }
 
-// ======================================================
-// PREPARE LEGACY CODE FOR JUDGE0
-// ======================================================
-
-function prepareLegacyTurboCode(
-  language,
-  code,
-  codeStyle
-) {
-  if (
-    codeStyle !==
-    "Legacy Turbo C"
-  ) {
-    return code;
-  }
-
-  if (
-    language !== "C" &&
-    language !== "C++"
-  ) {
-    return code;
-  }
-
-  let runnable =
-    code;
-
-  runnable =
-    runnable.replace(
-      /^\s*#include\s*<conio\.h>\s*\r?\n?/gim,
-      ""
-    );
-
-  runnable =
-    runnable.replace(
-      /\bclrscr\s*\(\s*\)\s*;?/gi,
-      ""
-    );
-
-  runnable =
-    runnable.replace(
-      /\bgetch\s*\(\s*\)\s*;?/gi,
-      ""
-    );
-
-  if (
-    language ===
-    "C++"
-  ) {
-    runnable =
-      runnable.replace(
-        /#include\s*<iostream\.h>/gi,
-        "#include <iostream>"
-      );
-  }
-
-  runnable =
-    runnable.replace(
-      /\bvoid\s+main\s*\(\s*\)/i,
-      "int main()"
-    );
-
-  runnable =
-    runnable.replace(
-      /^\s*return\s+[0-9]+\s*;\s*$/gim,
-      ""
-    );
-
-  const lastBrace =
-    runnable.lastIndexOf("}");
-
-  if (
-    lastBrace !== -1
-  ) {
-    runnable =
-      runnable.slice(
-        0,
-        lastBrace
-      ) +
-      "\n    return 0;\n" +
-      runnable.slice(
-        lastBrace
-      );
-  }
-
-  return runnable
-    .replace(
-      /\n{3,}/g,
-      "\n\n"
-    )
-    .trim();
-}
-
-// ======================================================
-// RUN JUDGE0
-// ======================================================
-
 async function runJudge0(
   language,
   code,
@@ -1907,9 +1845,7 @@ async function runJudge0(
   codeStyle
 ) {
   const lang =
-    LANGUAGES[
-      language
-    ];
+    LANGUAGES[language];
 
   if (!lang) {
     throw new Error(
@@ -1917,12 +1853,26 @@ async function runJudge0(
     );
   }
 
+  if (code.length > 20000) {
+    throw new Error(
+      "Code is too large."
+    );
+  }
+
+  if (
+    (stdin || "").length >
+    10000
+  ) {
+    throw new Error(
+      "Input is too large."
+    );
+  }
+
   const sourceCode =
     prepareLegacyTurboCode(
       language,
       code,
-      codeStyle ||
-        "Modern Standard"
+      codeStyle
     );
 
   const submit =
@@ -1931,38 +1881,22 @@ async function runJudge0(
       {
         method: "POST",
 
-        body:
-          JSON.stringify({
-            language_id:
-              lang.id,
+        body: JSON.stringify({
+          language_id: lang.id,
+          source_code: sourceCode,
+          stdin: stdin || "",
 
-            source_code:
-              sourceCode,
+          cpu_time_limit: 3,
+          wall_time_limit: 5,
+          memory_limit: 128000,
 
-            stdin:
-              stdin || "",
-
-            cpu_time_limit:
-              3,
-
-            wall_time_limit:
-              5,
-
-            memory_limit:
-              128000,
-
-            max_processes_and_or_threads:
-              30,
-
-            max_file_size:
-              1024,
-          }),
+          max_processes_and_or_threads: 30,
+          max_file_size: 1024,
+        }),
       }
     );
 
-  if (
-    !submit.ok
-  ) {
+  if (!submit.ok) {
     const body =
       await submit.text();
 
@@ -1974,10 +1908,11 @@ async function runJudge0(
     );
   }
 
-  const {
-    token,
-  } =
+  const submitData =
     await submit.json();
+
+  const token =
+    submitData?.token;
 
   if (!token) {
     throw new Error(
@@ -1986,16 +1921,13 @@ async function runJudge0(
   }
 
   for (
-    let i = 0;
-    i < 30;
-    i++
+    let attempt = 0;
+    attempt < 30;
+    attempt++
   ) {
     await new Promise(
       (resolve) =>
-        setTimeout(
-          resolve,
-          500
-        )
+        setTimeout(resolve, 500)
     );
 
     const result =
@@ -2008,9 +1940,7 @@ async function runJudge0(
         }
       );
 
-    if (
-      !result.ok
-    ) {
+    if (!result.ok) {
       throw new Error(
         `Judge0 result failed (${result.status}).`
       );
@@ -2020,37 +1950,75 @@ async function runJudge0(
       await result.json();
 
     if (
-      data.status?.id >
-      2
+      data.status?.id > 2
     ) {
       return data;
     }
   }
 
   throw new Error(
-    "Execution timed out."
+    "Execution timed out while waiting for Judge0."
   );
 }
 
-// ======================================================
-// CODE EXECUTION
-// ======================================================
+// ============================================================
+// FORMAT EXECUTION RESPONSE
+// ============================================================
+
+function buildExecutionResponse(
+  result,
+  language,
+  codeStyle
+) {
+  return {
+    language,
+    codeStyle,
+
+    status:
+      result.status?.description ||
+      "Unknown",
+
+    stdout:
+      result.stdout || "",
+
+    stderr:
+      result.stderr || "",
+
+    compileOutput:
+      result.compile_output || "",
+
+    message:
+      result.message || "",
+
+    time:
+      result.time || null,
+
+    memory:
+      result.memory || null,
+
+    token:
+      result.token || null,
+  };
+}
+
+// ============================================================
+// CODE LAB
+// AUTOMATIC LANGUAGE + STYLE DETECTION
+// ============================================================
 
 app.post(
   "/api/code/run",
   async (req, res) => {
     try {
       const {
-        language,
         code,
         stdin,
-        codeStyle,
       } = req.body;
 
       if (
         !code ||
-        typeof code !==
-          "string"
+        typeof code !== "string" ||
+        !code.trim()
       ) {
         return res.status(400).json({
           error:
@@ -2058,58 +2026,41 @@ app.post(
         });
       }
 
-      const result =
-        await runJudge0(
-          language,
-          code,
-          typeof stdin ===
-          "string"
-            ? stdin
-            : "",
-          codeStyle ||
-            "Modern Standard"
+      const detectedLanguage =
+        detectCodeLanguage(code);
+
+      const detectedStyle =
+        detectCodeStyle(
+          detectedLanguage,
+          code
         );
 
-      res.json({
-        status:
-          result.status?.description ||
-          "Unknown",
+      const result =
+        await runJudge0(
+          detectedLanguage,
+          code,
+          typeof stdin === "string"
+            ? stdin
+            : "",
+          detectedStyle
+        );
 
-        stdout:
-          result.stdout ||
-          "",
-
-        stderr:
-          result.stderr ||
-          "",
-
-        compileOutput:
-          result.compile_output ||
-          "",
-
-        message:
-          result.message ||
-          "",
-
-        time:
-          result.time ||
-          null,
-
-        memory:
-          result.memory ||
-          null,
-
-        token:
-          result.token ||
-          null,
-      });
+      res.json(
+        buildExecutionResponse(
+          result,
+          detectedLanguage,
+          detectedStyle
+        )
+      );
     } catch (error) {
       console.error(
-        "Code Execution Error:",
+        "Code Lab Execution Error:",
         error
       );
 
-      res.status(500).json({
+      res.status(
+        error.status || 500
+      ).json({
         error:
           error.message ||
           "Code execution failed.",
@@ -2118,13 +2069,10 @@ app.post(
   }
 );
 
-// ======================================================
+// ============================================================
 // ALGORITHM CODE RUNNER
-// ======================================================
-//
-// No language is supplied by the frontend.
-// The backend detects it automatically.
-// ======================================================
+// COMPLETELY SEPARATE EXECUTION ROUTE
+// ============================================================
 
 app.post(
   "/api/algorithm/run",
@@ -2137,108 +2085,50 @@ app.post(
 
       if (
         !code ||
-        typeof code !==
-          "string" ||
+        typeof code !== "string" ||
         !code.trim()
       ) {
         return res.status(400).json({
           error:
-            "Algorithm program code is required.",
+            "Algorithm code is required.",
         });
       }
 
       const detectedLanguage =
-        detectLanguage(
+        detectCodeLanguage(code);
+
+      const detectedStyle =
+        detectCodeStyle(
+          detectedLanguage,
           code
         );
-
-      // Automatically determine legacy style
-      // for C/C++ if classic Turbo C syntax is present.
-      let detectedStyle =
-        "Modern Standard";
-
-      if (
-        detectedLanguage ===
-          "C" ||
-        detectedLanguage ===
-          "C++"
-      ) {
-        if (
-          /#include\s*<conio\.h>/i.test(
-            code
-          ) ||
-          /\bclrscr\s*\(/i.test(
-            code
-          ) ||
-          /\bgetch\s*\(/i.test(
-            code
-          ) ||
-          /\bvoid\s+main\s*\(/i.test(
-            code
-          ) ||
-          /#include\s*<iostream\.h>/i.test(
-            code
-          )
-        ) {
-          detectedStyle =
-            "Legacy Turbo C";
-        }
-      }
 
       const result =
         await runJudge0(
           detectedLanguage,
           code,
-          typeof stdin ===
-          "string"
+          typeof stdin === "string"
             ? stdin
             : "",
           detectedStyle
         );
 
-      res.json({
-        detectedLanguage,
-        detectedStyle,
-
-        status:
-          result.status?.description ||
-          "Unknown",
-
-        stdout:
-          result.stdout ||
-          "",
-
-        stderr:
-          result.stderr ||
-          "",
-
-        compileOutput:
-          result.compile_output ||
-          "",
-
-        message:
-          result.message ||
-          "",
-
-        time:
-          result.time ||
-          null,
-
-        memory:
-          result.memory ||
-          null,
-
-        token:
-          result.token ||
-          null,
-      });
+      res.json(
+        buildExecutionResponse(
+          result,
+          detectedLanguage,
+          detectedStyle
+        )
+      );
     } catch (error) {
       console.error(
         "Algorithm Runner Error:",
         error
       );
 
-      res.status(500).json({
+      res.status(
+        error.status || 500
+      ).json({
         error:
           error.message ||
           "Algorithm code execution failed.",
@@ -2247,49 +2137,21 @@ app.post(
   }
 );
 
-// ======================================================
-// SERVER
-// ======================================================
+// ============================================================
+// START SERVER
+// ============================================================
 
 app.listen(
   PORT,
   () => {
-    console.log("");
-    console.log(
-      "=========================================="
-    );
-
-    console.log(
-      "            CODEMENTOR AI"
-    );
-
-    console.log(
-      "=========================================="
-    );
-
     console.log(
       `Backend: http://localhost:${PORT}`
-    );
-
-    console.log(
-      "AI Provider: Google Gemini"
-    );
-
-    console.log(
-      `Gemini Model: ${GEMINI_MODEL}`
     );
 
     console.log(
       `Gemini Configured: ${Boolean(
         GEMINI_API_KEY
       )}`
-    );
-
-    console.log(
-      `Judge0 URL: ${
-        process.env.JUDGE0_URL ||
-        "Not configured"
-      }`
     );
 
     console.log(
@@ -2313,9 +2175,7 @@ app.listen(
     );
 
     console.log(
-      "=========================================="
+      "Code Lab Auto-Detection: ENABLED"
     );
-
-    console.log("");
   }
 );
