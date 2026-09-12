@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./styles.css";
 
@@ -201,7 +201,7 @@ function StyleButtons({
         }
       >
         <span className="style-icon">
-          ✓
+          âœ“
         </span>
 
         <span>
@@ -248,7 +248,7 @@ function CopyButton({
       }
     >
       {copied
-        ? "COPIED ✓"
+        ? "COPIED âœ“"
         : label}
     </button>
   );
@@ -265,7 +265,7 @@ function HomePage({
     <main className="home-page">
       <section className="hero">
         <div className="hero-badge">
-          <span>✦</span>
+          <span>âœ¦</span>
           AI-POWERED PROGRAMMING EDUCATION
         </div>
 
@@ -376,7 +376,7 @@ function HomePage({
                 setPage("teacher")
               }
             >
-              OPEN AI TEACHER →
+              OPEN AI TEACHER â†’
             </button>
           </div>
 
@@ -401,7 +401,7 @@ function HomePage({
                 setPage("generator")
               }
             >
-              OPEN GENERATOR →
+              OPEN GENERATOR â†’
             </button>
           </div>
 
@@ -426,7 +426,7 @@ function HomePage({
                 setPage("lab")
               }
             >
-              OPEN CODE LAB →
+              OPEN CODE LAB â†’
             </button>
           </div>
 
@@ -453,34 +453,7 @@ function HomePage({
                 )
               }
             >
-              GENERATE ALGORITHM →
-            </button>
-          </div>
-
-          <div className="feature-card">
-            <div className="feature-number">
-              05
-            </div>
-
-            <h3>
-              Algorithm Code Runner
-            </h3>
-
-            <p>
-              Run actual source code while
-              automatic language and style
-              detection handles the setup.
-            </p>
-
-            <button
-              type="button"
-              onClick={() =>
-                setPage(
-                  "algorithm-runner"
-                )
-              }
-            >
-              OPEN RUNNER →
+              GENERATE ALGORITHM â†’
             </button>
           </div>
 
@@ -504,7 +477,7 @@ function HomePage({
                 setPage("practice")
               }
             >
-              START PRACTICE →
+              START PRACTICE â†’
             </button>
           </div>
         </div>
@@ -605,7 +578,7 @@ function LearnPage({
                 </p>
 
                 <span>
-                  START LEARNING →
+                  START LEARNING â†’
                 </span>
               </button>
             )
@@ -688,7 +661,7 @@ function LearnPage({
         >
           {algorithmBusy
             ? "AI IS THINKING..."
-            : "✦ TEACH ME ALGORITHM"}
+            : "âœ¦ TEACH ME ALGORITHM"}
         </button>
 
         {algorithmAnswer && (
@@ -793,7 +766,7 @@ function TeacherPage({
         >
           {busy
             ? "AI IS THINKING..."
-            : "✦ ASK AI TEACHER"}
+            : "âœ¦ ASK AI TEACHER"}
         </button>
 
         {answer && (
@@ -903,7 +876,7 @@ function GeneratorPage({
             {language}
           </strong>
 
-          <span>•</span>
+          <span>â€¢</span>
 
           <span>
             {level}
@@ -911,7 +884,7 @@ function GeneratorPage({
 
           {showStyle && (
             <>
-              <span>•</span>
+              <span>â€¢</span>
 
               <span>
                 {codeStyle}
@@ -1002,7 +975,7 @@ function GeneratorPage({
 
         <div className="generator-note">
           <strong>
-            ✓ ONE LANGUAGE AT A TIME
+            âœ“ ONE LANGUAGE AT A TIME
           </strong>
 
           <span>
@@ -1026,7 +999,7 @@ function GeneratorPage({
         >
           {generatorBusy
             ? "GENERATING CODE..."
-            : `✦ GENERATE ${language.toUpperCase()} CODE`}
+            : `âœ¦ GENERATE ${language.toUpperCase()} CODE`}
         </button>
 
         {generatedCode && (
@@ -1074,7 +1047,7 @@ function GeneratorPage({
                   sendGeneratedToLab
                 }
               >
-                RUN IN CODE LAB →
+                RUN IN CODE LAB â†’
               </button>
             </div>
           </section>
@@ -1138,7 +1111,7 @@ function LabPage({
                 {detectedLanguage}
               </strong>
 
-              <span>•</span>
+              <span>â€¢</span>
 
               <strong>
                 {detectedStyle}
@@ -1158,7 +1131,7 @@ function LabPage({
           >
             {running
               ? "RUNNING..."
-              : "▶ RUN CODE"}
+              : "â–¶ RUN CODE"}
           </button>
 
           <button
@@ -1307,7 +1280,7 @@ function PracticePage({
             {language}
           </strong>
           {" "}
-          · Level:
+          Â· Level:
           {" "}
           <strong>
             {level}
@@ -1552,154 +1525,10 @@ function AlgorithmGeneratorPage({
 }
 
 // ============================================================
-// ALGORITHM CODE RUNNER
 // NO LANGUAGE SELECTOR
 // NO STYLE SELECTOR
 // ============================================================
 
-function AlgorithmRunnerPage({
-  algorithmCode,
-  setAlgorithmCode,
-  algorithmInput,
-  setAlgorithmInput,
-  algorithmOutput,
-  algorithmRunning,
-  runAlgorithmCode,
-  detectedAlgorithmLanguage,
-  detectedAlgorithmStyle,
-  clearAlgorithmRunner,
-}) {
-  return (
-    <main className="content-page">
-      <div className="page-header">
-        <div className="small-label">
-          ALGORITHM CODE RUNNER
-        </div>
-
-        <h1>
-          Run Algorithm Code
-        </h1>
-
-        <p>
-          Paste actual program code and
-          CodeMentor AI automatically
-          detects the language and code
-          style before execution.
-        </p>
-      </div>
-
-      <section className="algorithm-runner-card">
-        <div className="automatic-detection-banner">
-          <div>
-            <span className="detection-dot"></span>
-
-            <strong>
-              Automatic language &amp;
-              code style detection enabled
-            </strong>
-          </div>
-
-          {detectedAlgorithmLanguage && (
-            <div className="detected-result">
-              Detected:
-              <strong>
-                {
-                  detectedAlgorithmLanguage
-                }
-              </strong>
-
-              <span>•</span>
-
-              <strong>
-                {
-                  detectedAlgorithmStyle
-                }
-              </strong>
-            </div>
-          )}
-        </div>
-
-        <div className="runner-action-row">
-          <button
-            type="button"
-            className="run-button"
-            onClick={
-              runAlgorithmCode
-            }
-            disabled={
-              algorithmRunning
-            }
-          >
-            {algorithmRunning
-              ? "RUNNING..."
-              : "▶ RUN ALGORITHM CODE"}
-          </button>
-
-          <button
-            type="button"
-            className="clear-button"
-            onClick={
-              clearAlgorithmRunner
-            }
-          >
-            CLEAR
-          </button>
-        </div>
-
-        <div className="algorithm-runner-grid">
-          <div>
-            <div className="editor-title">
-              ALGORITHM CODE
-            </div>
-
-            <textarea
-              className="code-editor"
-              value={algorithmCode}
-              onChange={(event) =>
-                setAlgorithmCode(
-                  event.target.value
-                )
-              }
-              spellCheck="false"
-              placeholder="Paste actual C, C++, Python, Java or JavaScript source code here..."
-            />
-          </div>
-
-          <div>
-            <div className="editor-title">
-              INPUT
-            </div>
-
-            <textarea
-              className="stdin-editor tall"
-              value={
-                algorithmInput
-              }
-              onChange={(event) =>
-                setAlgorithmInput(
-                  event.target.value
-                )
-              }
-              placeholder="Enter program input here..."
-              spellCheck="false"
-            />
-
-            <div className="editor-title output-title">
-              OUTPUT
-            </div>
-
-            <pre className="execution-output">
-              {
-                algorithmOutput ||
-                "Algorithm code output will appear here..."
-              }
-            </pre>
-          </div>
-        </div>
-      </section>
-    </main>
-  );
-}
 
 // ============================================================
 // FOOTER
@@ -1772,21 +1601,10 @@ function Footer({
         >
           Algorithm Generator
         </button>
-
-        <button
-          type="button"
-          onClick={() =>
-            setPage(
-              "algorithm-runner"
-            )
-          }
-        >
-          Algorithm Code Runner
-        </button>
       </div>
 
       <div className="copyright">
-        © {new Date().getFullYear()}
+        Â© {new Date().getFullYear()}
         {" "}
         CodeMentor AI
       </div>
@@ -1952,40 +1770,6 @@ function App() {
     copiedAlgorithm,
     setCopiedAlgorithm,
   ] = useState(false);
-
-  // ----------------------------------------------------------
-  // ALGORITHM CODE RUNNER
-  // ----------------------------------------------------------
-
-  const [
-    algorithmCode,
-    setAlgorithmCode,
-  ] = useState("");
-
-  const [
-    algorithmInput,
-    setAlgorithmInput,
-  ] = useState("");
-
-  const [
-    algorithmOutput,
-    setAlgorithmOutput,
-  ] = useState("");
-
-  const [
-    algorithmRunning,
-    setAlgorithmRunning,
-  ] = useState(false);
-
-  const [
-    detectedAlgorithmLanguage,
-    setDetectedAlgorithmLanguage,
-  ] = useState("");
-
-  const [
-    detectedAlgorithmStyle,
-    setDetectedAlgorithmStyle,
-  ] = useState("");
 
   // ----------------------------------------------------------
   // PROGRAMMING PRACTICE
@@ -2520,7 +2304,6 @@ function App() {
   }
 
   // ==========================================================
-  // ALGORITHM CODE RUNNER
   // AUTO-DETECT
   // ==========================================================
 
@@ -2629,22 +2412,6 @@ function App() {
         false
       );
     }
-  }
-
-  // ==========================================================
-  // CLEAR ALGORITHM RUNNER
-  // ==========================================================
-
-  function clearAlgorithmRunner() {
-    setAlgorithmCode("");
-    setAlgorithmInput("");
-    setAlgorithmOutput("");
-    setDetectedAlgorithmLanguage(
-      ""
-    );
-    setDetectedAlgorithmStyle(
-      ""
-    );
   }
 
   // ==========================================================
@@ -3028,46 +2795,6 @@ Do not claim execution.
       );
     }
 
-    if (
-      page ===
-      "algorithm-runner"
-    ) {
-      return (
-        <AlgorithmRunnerPage
-          algorithmCode={
-            algorithmCode
-          }
-          setAlgorithmCode={
-            setAlgorithmCode
-          }
-          algorithmInput={
-            algorithmInput
-          }
-          setAlgorithmInput={
-            setAlgorithmInput
-          }
-          algorithmOutput={
-            algorithmOutput
-          }
-          algorithmRunning={
-            algorithmRunning
-          }
-          runAlgorithmCode={
-            runAlgorithmCode
-          }
-          detectedAlgorithmLanguage={
-            detectedAlgorithmLanguage
-          }
-          detectedAlgorithmStyle={
-            detectedAlgorithmStyle
-          }
-          clearAlgorithmRunner={
-            clearAlgorithmRunner
-          }
-        />
-      );
-    }
-
     return (
       <HomePage
         setPage={setPage}
@@ -3092,10 +2819,6 @@ Do not claim execution.
     [
       "algorithm-generator",
       "Algorithm Generator",
-    ],
-    [
-      "algorithm-runner",
-      "Algorithm Code Runner",
     ],
   ];
 
@@ -3172,3 +2895,6 @@ ReactDOM.createRoot(
     <App />
   </React.StrictMode>
 );
+
+
+
