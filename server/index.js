@@ -5,20 +5,13 @@ const cors = require("cors");
 
 const app = express();
 
-const PORT = Number(process.env.PORT || 8787);
+const PORT = Number(
+  process.env.PORT || 8787
+);
+
 const CLIENT_ORIGIN =
-  process.env.CLIENT_ORIGIN || "http://localhost:5173";
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const GEMINI_MODEL =
-  process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
-
-const JUDGE0_URL = (
-  process.env.JUDGE0_URL || "https://ce.judge0.com"
-).replace(/\/+$/, "");
-
-const JUDGE0_API_KEY = process.env.JUDGE0_API_KEY || "";
-const JUDGE0_AUTH_USER = process.env.JUDGE0_AUTH_USER || "";
+  process.env.CLIENT_ORIGIN ||
+  "http://localhost:5173";
 
 app.use(
   cors({
@@ -26,753 +19,1318 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: "5mb" }));
+app.use(
+  express.json({
+    limit: "512kb",
+  })
+);
 
-/* =========================================================
-   LANGUAGES
-========================================================= */
+
+// ======================================================
+// GEMINI
+// ======================================================
+
+const GEMINI_API_KEY =
+  process.env.GEMINI_API_KEY;
+
+const GEMINI_MODEL =
+  process.env.GEMINI_MODEL ||
+  "gemini-3.5-flash-lite";
+
+const GEMINI_URL =
+  `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
 
 const LANGUAGES = {
-  c: {
-    name: "C",
+  C: {
     id: 50,
+    name: "C",
   },
 
-  cpp: {
-    name: "C++",
+  "C++": {
     id: 54,
+    name: "C++",
   },
 
-  python: {
-    name: "Python",
+  Python: {
     id: 71,
+    name: "Python",
   },
 
-  java: {
-    name: "Java",
+  Java: {
     id: 62,
+    name: "Java",
   },
 
-  javascript: {
-    name: "JavaScript",
+  JavaScript: {
     id: 63,
+    name: "JavaScript",
   },
 };
 
-/* =========================================================
-   HEALTH CHECK
-========================================================= */
 
-app.get("/", (req, res) => {
-  res.json({
-    ok: true,
-    application: "CodeMentor AI",
-    gemini: Boolean(GEMINI_API_KEY),
-    geminiModel: GEMINI_MODEL,
-    judge0: JUDGE0_URL,
-  });
-});
+const LEVELS = [
+  "Beginner",
+  "Intermediate",
+  "Advanced",
+];
 
-app.get("/api/health", (req, res) => {
-  res.json({
-    ok: true,
-    geminiConfigured: Boolean(GEMINI_API_KEY),
-    judge0Configured: true,
-  });
-});
 
-/* =========================================================
-   GEMINI
-========================================================= */
+const STYLES = [
+  "Modern Standard",
+  "Legacy Turbo C",
+];
 
-async function askGemini(prompt) {
+
+const SYSTEM_PROMPT = `
+You are CodeMentor AI, an expert programming teacher.
+
+Teach C, C++, Python, Java and JavaScript accurately using simple beginner-friendly language.
+
+Never claim code was executed.
+
+Never invent actual execution results.
+
+The Code Lab uses Judge0 for real execution.
+
+Be practical, encouraging and precise.
+`;
+
+
+const COMMENT_RULE = `
+COMMENTING REQUIREMENT:
+
+The learner is a beginner.
+
+Add a useful beginner-friendly comment to EVERY important source-code line or statement whenever the language permits it.
+
+Explain:
+- declarations
+- imports/includes
+- input
+- variables
+- assignments
+- calculations
+- conditions
+- loops
+- functions/classes
+- output
+- important return statements
+
+Keep comments short and directly related to the line.
+
+Do not add meaningless comments to blank lines.
+
+Use correct comment syntax:
+# for Python
+// or /* */ for C, C++, Java and JavaScript.
+
+The code must remain valid and runnable after comments are added.
+`;
+
+
+function requireAI() {
   if (!GEMINI_API_KEY) {
-    throw new Error(
-      "Gemini API key is missing. Check your .env file."
+    const error = new Error(
+      "Gemini AI is not configured. Add GEMINI_API_KEY to .env."
     );
+
+    error.status = 503;
+
+    throw error;
   }
+}
 
-  const url =
-    `https://generativelanguage.googleapis.com/v1beta/models/` +
-    `${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
 
-  const response = await fetch(url, {
-    method: "POST",
+async function askAI(instruction) {
+  requireAI();
 
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": GEMINI_API_KEY,
-    },
+  const response = await fetch(
+    GEMINI_URL,
+    {
+      method: "POST",
 
-    body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
+      headers: {
+        "Content-Type":
+          "application/json",
+
+        "x-goog-api-key":
+          GEMINI_API_KEY,
+      },
+
+      body: JSON.stringify({
+        systemInstruction: {
           parts: [
             {
-              text: prompt,
+              text: SYSTEM_PROMPT,
             },
           ],
         },
-      ],
 
-      generationConfig: {
-        temperature: 0.15,
-        maxOutputTokens: 6000,
-      },
-    }),
-  });
+        contents: [
+          {
+            role: "user",
 
-  const data = await response.json();
+            parts: [
+              {
+                text: instruction,
+              },
+            ],
+          },
+        ],
+
+        generationConfig: {
+          temperature: 0.2,
+        },
+      }),
+    }
+  );
+
+
+  const data =
+    await response.json();
+
 
   if (!response.ok) {
-    throw new Error(
+    const error = new Error(
       data?.error?.message ||
-        `Gemini request failed with status ${response.status}.`
+        `Gemini API request failed (${response.status}).`
     );
+
+    error.status =
+      response.status;
+
+    throw error;
   }
 
-  const answer =
+
+  const text =
     data?.candidates?.[0]?.content?.parts
-      ?.map((part) => part.text || "")
+      ?.map(
+        (part) =>
+          part.text || ""
+      )
       .join("") || "";
 
-  if (!answer.trim()) {
-    throw new Error("Gemini returned an empty response.");
+
+  if (!text.trim()) {
+    throw new Error(
+      "Gemini returned an empty response."
+    );
   }
 
-  return answer.trim();
+
+  return text.trim();
 }
 
-/* =========================================================
-   CLEAN AI GENERATED CODE
-========================================================= */
 
-function cleanGeneratedCode(text, language) {
-  let code = String(text || "").trim();
+// ======================================================
+// CODE EXTRACTION
+// ======================================================
 
-  /* Remove Markdown fences */
+function extractCode(text) {
+  if (!text) {
+    return "";
+  }
 
-  code = code
-    .replace(/^```[a-zA-Z0-9_+#.-]*\s*/i, "")
-    .replace(/\s*```$/i, "")
+
+  const matches = [
+    ...text.matchAll(
+      /```(?:[a-zA-Z0-9_+#.-]+)?\s*\n?([\s\S]*?)```/g
+    ),
+  ];
+
+
+  if (matches.length) {
+    return matches[0][1].trim();
+  }
+
+
+  return text
+    .replace(
+      /^===\s*CODE\s*===/i,
+      ""
+    )
+    .replace(
+      /^Here is.*?:/i,
+      ""
+    )
     .trim();
-
-  /* Remove common AI introductory text */
-
-  const lines = code.split("\n");
-
-  const cleaned = [];
-
-  for (const line of lines) {
-    const lower = line.trim().toLowerCase();
-
-    const unwanted = [
-      "here is the code",
-      "here's the code",
-      "here is the complete code",
-      "here's the complete code",
-      "let's fix",
-      "lets fix",
-      "wait, let's",
-      "wait, lets",
-      "the final code",
-      "the corrected code",
-      "the correct code",
-      "this program will",
-      "this program finds",
-      "i'll provide",
-      "i will provide",
-    ];
-
-    if (
-      unwanted.some((phrase) =>
-        lower.startsWith(phrase)
-      )
-    ) {
-      continue;
-    }
-
-    cleaned.push(line);
-  }
-
-  code = cleaned.join("\n").trim();
-
-  /* C / C++ */
-
-  if (language === "c" || language === "cpp") {
-    const includePosition = code.indexOf("#include");
-
-    if (includePosition > 0) {
-      code = code.substring(includePosition).trim();
-    }
-
-    /* Remove obvious AI meta-comments */
-
-    code = code
-      .split("\n")
-      .filter((line) => {
-        const value = line.trim().toLowerCase();
-
-        return !(
-          value.startsWith("// wait") ||
-          value.startsWith("// let's") ||
-          value.startsWith("// lets") ||
-          value.startsWith("// here is") ||
-          value.startsWith("// here's") ||
-          value.startsWith("// the final") ||
-          value.startsWith("// corrected code")
-        );
-      })
-      .join("\n");
-  }
-
-  /* Python */
-
-  if (language === "python") {
-    code = code
-      .split("\n")
-      .filter((line) => {
-        const value = line.trim().toLowerCase();
-
-        return !(
-          value.startsWith("# wait") ||
-          value.startsWith("# let's") ||
-          value.startsWith("# lets") ||
-          value.startsWith("# here is") ||
-          value.startsWith("# here's") ||
-          value.startsWith("# the final")
-        );
-      })
-      .join("\n");
-  }
-
-  return code.trim();
 }
 
-/* =========================================================
-   AI TEACHER
-========================================================= */
 
-app.post("/api/ai/teach", async (req, res) => {
-  try {
-    const language =
-      String(req.body?.language || "Python");
-
-    const level =
-      String(req.body?.level || "Beginner");
-
-    const question =
-      String(req.body?.question || "").trim();
-
-    if (!question) {
-      return res.status(400).json({
-        error: "Please enter your programming question.",
-      });
-    }
-
-    const prompt = `
-You are CodeMentor AI.
-
-You are an expert programming teacher who teaches:
-
-C
-C++
-Python
-Java
-JavaScript
-
-Teach the student using ${language}.
-
-Student level:
-${level}
-
-Student question:
-${question}
-
-IMPORTANT RULES:
-
-- Explain everything in very easy language.
-- Assume the student may be a beginner.
-- Give practical examples.
-- Explain concepts step by step.
-- If code is requested, provide complete working code.
-- Never provide pseudocode when a real program is requested.
-- Never invent execution results.
-- Explain important lines of code.
-- Mention common mistakes when useful.
-- Keep the answer organized and easy to read.
-`;
-
-    const answer = await askGemini(prompt);
-
-    res.json({
-      answer,
-      language,
-      level,
-    });
-  } catch (error) {
-    console.error("AI Teacher Error:", error);
-
-    res.status(500).json({
-      error:
-        error.message ||
-        "AI Teacher request failed.",
-    });
+function cleanGeneratedExplanation(text) {
+  if (!text) {
+    return "";
   }
-});
 
-/* =========================================================
-   CODE GENERATOR
-========================================================= */
 
-app.post("/api/ai/generate-code", async (req, res) => {
-  try {
-    const language =
-      String(req.body?.language || "python")
-        .toLowerCase();
-
-    const level =
-      String(req.body?.level || "Beginner");
-
-    const topic =
-      String(req.body?.topic || "").trim();
-
-    if (!topic) {
-      return res.status(400).json({
-        error: "Please enter a code topic.",
-      });
-    }
-
-    const languageInfo = LANGUAGES[language];
-
-    if (!languageInfo) {
-      return res.status(400).json({
-        error: "Unsupported programming language.",
-      });
-    }
-
-    const prompt = `
-You are CodeMentor AI, an expert programming instructor.
-
-Generate a complete working ${languageInfo.name} program.
-
-PROGRAM TOPIC:
-${topic}
-
-STUDENT LEVEL:
-${level}
-
-STRICT REQUIREMENTS:
-
-1. Return ONLY source code.
-2. Do NOT use Markdown code fences.
-3. Do NOT write explanations outside the code.
-4. Do NOT write "Here is the code".
-5. Do NOT write "Let's fix".
-6. Do NOT write "Wait".
-7. Do NOT write AI reasoning.
-8. Do NOT put AI reasoning inside comments.
-9. Do NOT write fake execution results.
-10. The program must be complete.
-11. The program must be compilable/runnable.
-12. Use standard modern ${languageInfo.name}.
-13. Read required input from standard input.
-14. Print the result clearly.
-15. Keep the program beginner-friendly.
-
-SPECIAL RULES:
-
-For C:
-- Use #include <stdio.h>
-- Use int main(void)
-- Do not use conio.h
-- Do not use clrscr()
-- Do not use getch()
-- Do not use void main()
-
-For C++:
-- Use standard C++.
-- Use int main().
-
-For Python:
-- Use Python 3.
-- Use standard input/output.
-
-For Java:
-- Use public class Main.
-- Use a valid main method.
-
-For JavaScript:
-- Use Node.js compatible JavaScript.
-- Use standard input when input is required.
-
-Return ONLY the source code.
-`;
-
-    const raw = await askGemini(prompt);
-
-    const code = cleanGeneratedCode(
-      raw,
-      language
+  const withoutCode =
+    text.replace(
+      /```[\s\S]*?```/g,
+      ""
     );
 
-    if (!code) {
-      throw new Error(
-        "No usable source code was generated."
-      );
-    }
+
+  const markerIndex =
+    withoutCode.search(
+      /===\s*HOW IT WORKS\s*===/i
+    );
+
+
+  if (markerIndex >= 0) {
+    return withoutCode
+      .slice(markerIndex)
+      .replace(
+        /^===\s*/i,
+        ""
+      )
+      .trim();
+  }
+
+
+  return withoutCode
+    .replace(
+      /^===\s*CODE\s*===/i,
+      ""
+    )
+    .trim();
+}
+
+
+// ======================================================
+// HEALTH
+// ======================================================
+
+app.get(
+  "/api/health",
+  (req, res) => {
 
     res.json({
-      language,
-      level,
-      topic,
-      code,
-    });
-  } catch (error) {
-    console.error("Code Generator Error:", error);
+      ok: true,
 
-    res.status(500).json({
-      error:
-        error.message ||
-        "Code generation failed.",
+      aiProvider:
+        "Gemini",
+
+      aiConfigured:
+        Boolean(
+          GEMINI_API_KEY
+        ),
+
+      model:
+        GEMINI_MODEL,
+
+      judge0Configured:
+        Boolean(
+          process.env.JUDGE0_URL
+        ),
     });
+
   }
-});
+);
 
-/* =========================================================
-   JUDGE0 HEADERS
-========================================================= */
 
-function getJudgeHeaders() {
+// ======================================================
+// AI TEACHER
+// ======================================================
+
+app.post(
+  "/api/ai/teach",
+  async (req, res) => {
+
+    try {
+
+      const {
+        language,
+        level,
+        question,
+      } = req.body;
+
+
+      if (
+        !question ||
+        typeof question !==
+          "string" ||
+        !question.trim()
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Enter a programming question.",
+          });
+
+      }
+
+
+      if (
+        question.length >
+        6000
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Question is too long. Maximum 6000 characters.",
+          });
+
+      }
+
+
+      const instruction = `
+Programming language:
+${language || "General programming"}
+
+Learner level:
+${level || "Beginner"}
+
+
+Student question:
+
+${question.trim()}
+
+
+Teach the student clearly and accurately.
+
+If the student asks for a program, provide a complete runnable program in the selected language.
+
+${COMMENT_RULE}
+
+After code, give a short beginner-friendly explanation.
+
+Clearly label example input and EXPECTED OUTPUT.
+
+Do not claim you executed the code.
+`;
+
+
+      const answer =
+        await askAI(
+          instruction
+        );
+
+
+      res.json({
+        answer,
+      });
+
+    } catch (error) {
+
+      console.error(
+        "AI Teacher Error:",
+        error
+      );
+
+      res
+        .status(
+          error.status || 500
+        )
+        .json({
+          error:
+            error.message ||
+            "Gemini AI request failed.",
+        });
+
+    }
+
+  }
+);
+
+
+// ======================================================
+// AI CODE ANALYSIS
+// ======================================================
+
+app.post(
+  "/api/ai/code",
+  async (req, res) => {
+
+    try {
+
+      const {
+        action,
+        language,
+        code,
+      } = req.body;
+
+
+      if (
+        !code ||
+        typeof code !==
+          "string"
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Code is required.",
+          });
+
+      }
+
+
+      if (
+        code.length >
+        20000
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Code is too large.",
+          });
+
+      }
+
+
+      const instruction = `
+Programming language:
+${language || "Unknown"}
+
+Task:
+${action || "Explain this code"}
+
+
+Analyze only this code.
+
+Do not claim that you executed it.
+
+
+CODE:
+
+\`\`\`
+
+${code}
+
+\`\`\`
+
+
+Give an easy but accurate explanation.
+
+If there is an error, identify it, explain why it occurs, and show corrected code when useful.
+`;
+
+
+      const answer =
+        await askAI(
+          instruction
+        );
+
+
+      res.json({
+        answer,
+      });
+
+    } catch (error) {
+
+      console.error(
+        "AI Code Error:",
+        error
+      );
+
+      res
+        .status(
+          error.status || 500
+        )
+        .json({
+          error:
+            error.message ||
+            "Gemini AI request failed.",
+        });
+
+    }
+
+  }
+);
+
+
+// ======================================================
+// ONE-LANGUAGE CODE GENERATOR
+// ======================================================
+
+app.post(
+  "/api/ai/generate-code",
+  async (req, res) => {
+
+    try {
+
+      const {
+        language,
+        level,
+        codeStyle,
+        topic,
+      } = req.body;
+
+
+      if (
+        !LANGUAGES[language]
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Choose a supported programming language.",
+          });
+
+      }
+
+
+      if (
+        !LEVELS.includes(level)
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Choose a valid learning level.",
+          });
+
+      }
+
+
+      if (
+        !STYLES.includes(
+          codeStyle
+        )
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Choose a valid code style.",
+          });
+
+      }
+
+
+      if (
+        !topic ||
+        typeof topic !==
+          "string" ||
+        !topic.trim()
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Enter a programming problem or topic.",
+          });
+
+      }
+
+
+      if (
+        topic.length >
+        6000
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Programming request is too long. Maximum 6000 characters.",
+          });
+
+      }
+
+
+      let styleRules = "";
+
+
+      if (
+        language === "C" ||
+        language === "C++"
+      ) {
+
+        styleRules = `
+
+For C/C++, the selected code style matters.
+
+IF STYLE IS MODERN STANDARD:
+
+C:
+- Use standard modern C.
+- Use int main().
+- Use standard headers.
+- Never use conio.h.
+- Never use clrscr().
+- Never use getch().
+
+C++:
+- Use standard modern C++.
+- Use int main().
+- Use standard C++ headers.
+- Never use conio.h.
+- Never use clrscr().
+- Never use getch().
+
+
+IF STYLE IS LEGACY TURBO C:
+
+C:
+- Make the displayed source look like classic Turbo C educational code.
+- Classic constructs such as void main(), #include <conio.h>, clrscr() and getch() may be used when appropriate.
+- Traditional C syntax is acceptable.
+- Preserve #define when useful.
+
+C++:
+- Make the displayed source look like classic Turbo C++ educational code.
+- Legacy console constructs may be used when appropriate.
+- Keep the program simple and educational.
+
+`;
+
+      } else {
+
+        styleRules = `
+
+This language does not use Turbo C syntax.
+
+Generate normal valid ${language} code regardless of the selected style.
+
+Python:
+- Use normal valid Python.
+
+Java:
+- Use public class Main.
+
+JavaScript:
+- Use Node.js.
+- Use standard input when input is required.
+- Do not use prompt-sync.
+- Do not use external packages.
+
+`;
+
+      }
+
+
+      const instruction = `
+
+Generate ONE complete solution for this programming problem.
+
+Programming language:
+${language}
+
+Learner level:
+${level}
+
+Selected code style:
+${codeStyle}
+
+Programming problem:
+${topic.trim()}
+
+
+${COMMENT_RULE}
+
+
+${styleRules}
+
+
+GENERAL RULES:
+
+- Generate ONLY ${language}.
+- Do not generate other languages.
+- Solve exactly the requested problem.
+- Make the program complete.
+- Make it appropriate for the learner's level.
+- Use standard input for input-based programs.
+- Keep the code valid.
+- Do not claim that you executed the code.
+- Do not invent actual execution results.
+- Include a short explanation after the code.
+
+
+Return exactly:
+
+=== CODE ===
+
+\`\`\`
+COMPLETE PROGRAM
+\`\`\`
+
+
+=== HOW IT WORKS ===
+
+Simple beginner-friendly explanation.
+
+
+=== EXAMPLE INPUT ===
+
+Example input if required.
+
+
+=== EXPECTED OUTPUT ===
+
+Expected output for the example.
+
+
+=== IMPORTANT POINTS ===
+
+Short bullet points.
+`;
+
+
+      const answer =
+        await askAI(
+          instruction
+        );
+
+
+      const code =
+        extractCode(answer);
+
+
+      if (!code) {
+
+        throw new Error(
+          "Gemini did not return a code block. Please try again."
+        );
+
+      }
+
+
+      const explanation =
+        cleanGeneratedExplanation(
+          answer
+        );
+
+
+      res.json({
+
+        code,
+
+        explanation,
+
+        language,
+
+        level,
+
+        codeStyle,
+
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Code Generation Error:",
+        error
+      );
+
+      res
+        .status(
+          error.status || 500
+        )
+        .json({
+          error:
+            error.message ||
+            "Code generation failed.",
+        });
+
+    }
+
+  }
+);
+
+
+// ======================================================
+// JUDGE0
+// ======================================================
+
+function judgeHeaders() {
+
   const headers = {
-    "Content-Type": "application/json",
+    "Content-Type":
+      "application/json",
   };
 
-  if (JUDGE0_API_KEY.trim()) {
-    headers["X-Auth-Token"] =
-      JUDGE0_API_KEY.trim();
+
+  if (
+    process.env.JUDGE0_API_KEY
+  ) {
+
+    headers[
+      "X-Auth-Token"
+    ] =
+      process.env.JUDGE0_API_KEY;
+
   }
 
-  if (JUDGE0_AUTH_USER.trim()) {
-    headers["X-Auth-User"] =
-      JUDGE0_AUTH_USER.trim();
+
+  if (
+    process.env.JUDGE0_AUTH_USER
+  ) {
+
+    headers[
+      "X-Auth-User"
+    ] =
+      process.env.JUDGE0_AUTH_USER;
+
   }
+
 
   return headers;
 }
 
-/* =========================================================
-   BASE64
-========================================================= */
 
-function encodeBase64(value) {
-  return Buffer.from(
-    String(value || ""),
-    "utf8"
-  ).toString("base64");
-}
-
-function decodeBase64(value) {
-  if (!value) {
-    return "";
-  }
-
-  try {
-    return Buffer.from(
-      value,
-      "base64"
-    ).toString("utf8");
-  } catch {
-    return String(value);
-  }
-}
-
-/* =========================================================
-   JUDGE0 SUBMIT
-========================================================= */
-
-async function submitCode(
-  languageId,
-  sourceCode,
-  stdin
+async function judgeFetch(
+  path,
+  options = {}
 ) {
-  const url =
-    `${JUDGE0_URL}/submissions` +
-    `?base64_encoded=true&wait=false`;
 
-  const body = {
-    language_id: languageId,
-    source_code: encodeBase64(sourceCode),
-  };
+  const base =
+    (
+      process.env.JUDGE0_URL ||
+      ""
+    ).replace(
+      /\/$/,
+      ""
+    );
 
-  if (String(stdin || "").length > 0) {
-    body.stdin = encodeBase64(stdin);
+
+  if (!base) {
+
+    throw new Error(
+      "JUDGE0_URL is not configured."
+    );
+
   }
 
-  console.log(
-    `Submitting code to Judge0: language ${languageId}`
+
+  return fetch(
+    base + path,
+    {
+      ...options,
+
+      headers: {
+        ...judgeHeaders(),
+
+        ...(options.headers ||
+          {}),
+      },
+    }
   );
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: getJudgeHeaders(),
-    body: JSON.stringify(body),
-  });
-
-  const text = await response.text();
-
-  let data = null;
-
-  try {
-    data = JSON.parse(text);
-  } catch {
-    data = null;
-  }
-
-  if (!response.ok) {
-    console.error(
-      "Judge0 submission response:",
-      response.status,
-      text
-    );
-
-    throw new Error(
-      data?.error ||
-        data?.message ||
-        `Judge0 submission failed with status ${response.status}.`
-    );
-  }
-
-  if (!data?.token) {
-    throw new Error(
-      "Judge0 did not return an execution token."
-    );
-  }
-
-  return data.token;
 }
 
-/* =========================================================
-   JUDGE0 RESULT
-========================================================= */
 
-async function getCodeResult(token) {
-  const url =
-    `${JUDGE0_URL}/submissions/` +
-    `${encodeURIComponent(token)}` +
-    `?base64_encoded=true`;
+// ======================================================
+// TURBO C COMPATIBILITY
+// ======================================================
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: getJudgeHeaders(),
-  });
+function prepareLegacyTurboCode(
+  language,
+  code,
+  codeStyle
+) {
 
-  const text = await response.text();
+  if (
+    codeStyle !==
+      "Legacy Turbo C" ||
+    (
+      language !== "C" &&
+      language !== "C++"
+    )
+  ) {
 
-  let data = null;
+    return code;
 
-  try {
-    data = JSON.parse(text);
-  } catch {
-    data = null;
   }
 
-  if (!response.ok) {
-    console.error(
-      "Judge0 result response:",
-      response.status,
-      text
+
+  let runnable =
+    code;
+
+
+  /*
+   * Modern Judge0 GCC/G++ does not provide
+   * Turbo C's conio.h functions.
+   *
+   * The original Turbo C source stays visible
+   * in the Code Lab editor.
+   *
+   * Only the copy sent to Judge0 is transformed.
+   */
+
+
+  runnable =
+    runnable.replace(
+      /^\s*#include\s*<conio\.h>\s*\r?\n?/gmi,
+      ""
     );
 
-    throw new Error(
-      data?.error ||
-        data?.message ||
-        `Judge0 result request failed with status ${response.status}.`
+
+  runnable =
+    runnable.replace(
+      /\bclrscr\s*\(\s*\)\s*;?/g,
+      ""
     );
+
+
+  runnable =
+    runnable.replace(
+      /\bgetch\s*\(\s*\)\s*;?/g,
+      ""
+    );
+
+
+  runnable =
+    runnable.replace(
+      /\bvoid\s+main\s*\(/,
+      "int main("
+    );
+
+
+  const mainClose =
+    runnable.lastIndexOf(
+      "}"
+    );
+
+
+  if (
+    mainClose >= 0 &&
+    !/return\s+0\s*;/.test(
+      runnable
+    )
+  ) {
+
+    runnable =
+      `${runnable.slice(
+        0,
+        mainClose
+      )}
+
+    return 0;
+${runnable.slice(
+  mainClose
+)}`;
+
   }
 
-  return data;
+
+  return runnable;
 }
 
-/* =========================================================
-   WAIT FOR RESULT
-========================================================= */
 
-async function waitForResult(token) {
-  const maximumAttempts = 40;
+// ======================================================
+// RUN JUDGE0
+// ======================================================
+
+async function runJudge0(
+  language,
+  code,
+  stdin,
+  codeStyle
+) {
+
+  const lang =
+    LANGUAGES[language];
+
+
+  if (!lang) {
+
+    throw new Error(
+      "Unsupported programming language."
+    );
+
+  }
+
+
+  if (
+    code.length >
+    20000
+  ) {
+
+    throw new Error(
+      "Code is too large."
+    );
+
+  }
+
+
+  if (
+    (stdin || "")
+      .length >
+    10000
+  ) {
+
+    throw new Error(
+      "Input is too large."
+    );
+
+  }
+
+
+  const sourceCode =
+    prepareLegacyTurboCode(
+      language,
+      code,
+      codeStyle
+    );
+
+
+  const submit =
+    await judgeFetch(
+      "/submissions/?base64_encoded=false&wait=false",
+      {
+        method: "POST",
+
+        body: JSON.stringify({
+
+          language_id:
+            lang.id,
+
+          source_code:
+            sourceCode,
+
+          stdin:
+            stdin || "",
+
+          cpu_time_limit:
+            3,
+
+          wall_time_limit:
+            5,
+
+          memory_limit:
+            128000,
+
+          max_processes_and_or_threads:
+            30,
+
+          max_file_size:
+            1024,
+
+        }),
+      }
+    );
+
+
+  if (!submit.ok) {
+
+    const body =
+      await submit.text();
+
+    throw new Error(
+      `Judge0 submission failed (${submit.status}): ${body.slice(
+        0,
+        500
+      )}`
+    );
+
+  }
+
+
+  const {
+    token,
+  } =
+    await submit.json();
+
+
+  if (!token) {
+
+    throw new Error(
+      "Judge0 did not return a submission token."
+    );
+
+  }
+
 
   for (
-    let attempt = 0;
-    attempt < maximumAttempts;
-    attempt++
+    let i = 0;
+    i < 30;
+    i++
   ) {
-    const result =
-      await getCodeResult(token);
 
-    const statusId =
-      Number(result?.status?.id || 0);
-
-    console.log(
-      `Judge0 status: ${
-        result?.status?.description ||
-        "Unknown"
-      }`
+    await new Promise(
+      (resolve) =>
+        setTimeout(
+          resolve,
+          500
+        )
     );
 
-    /*
-      1 = In Queue
-      2 = Processing
-      3+ = Finished
-    */
 
-    if (statusId >= 3) {
-      return result;
+    const result =
+      await judgeFetch(
+        `/submissions/${encodeURIComponent(
+          token
+        )}?base64_encoded=false`,
+        {
+          method: "GET",
+        }
+      );
+
+
+    if (!result.ok) {
+
+      throw new Error(
+        `Judge0 result failed (${result.status}).`
+      );
+
     }
 
-    await new Promise((resolve) =>
-      setTimeout(resolve, 750)
-    );
+
+    const data =
+      await result.json();
+
+
+    if (
+      data.status?.id >
+      2
+    ) {
+
+      return data;
+
+    }
+
   }
 
+
   throw new Error(
-    "Judge0 took too long to execute the program."
+    "Execution timed out while waiting for Judge0."
   );
 }
 
-/* =========================================================
-   CODE LAB RUN
-========================================================= */
 
-app.post("/api/code/run", async (req, res) => {
-  try {
-    const language =
-      String(req.body?.language || "")
-        .toLowerCase();
+// ======================================================
+// CODE EXECUTION ROUTE
+// ======================================================
 
-    const code =
-      String(req.body?.code || "");
+app.post(
+  "/api/code/run",
+  async (req, res) => {
 
-    const stdin =
-      req.body?.stdin == null
-        ? ""
-        : String(req.body.stdin);
+    try {
 
-    if (!language) {
-      return res.status(400).json({
-        error:
-          "Please select a programming language.",
+      const {
+        language,
+        code,
+        stdin,
+        codeStyle,
+      } = req.body;
+
+
+      if (
+        !code ||
+        typeof code !==
+          "string"
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Code is required.",
+          });
+
+      }
+
+
+      const result =
+        await runJudge0(
+          language,
+          code,
+          typeof stdin ===
+            "string"
+            ? stdin
+            : "",
+          codeStyle ||
+            "Modern Standard"
+        );
+
+
+      res.json({
+
+        status:
+          result.status
+            ?.description ||
+          "Unknown",
+
+        stdout:
+          result.stdout ||
+          "",
+
+        stderr:
+          result.stderr ||
+          "",
+
+        compileOutput:
+          result.compile_output ||
+          "",
+
+        message:
+          result.message ||
+          "",
+
+        time:
+          result.time ||
+          null,
+
+        memory:
+          result.memory ||
+          null,
+
+        token:
+          result.token ||
+          null,
+
       });
-    }
 
-    if (!code.trim()) {
-      return res.status(400).json({
-        error: "Please enter some code.",
-      });
-    }
+    } catch (error) {
 
-    const languageInfo =
-      LANGUAGES[language];
-
-    if (!languageInfo) {
-      return res.status(400).json({
-        error:
-          "This programming language is not supported.",
-      });
-    }
-
-    const token = await submitCode(
-      languageInfo.id,
-      code,
-      stdin
-    );
-
-    const result =
-      await waitForResult(token);
-
-    const stdout =
-      decodeBase64(result.stdout);
-
-    const stderr =
-      decodeBase64(result.stderr);
-
-    const compileOutput =
-      decodeBase64(
-        result.compile_output
+      console.error(
+        "Code Execution Error:",
+        error
       );
 
-    const message =
-      decodeBase64(result.message);
+      res
+        .status(500)
+        .json({
+          error:
+            error.message ||
+            "Code execution failed.",
+        });
 
-    res.json({
-      status:
-        result.status?.description ||
-        "Unknown",
+    }
 
-      stdout,
+  }
+);
 
-      stderr,
 
-      compileOutput,
+// ======================================================
+// SERVER
+// ======================================================
 
-      message,
+app.listen(
+  PORT,
+  () => {
 
-      time:
-        result.time || null,
-
-      memory:
-        result.memory || null,
-
-      token,
-    });
-  } catch (error) {
-    console.error(
-      "CODE LAB ERROR:",
-      error
+    console.log(
+      `CodeMentor AI server running on http://localhost:${PORT}`
     );
 
-    res.status(500).json({
-      error:
-        error.message ||
-        "Code execution failed.",
-    });
+    console.log(
+      "AI Provider: Gemini"
+    );
+
+    console.log(
+      `Gemini Model: ${GEMINI_MODEL}`
+    );
+
+    console.log(
+      `Gemini configured: ${Boolean(
+        GEMINI_API_KEY
+      )}`
+    );
+
   }
-});
-
-/* =========================================================
-   START
-========================================================= */
-
-app.listen(PORT, () => {
-  console.log("");
-  console.log(
-    "======================================"
-  );
-  console.log(
-    "          CODEMENTOR AI"
-  );
-  console.log(
-    "======================================"
-  );
-  console.log(
-    `Backend: http://localhost:${PORT}`
-  );
-  console.log(
-    "AI Provider: Google Gemini"
-  );
-  console.log(
-    `Gemini Model: ${GEMINI_MODEL}`
-  );
-  console.log(
-    `Gemini Configured: ${Boolean(
-      GEMINI_API_KEY
-    )}`
-  );
-  console.log(
-    `Judge0 URL: ${JUDGE0_URL}`
-  );
-  console.log(
-    "======================================"
-  );
-  console.log("");
-});
+);
