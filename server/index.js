@@ -1,4 +1,4 @@
-require("dotenv").config();
+﻿require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
@@ -395,7 +395,40 @@ function cleanAlgorithmResponse(text) {
     ""
   );
 
-  result = result.trim();
+  result = result
+    .split(/\r?\n/)
+    .map((line) => {
+      const match = line.match(/^(\s*Step-\d+\s*:\s*)(.*)$/i);
+
+      if (!match) {
+        return line;
+      }
+
+      const prefix = match[1];
+      let explanation = match[2].trim();
+
+      if (!explanation) {
+        return line;
+      }
+
+      // Already correctly wrapped.
+      if (
+        explanation.startsWith("[") &&
+        explanation.endsWith("]")
+      ) {
+        return `${prefix}${explanation}`;
+      }
+
+      // Remove accidental outer brackets before rebuilding.
+      explanation = explanation.replace(
+        /^\[(.*)\]$/,
+        "$1"
+      );
+
+      return `${prefix}[${explanation}]`;
+    })
+    .join("\n")
+    .trim();
 
   return result;
 }
@@ -1670,9 +1703,7 @@ RETURN
 FINISH
 ARR[i] <- VALUE
 
-Use numbered steps.
-
-Keep it concise.
+Use numbered steps.\r?\n\r?\nCRITICAL STEP FORMAT:\r?\nEvery numbered step description MUST be written inside square brackets.\r?\nCorrect: Step-1: [Check if the position is valid]\r?\nCorrect: Step-2: [Update the array element]\r?\nNever write: Step-1: Check if the position is valid\r?\nNever write a step description without square brackets.\r?\n\r?\nKeep it concise\.
 
 Do not use Markdown code fences.
 
@@ -2179,3 +2210,7 @@ app.listen(
     );
   }
 );
+
+
+
+
