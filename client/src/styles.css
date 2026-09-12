@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap");
+﻿@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap");
 
 * {
   box-sizing: border-box;
@@ -1123,7 +1123,7 @@ textarea {
     1px solid
     rgba(255, 255, 255, 0.08);
   border-radius: 14px;
-  background: #f6f1df;
+  background: #070b15;
   overflow: hidden;
 }
 
@@ -1133,9 +1133,8 @@ textarea {
   border-bottom:
     1px solid
     rgba(30, 30, 30, 0.12);
-  background:
-    #e9e2cc;
-  color: #34312a;
+  background: #0b1020;
+  color: #e9ebf6;
   font:
     700 11px
     "Space Mono",
@@ -1146,7 +1145,7 @@ textarea {
 .algorithm-output {
   margin: 0;
   padding: 24px;
-  color: #292721;
+  color: #dce3f5;
   font:
     14px / 1.75
     "Space Mono",
@@ -1161,8 +1160,7 @@ textarea {
   border-top:
     1px solid
     rgba(30, 30, 30, 0.12);
-  background:
-    #efe8d3;
+  background: #090e1a;
   display: flex;
   justify-content: flex-end;
 }
