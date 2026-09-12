@@ -541,7 +541,9 @@ function LearnPage({
       );
 
     if (selected) {
-      setCode(selected.starter);
+      setCode(
+        selected.starter
+      );
     }
 
     setPage("teacher");
@@ -1709,20 +1711,8 @@ function Footer({
   return (
     <footer className="footer">
       <div>
-        <div className="footer-brand">
-          <span className="brand-mark">
-            &lt;/&gt;
-          </span>
-
-          <strong>
-            CodeMentor AI
-          </strong>
-        </div>
-
-        <p>
-          Learn programming. Build
-          projects. Master algorithms
-          and code with AI.
+        <p className="made-by">
+          Made By Kirtan Ka.patel
         </p>
       </div>
 
