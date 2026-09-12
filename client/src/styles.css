@@ -1509,3 +1509,34 @@ textarea {
     font-size: 12px;
   }
 }
+
+/* ============================================================
+   FINAL ALGORITHM GENERATOR DARK THEME OVERRIDE
+   ============================================================ */
+
+.algorithm-output-card {
+  background: #070b15 !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
+}
+
+.algorithm-paper {
+  background: #070b15 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.algorithm-paper-title {
+  background: #0b1020 !important;
+  color: #e9ebf6 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.algorithm-output {
+  background: #070b15 !important;
+  color: #dce3f5 !important;
+}
+
+.copy-action-row {
+  background: #090e1a !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
