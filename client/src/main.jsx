@@ -1,61 +1,25 @@
-import React, { useState } from "react";
-import ReactDOM from "react-dom/client";
+import React, {
+  useState,
+  useEffect,
+} from "react";
+
+import {
+  createRoot,
+} from "react-dom/client";
+
 import "./styles.css";
 
+// ======================================================
+// API
+// ======================================================
+
 const API =
-  import.meta.env.VITE_API_URL || "http://localhost:8787";
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:8787";
 
-const LANGUAGES = [
-  {
-    name: "C",
-    icon: "C",
-    starter: `#include <stdio.h>
-
-int main() {
-    // Print a welcome message.
-    printf("Hello, CodeMentor AI!\\n");
-
-    // Return 0 to show the program finished successfully.
-    return 0;
-}`,
-  },
-  {
-    name: "C++",
-    icon: "C++",
-    starter: `#include <iostream>
-using namespace std;
-
-int main() {
-    // Print a welcome message.
-    cout << "Hello, CodeMentor AI!" << endl;
-
-    // Return 0 to show the program finished successfully.
-    return 0;
-}`,
-  },
-  {
-    name: "Python",
-    icon: "Py",
-    starter: `# Print a welcome message.
-print("Hello, CodeMentor AI!")`,
-  },
-  {
-    name: "Java",
-    icon: "Ja",
-    starter: `public class Main {
-    public static void main(String[] args) {
-        // Print a welcome message.
-        System.out.println("Hello, CodeMentor AI!");
-    }
-}`,
-  },
-  {
-    name: "JavaScript",
-    icon: "JS",
-    starter: `// Print a welcome message.
-console.log("Hello, CodeMentor AI!");`,
-  },
-];
+// ======================================================
+// CONSTANTS
+// ======================================================
 
 const LEVELS = [
   "Beginner",
@@ -63,35 +27,53 @@ const LEVELS = [
   "Advanced",
 ];
 
-const EXAMPLES = [
-  "Find the maximum number among 5 numbers",
-  "Check whether a number is prime",
-  "Reverse a string",
-  "Sort an array",
-  "Check whether a string is palindrome",
+const LANGUAGES = [
+  "C",
+  "C++",
+  "Python",
+  "Java",
+  "JavaScript",
 ];
 
-/* =========================================================
-   REUSABLE UI COMPONENTS
-   IMPORTANT:
-   These components are OUTSIDE App().
-   This prevents React from recreating their component
-   identity on every keystroke and fixes focus loss.
-   ========================================================= */
+const STYLES = [
+  "Modern Standard",
+  "Legacy Turbo C",
+];
 
-function LevelButtons({ level, onSelect }) {
+// ======================================================
+// ICON
+// ======================================================
+
+function CodeIcon() {
   return (
-    <div className="level-buttons">
+    <span className="brand-code-icon">
+      {"</>"}
+    </span>
+  );
+}
+
+// ======================================================
+// LEVEL BUTTONS
+// ======================================================
+
+function LevelButtons({
+  level,
+  setLevel,
+}) {
+  return (
+    <div className="button-row">
       {LEVELS.map((item) => (
         <button
-          type="button"
           key={item}
+          type="button"
           className={
             level === item
-              ? "level-button active"
-              : "level-button"
+              ? "choice-button active"
+              : "choice-button"
           }
-          onClick={() => onSelect(item)}
+          onClick={() =>
+            setLevel(item)
+          }
         >
           {item}
         </button>
@@ -100,1105 +82,1657 @@ function LevelButtons({ level, onSelect }) {
   );
 }
 
+// ======================================================
+// LANGUAGE BUTTONS
+// ======================================================
+
 function LanguageButtons({
   language,
-  onSelect,
-  compact = false,
+  setLanguage,
 }) {
   return (
-    <div
-      className={
-        compact
-          ? "language-buttons compact"
-          : "language-buttons"
-      }
-    >
+    <div className="language-grid">
       {LANGUAGES.map((item) => (
         <button
+          key={item}
           type="button"
-          key={item.name}
           className={
-            language === item.name
+            language === item
               ? "language-button active"
               : "language-button"
           }
-          onClick={() => onSelect(item.name)}
+          onClick={() =>
+            setLanguage(item)
+          }
         >
-          <span className="button-language-icon">
-            {item.icon}
+          <span className="language-symbol">
+            {item === "C"
+              ? "C"
+              : item === "C++"
+              ? "C++"
+              : item === "Python"
+              ? "Py"
+              : item === "Java"
+              ? "Ja"
+              : "JS"}
           </span>
 
-          <span>{item.name}</span>
+          <span>{item}</span>
         </button>
       ))}
     </div>
   );
 }
 
+// ======================================================
+// STYLE BUTTONS
+// ======================================================
+
 function StyleButtons({
   codeStyle,
-  onSelect,
+  setCodeStyle,
 }) {
   return (
-    <div className="style-buttons">
-      <button
-        type="button"
-        className={
-          codeStyle === "Modern Standard"
-            ? "style-button active"
-            : "style-button"
-        }
-        onClick={() =>
-          onSelect("Modern Standard")
-        }
-      >
-        <span className="style-icon">
-          ✓
-        </span>
+    <div className="style-grid">
+      {STYLES.map((item) => (
+        <button
+          key={item}
+          type="button"
+          className={
+            codeStyle === item
+              ? "style-button active"
+              : "style-button"
+          }
+          onClick={() =>
+            setCodeStyle(item)
+          }
+        >
+          <span className="style-icon">
+            {item ===
+            "Legacy Turbo C"
+              ? "</>"
+              : "✓"}
+          </span>
 
-        <span>MODERN STANDARD</span>
-      </button>
-
-      <button
-        type="button"
-        className={
-          codeStyle === "Legacy Turbo C"
-            ? "style-button turbo-active"
-            : "style-button"
-        }
-        onClick={() =>
-          onSelect("Legacy Turbo C")
-        }
-      >
-        <span className="style-icon">
-          &lt;/&gt;
-        </span>
-
-        <span>LEGACY TURBO C</span>
-      </button>
+          <span>{item}</span>
+        </button>
+      ))}
     </div>
   );
 }
 
-/* =========================================================
-   HOME PAGE
-   ========================================================= */
+// ======================================================
+// PAGE HEADER
+// ======================================================
 
-function HomePage({ setPage }) {
+function PageHeader({
+  eyebrow,
+  title,
+  description,
+}) {
   return (
-    <main className="home-page">
-      <section className="hero">
+    <div className="page-header">
+      {eyebrow && (
+        <div className="eyebrow">
+          {eyebrow}
+        </div>
+      )}
+
+      <h1>{title}</h1>
+
+      {description && (
+        <p>{description}</p>
+      )}
+    </div>
+  );
+}
+
+// ======================================================
+// RESULT PANEL
+// ======================================================
+
+function ResultPanel({
+  title,
+  children,
+}) {
+  return (
+    <div className="result-panel">
+      <div className="result-title">
+        {title}
+      </div>
+
+      <div className="result-content">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ======================================================
+// HOME PAGE
+// ======================================================
+
+function HomePage({
+  navigate,
+}) {
+  return (
+    <main className="page-shell home-page">
+      <section className="hero-section">
         <div className="hero-badge">
-          <span>✦</span>
-          AI-POWERED PROGRAMMING EDUCATION
+          AI-POWERED PROGRAMMING LEARNING
         </div>
 
         <h1>
-          Learn to Code.
-          <br />
-          <span>Build the Future.</span>
+          Welcome to{" "}
+          <span>CodeMentor AI</span>
         </h1>
 
-        <p className="hero-text">
-          Master C, C++, Python, Java and
-          JavaScript with your personal
-          AI-powered programming mentor.
+        <p>
+          Learn programming, understand algorithms,
+          generate code, practice problems and run
+          programs in one beginner-friendly platform.
         </p>
 
-        <div className="hero-buttons">
+        <div className="hero-actions">
           <button
             type="button"
             className="primary-button"
-            onClick={() => setPage("learn")}
+            onClick={() =>
+              navigate("generator")
+            }
           >
-            START LEARNING
+            GENERATE CODE
           </button>
 
           <button
             type="button"
             className="secondary-button"
-            onClick={() => setPage("generator")}
+            onClick={() =>
+              navigate("algorithm-generator")
+            }
           >
-            GENERATE CODE
+            ALGORITHM GENERATOR
           </button>
-        </div>
 
-        <div className="language-showcase">
-          {LANGUAGES.map((item) => (
-            <div
-              className="language-card"
-              key={item.name}
-            >
-              <div className="language-icon">
-                {item.icon}
-              </div>
-
-              <span>{item.name}</span>
-            </div>
-          ))}
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() =>
+              navigate("algorithm-runner")
+            }
+          >
+            ALGORITHM CODE RUNNER
+          </button>
         </div>
       </section>
 
-      <section className="feature-section">
-        <div className="section-heading">
-          <div className="small-label">
-            WHY CODEMENTOR AI?
+      <section className="feature-grid">
+        <div className="feature-card">
+          <div className="feature-number">
+            01
           </div>
 
-          <h2>Your Personal AI Coding Lab</h2>
+          <h3>AI Teacher</h3>
 
           <p>
-            Learn, generate, execute and
-            practice code in one powerful
-            platform.
+            Ask programming and algorithm questions
+            and learn in simple language.
           </p>
         </div>
 
-        <div className="feature-grid">
-          <div className="feature-card">
-            <div className="feature-number">
-              01
-            </div>
-
-            <h3>AI Teacher</h3>
-
-            <p>
-              Ask programming questions and
-              receive beginner-friendly
-              explanations, examples and
-              step-by-step guidance.
-            </p>
-
-            <button
-              type="button"
-              onClick={() => setPage("teacher")}
-            >
-              OPEN AI TEACHER →
-            </button>
+        <div className="feature-card">
+          <div className="feature-number">
+            02
           </div>
 
-          <div className="feature-card">
-            <div className="feature-number">
-              02
-            </div>
+          <h3>Learn</h3>
 
-            <h3>Code Generator</h3>
+          <p>
+            Study programming concepts and algorithms
+            step-by-step.
+          </p>
+        </div>
 
-            <p>
-              Choose a language, style and
-              learning level, then generate
-              one complete program at a time.
-            </p>
-
-            <button
-              type="button"
-              onClick={() => setPage("generator")}
-            >
-              OPEN GENERATOR →
-            </button>
+        <div className="feature-card">
+          <div className="feature-number">
+            03
           </div>
 
-          <div className="feature-card">
-            <div className="feature-number">
-              03
-            </div>
+          <h3>Practice</h3>
 
-            <h3>Real Code Lab</h3>
+          <p>
+            Improve your skills with programming and
+            algorithm practice.
+          </p>
+        </div>
 
-            <p>
-              Write code, provide input and
-              execute programs using the real
-              Judge0 execution engine.
-            </p>
-
-            <button
-              type="button"
-              onClick={() => setPage("lab")}
-            >
-              OPEN CODE LAB →
-            </button>
+        <div className="feature-card">
+          <div className="feature-number">
+            04
           </div>
 
-          <div className="feature-card">
-            <div className="feature-number">
-              04
-            </div>
+          <h3>Algorithm Generator</h3>
 
-            <h3>Practice</h3>
+          <p>
+            Generate exam-ready algorithms with
+            variables, steps and pseudocode.
+          </p>
+        </div>
 
-            <p>
-              Improve your programming skills
-              with coding challenges and
-              structured practice.
-            </p>
-
-            <button
-              type="button"
-              onClick={() => setPage("practice")}
-            >
-              START PRACTICE →
-            </button>
+        <div className="feature-card">
+          <div className="feature-number">
+            05
           </div>
+
+          <h3>Algorithm Code Runner</h3>
+
+          <p>
+            Run algorithm programs with real Judge0
+            execution.
+          </p>
         </div>
       </section>
     </main>
   );
 }
 
-/* =========================================================
-   LEARN PAGE
-   ========================================================= */
+// ======================================================
+// LEARN PAGE
+// ======================================================
 
 function LearnPage({
-  language,
-  setLanguage,
-  setCode,
-  setPage,
+  level,
+  setLevel,
+  algorithmTopic,
+  setAlgorithmTopic,
+  algorithmAnswer,
+  algorithmLoading,
+  askAlgorithm,
 }) {
-  function selectLanguage(name) {
-    setLanguage(name);
+  const programmingTopics = [
+    "Variables",
+    "Loops",
+    "Conditions",
+    "Functions",
+    "Arrays",
+    "Pointers",
+    "Classes",
+  ];
 
-    const selected = LANGUAGES.find(
-      (item) => item.name === name
-    );
-
-    if (selected) {
-      setCode(selected.starter);
-    }
-
-    setPage("teacher");
-  }
+  const algorithmTopics = [
+    "Linear Search",
+    "Binary Search",
+    "Bubble Sort",
+    "Selection Sort",
+    "Insertion Sort",
+    "Array Insertion",
+    "Array Deletion",
+    "Array Update",
+    "Stack",
+    "Queue",
+    "Linked List",
+  ];
 
   return (
-    <main className="content-page">
-      <div className="page-header">
-        <div className="small-label">
-          LEARNING CENTER
-        </div>
+    <main className="page-shell">
+      <PageHeader
+        eyebrow="LEARNING CENTER"
+        title="Learn Programming & Algorithms"
+        description="Learn difficult concepts in simple, beginner-friendly language."
+      />
 
-        <h1>Learn Programming</h1>
+      <section className="content-card">
+        <h2>Learning Level</h2>
 
-        <p>
-          Build a strong programming
-          foundation with simple
-          explanations and practical
-          examples.
-        </p>
-      </div>
+        <LevelButtons
+          level={level}
+          setLevel={setLevel}
+        />
+      </section>
 
-      <div className="learning-grid">
-        {LANGUAGES.map((item) => (
-          <button
-            type="button"
-            className="learning-card"
-            key={item.name}
-            onClick={() =>
-              selectLanguage(item.name)
-            }
-          >
-            <div className="large-language-icon">
-              {item.icon}
+      <section className="content-card">
+        <div className="section-title-row">
+          <div>
+            <div className="eyebrow">
+              PROGRAMMING LEARNING
             </div>
 
-            <h2>{item.name}</h2>
+            <h2>
+              Core Programming Topics
+            </h2>
+          </div>
+        </div>
 
-            <p>
-              Learn {item.name} from
-              beginner to advanced.
-            </p>
+        <div className="topic-grid">
+          {programmingTopics.map(
+            (topic) => (
+              <div
+                key={topic}
+                className="topic-card"
+              >
+                <strong>{topic}</strong>
 
-            <span>START LEARNING →</span>
-          </button>
-        ))}
-      </div>
+                <span>
+                  Learn {topic.toLowerCase()} with
+                  simple examples.
+                </span>
+              </div>
+            )
+          )}
+        </div>
+      </section>
+
+      <section className="content-card algorithm-learning-card">
+        <div className="section-title-row">
+          <div>
+            <div className="eyebrow">
+              ALGORITHM LEARNING
+            </div>
+
+            <h2>
+              Learn Algorithms Easily
+            </h2>
+          </div>
+
+          <div className="algorithm-mark">
+            ALGO
+          </div>
+        </div>
+
+        <p className="section-description">
+          Select an algorithm below and learn its
+          meaning, idea, variables, steps, example
+          and complexity in very easy language.
+        </p>
+
+        <div className="topic-grid">
+          {algorithmTopics.map(
+            (topic) => (
+              <button
+                key={topic}
+                type="button"
+                className="topic-card topic-button"
+                onClick={() => {
+                  setAlgorithmTopic(topic);
+                  askAlgorithm(
+                    topic,
+                    "teach"
+                  );
+                }}
+              >
+                <strong>{topic}</strong>
+
+                <span>
+                  Click to learn
+                </span>
+              </button>
+            )
+          )}
+        </div>
+
+        <div className="form-group">
+          <label>
+            ASK ABOUT ANY ALGORITHM
+          </label>
+
+          <textarea
+            value={algorithmTopic}
+            onChange={(event) =>
+              setAlgorithmTopic(
+                event.target.value
+              )
+            }
+            placeholder="Example: Explain binary search algorithm in very easy language"
+            rows={4}
+          />
+        </div>
+
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() =>
+            askAlgorithm(
+              algorithmTopic,
+              "teach"
+            )
+          }
+          disabled={algorithmLoading}
+        >
+          {algorithmLoading
+            ? "TEACHING..."
+            : "TEACH ME THIS ALGORITHM"}
+        </button>
+
+        {algorithmAnswer && (
+          <ResultPanel title="ALGORITHM LESSON">
+            <div className="ai-text">
+              {algorithmAnswer}
+            </div>
+          </ResultPanel>
+        )}
+      </section>
     </main>
   );
 }
 
-/* =========================================================
-   AI TEACHER PAGE
-   ========================================================= */
+// ======================================================
+// AI TEACHER PAGE
+// ======================================================
 
 function TeacherPage({
-  language,
-  setLanguage,
   level,
   setLevel,
-  question,
-  setQuestion,
-  answer,
-  busy,
+  language,
+  setLanguage,
+  teacherQuestion,
+  setTeacherQuestion,
+  teacherAnswer,
+  teacherLoading,
   askTeacher,
+  algorithmMode,
+  setAlgorithmMode,
 }) {
   return (
-    <main className="content-page">
-      <div className="page-header">
-        <div className="small-label">
-          AI TEACHER
+    <main className="page-shell">
+      <PageHeader
+        eyebrow="AI TEACHER"
+        title="Learn With Your AI Teacher"
+        description="Ask anything about programming or algorithms and get a clear explanation."
+      />
+
+      <section className="content-card">
+        <div className="teacher-mode-row">
+          <button
+            type="button"
+            className={
+              !algorithmMode
+                ? "mode-button active"
+                : "mode-button"
+            }
+            onClick={() =>
+              setAlgorithmMode(false)
+            }
+          >
+            PROGRAMMING TEACHER
+          </button>
+
+          <button
+            type="button"
+            className={
+              algorithmMode
+                ? "mode-button active"
+                : "mode-button"
+            }
+            onClick={() =>
+              setAlgorithmMode(true)
+            }
+          >
+            ALGORITHM TEACHER
+          </button>
         </div>
+      </section>
 
-        <h1>
-          Your Personal
-          <br />
-          Programming Mentor
-        </h1>
+      <section className="content-card">
+        <h2>Learning Level</h2>
 
-        <p>
-          Ask anything about programming
-          and learn through simple,
-          step-by-step explanations.
-        </p>
-      </div>
-
-      <section className="teacher-panel">
-        <div className="control-section">
-          <label>PROGRAMMING LANGUAGE</label>
-
-          <LanguageButtons
-            language={language}
-            onSelect={setLanguage}
-            compact
-          />
-        </div>
-
-        <div className="control-section">
-          <label>YOUR LEARNING LEVEL</label>
-
-          <LevelButtons
-            level={level}
-            onSelect={setLevel}
-          />
-        </div>
-
-        <label className="big-label">
-          ASK YOUR QUESTION
-        </label>
-
-        <textarea
-          className="question-box"
-          value={question}
-          onChange={(event) =>
-            setQuestion(event.target.value)
-          }
-          placeholder="Example: Explain loops in Python with a simple example."
+        <LevelButtons
+          level={level}
+          setLevel={setLevel}
         />
+
+        {!algorithmMode && (
+          <>
+            <h2 className="top-gap">
+              Programming Language
+            </h2>
+
+            <LanguageButtons
+              language={language}
+              setLanguage={setLanguage}
+            />
+          </>
+        )}
+
+        <div className="form-group top-gap">
+          <label>
+            {algorithmMode
+              ? "ASK ABOUT AN ALGORITHM"
+              : "ASK YOUR PROGRAMMING QUESTION"}
+          </label>
+
+          <textarea
+            value={teacherQuestion}
+            onChange={(event) =>
+              setTeacherQuestion(
+                event.target.value
+              )
+            }
+            placeholder={
+              algorithmMode
+                ? "Example: Explain binary search algorithm in very easy language"
+                : "Example: Explain arrays in C with a simple example"
+            }
+            rows={8}
+          />
+        </div>
 
         <button
           type="button"
-          className="primary-button full-button"
-          onClick={() => askTeacher()}
-          disabled={busy}
+          className="primary-button"
+          disabled={teacherLoading}
+          onClick={askTeacher}
         >
-          {busy
-            ? "AI IS THINKING..."
-            : "✦ ASK AI TEACHER"}
+          {teacherLoading
+            ? "THINKING..."
+            : "ASK AI TEACHER"}
         </button>
 
-        {answer && (
-          <div className="answer-panel">
-            <div className="answer-title">
-              AI TEACHER RESPONSE
+        {teacherAnswer && (
+          <ResultPanel
+            title={
+              algorithmMode
+                ? "ALGORITHM LESSON"
+                : "AI TEACHER ANSWER"
+            }
+          >
+            <div className="ai-text">
+              {teacherAnswer}
             </div>
-
-            <div className="answer-content">
-              {answer}
-            </div>
-          </div>
+          </ResultPanel>
         )}
       </section>
     </main>
   );
 }
 
-/* =========================================================
-   CODE GENERATOR PAGE
-   ========================================================= */
+// ======================================================
+// CODE GENERATOR PAGE
+// ======================================================
 
 function GeneratorPage({
-  language,
-  setLanguage,
   level,
   setLevel,
+  language,
+  setLanguage,
   codeStyle,
   setCodeStyle,
-  codeTopic,
-  setCodeTopic,
+  topic,
+  setTopic,
   generatedCode,
-  generatedAnswer,
-  generatorBusy,
+  generatedExplanation,
+  generating,
   generateCode,
-  copyGeneratedCode,
-  sendGeneratedToLab,
 }) {
   return (
-    <main className="content-page">
-      <div className="page-header">
-        <div className="small-label">
-          AI CODE GENERATOR
-        </div>
+    <main className="page-shell">
+      <PageHeader
+        eyebrow="CODE GENERATOR"
+        title="Generate Programming Code"
+        description="Generate one complete program at a time with beginner-friendly comments."
+      />
 
-        <h1>
-          Solve Any Programming Problem
-        </h1>
+      <section className="content-card">
+        <h2>Learning Level</h2>
 
-        <p>
-          Select a language and generate
-          its code separately. No dropdowns.
-          No multi-language output.
-        </p>
-      </div>
-
-      <section className="generator-panel">
-        <div className="control-section">
-          <label>YOUR LEARNING LEVEL</label>
-
-          <LevelButtons
-            level={level}
-            onSelect={setLevel}
-          />
-        </div>
-
-        <div className="control-section">
-          <label>PROGRAMMING LANGUAGE</label>
-
-          <LanguageButtons
-            language={language}
-            onSelect={setLanguage}
-          />
-        </div>
-
-        <div className="control-section">
-          <label>CODE GENERATION STYLE</label>
-
-          <StyleButtons
-            codeStyle={codeStyle}
-            onSelect={setCodeStyle}
-          />
-        </div>
-
-        <div className="selected-generator-info">
-          <span className="selected-dot"></span>
-
-          <strong>{language}</strong>
-
-          <span>•</span>
-
-          <span>{level}</span>
-
-          <span>•</span>
-
-          <span>{codeStyle}</span>
-        </div>
-
-        <label className="big-label">
-          ENTER YOUR PROGRAMMING PROBLEM
-        </label>
-
-        <textarea
-          className="topic-box"
-          value={codeTopic}
-          onChange={(event) =>
-            setCodeTopic(event.target.value)
-          }
-          placeholder="Example: Find the maximum number among 5 numbers"
-          spellCheck="false"
+        <LevelButtons
+          level={level}
+          setLevel={setLevel}
         />
 
-        <div className="example-section">
-          <span>TRY AN EXAMPLE:</span>
+        <h2 className="top-gap">
+          Programming Language
+        </h2>
 
-          <div className="example-buttons">
-            {EXAMPLES.map((example) => (
-              <button
-                type="button"
-                key={example}
-                onClick={() =>
-                  setCodeTopic(example)
-                }
-              >
-                {example}
-              </button>
-            ))}
-          </div>
+        <LanguageButtons
+          language={language}
+          setLanguage={setLanguage}
+        />
+
+        <h2 className="top-gap">
+          Code Generation Style
+        </h2>
+
+        <StyleButtons
+          codeStyle={codeStyle}
+          setCodeStyle={setCodeStyle}
+        />
+
+        <div className="selection-summary">
+          <span className="summary-dot" />
+          {language}
+          <span>•</span>
+          {level}
+          <span>•</span>
+          {codeStyle}
         </div>
 
-        <div className="generator-note">
-          <strong>
-            ✓ ONE LANGUAGE AT A TIME
-          </strong>
+        <div className="form-group">
+          <label>
+            ENTER YOUR PROGRAMMING PROBLEM
+          </label>
 
-          <span>
-            Generate only the selected
-            language. The generated program
-            contains beginner-friendly comments.
-            Legacy Turbo C is available for C
-            and C++.
-          </span>
+          <textarea
+            value={topic}
+            onChange={(event) =>
+              setTopic(event.target.value)
+            }
+            placeholder="Example: Write a program to find an element in an array"
+            rows={8}
+          />
         </div>
 
         <button
           type="button"
-          className="generate-code-button"
-          onClick={() => generateCode()}
-          disabled={generatorBusy}
+          className="primary-button full-width"
+          disabled={generating}
+          onClick={generateCode}
         >
-          {generatorBusy
-            ? "GENERATING CODE..."
-            : `✦ GENERATE ${language.toUpperCase()} CODE`}
+          {generating
+            ? "GENERATING..."
+            : "GENERATE CODE"}
         </button>
 
-        {generatedAnswer &&
-          generatedAnswer.startsWith("Error:") && (
-            <div className="generator-error">
-              {generatedAnswer}
-            </div>
-          )}
-
         {generatedCode && (
-          <section className="generated-output">
-            <div className="output-header">
-              <div>
-                <span className="result-label">
-                  CODE OUTPUT
-                </span>
-
-                <h2>
-                  Generated {language} Program
-                </h2>
-              </div>
-
-              <span className="code-style-badge">
-                {codeStyle}
-              </span>
+          <>
+            <div className="selection-summary result-summary">
+              <span className="summary-dot" />
+              {language}
+              <span>•</span>
+              {level}
+              <span>•</span>
+              {codeStyle}
             </div>
 
-            <pre className="generated-code">
-              <code>{generatedCode}</code>
-            </pre>
+            <ResultPanel title="GENERATED CODE">
+              <pre className="code-output">
+                {generatedCode}
+              </pre>
+            </ResultPanel>
 
-            <div className="generated-actions">
-              <button
-                type="button"
-                onClick={copyGeneratedCode}
-              >
-                COPY CODE
-              </button>
-
-              <button
-                type="button"
-                onClick={sendGeneratedToLab}
-              >
-                RUN IN CODE LAB →
-              </button>
-            </div>
-
-            {generatedAnswer &&
-              !generatedAnswer.startsWith(
-                "Error:"
-              ) && (
-                <div className="generated-explanation">
-                  <h3>HOW IT WORKS</h3>
-
-                  <p>{generatedAnswer}</p>
+            {generatedExplanation && (
+              <ResultPanel title="EXPLANATION">
+                <div className="ai-text">
+                  {generatedExplanation}
                 </div>
-              )}
-          </section>
+              </ResultPanel>
+            )}
+          </>
         )}
       </section>
     </main>
   );
 }
 
-/* =========================================================
-   CODE LAB PAGE
-   ========================================================= */
+// ======================================================
+// CODE LAB PAGE
+// ======================================================
 
 function LabPage({
   language,
   setLanguage,
   codeStyle,
   setCodeStyle,
-  code,
-  setCode,
-  stdin,
-  setStdin,
-  output,
-  running,
-  runCode,
+  labCode,
+  setLabCode,
+  labInput,
+  setLabInput,
+  labResult,
+  labRunning,
+  runLabCode,
+  clearLab,
 }) {
-  function selectLanguage(newLanguage) {
-    setLanguage(newLanguage);
-
-    const selected = LANGUAGES.find(
-      (item) => item.name === newLanguage
-    );
-
-    if (selected) {
-      setCode(selected.starter);
-    }
-  }
-
   return (
-    <main className="content-page lab-page">
-      <div className="page-header">
-        <div className="small-label">
-          CODE LAB
+    <main className="page-shell">
+      <PageHeader
+        eyebrow="CODE LAB"
+        title="Run & Test Your Code"
+        description="Use the Code Lab for normal programming code execution."
+      />
+
+      <section className="content-card">
+        <h2>Programming Language</h2>
+
+        <LanguageButtons
+          language={language}
+          setLanguage={setLanguage}
+        />
+
+        <h2 className="top-gap">
+          Code Style
+        </h2>
+
+        <StyleButtons
+          codeStyle={codeStyle}
+          setCodeStyle={setCodeStyle}
+        />
+
+        <div className="editor-label">
+          CODE
         </div>
 
-        <h1>Write. Run. Learn.</h1>
+        <textarea
+          className="code-editor"
+          value={labCode}
+          onChange={(event) =>
+            setLabCode(event.target.value)
+          }
+          spellCheck={false}
+          placeholder="Paste or write your code here..."
+        />
 
-        <p>
-          Execute your programs using
-          the real online code execution
-          engine.
-        </p>
-      </div>
-
-      <section className="lab-panel">
-        <div className="control-section">
-          <label>PROGRAMMING LANGUAGE</label>
-
-          <LanguageButtons
-            language={language}
-            onSelect={selectLanguage}
-            compact
-          />
+        <div className="editor-label top-gap">
+          STANDARD INPUT
         </div>
 
-        <div className="control-section">
-          <label>CODE STYLE</label>
+        <textarea
+          className="input-editor"
+          value={labInput}
+          onChange={(event) =>
+            setLabInput(event.target.value)
+          }
+          placeholder="Enter program input here..."
+          rows={5}
+          spellCheck={false}
+        />
 
-          <StyleButtons
-            codeStyle={codeStyle}
-            onSelect={setCodeStyle}
-          />
+        <div className="action-row">
+          <button
+            type="button"
+            className="primary-button"
+            disabled={labRunning}
+            onClick={runLabCode}
+          >
+            {labRunning
+              ? "RUNNING..."
+              : "RUN CODE"}
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={clearLab}
+          >
+            CLEAR
+          </button>
         </div>
 
-        <button
-          type="button"
-          className="run-button"
-          onClick={runCode}
-          disabled={running}
-        >
-          {running
-            ? "RUNNING..."
-            : "▶ RUN CODE"}
-        </button>
-
-        <div className="editor-layout">
-          <div className="editor-side">
-            <div className="editor-title">
-              SOURCE CODE
+        {labResult && (
+          <ResultPanel title="ACTUAL OUTPUT">
+            <div className="runner-status">
+              {labResult.status}
             </div>
 
-            <textarea
-              className="code-editor"
-              value={code}
-              onChange={(event) =>
-                setCode(event.target.value)
-              }
-              spellCheck="false"
-            />
-          </div>
+            {labResult.stdout && (
+              <pre className="terminal-output">
+                {labResult.stdout}
+              </pre>
+            )}
 
-          <div className="output-side">
-            <div className="editor-title">
-              INPUT
-            </div>
+            {labResult.stderr && (
+              <pre className="error-output">
+                {labResult.stderr}
+              </pre>
+            )}
 
-            <textarea
-              className="stdin-editor"
-              value={stdin}
-              onChange={(event) =>
-                setStdin(event.target.value)
-              }
-              placeholder="Enter program input here..."
-              spellCheck="false"
-            />
+            {labResult.compileOutput && (
+              <pre className="error-output">
+                {labResult.compileOutput}
+              </pre>
+            )}
 
-            <div className="editor-title output-title">
-              OUTPUT
-            </div>
-
-            <pre className="execution-output">
-              {output ||
-                "Program output will appear here..."}
-            </pre>
-          </div>
-        </div>
-
-        <div className="lab-note">
-          For Legacy Turbo C, CodeMentor
-          keeps the old-style source visible
-          but converts unsupported Turbo C
-          console constructs for modern Judge0
-          execution.
-        </div>
+            {labResult.message && (
+              <pre className="error-output">
+                {labResult.message}
+              </pre>
+            )}
+          </ResultPanel>
+        )}
       </section>
     </main>
   );
 }
 
-/* =========================================================
-   PRACTICE PAGE
-   ========================================================= */
+// ======================================================
+// PRACTICE PAGE
+// ======================================================
 
 function PracticePage({
-  setCodeTopic,
-  setPage,
+  level,
+  setLevel,
+  language,
+  setLanguage,
+  practiceQuestion,
+  setPracticeQuestion,
+  practiceAnswer,
+  setPracticeAnswer,
+  practiceResult,
+  practiceLoading,
+  generatePractice,
+  evaluatePractice,
 }) {
-  const challenges = [
-    {
-      title: "Find the Maximum",
-      description:
-        "Write a program to find the largest number in an array.",
-      difficulty: "BEGINNER",
-    },
-    {
-      title: "Prime Number",
-      description:
-        "Check whether a given number is prime.",
-      difficulty: "BEGINNER",
-    },
-    {
-      title: "Palindrome",
-      description:
-        "Determine whether a string is a palindrome.",
-      difficulty: "BEGINNER",
-    },
-    {
-      title: "Array Sorting",
-      description:
-        "Sort an array without using a built-in sorting function.",
-      difficulty: "INTERMEDIATE",
-    },
-    {
-      title: "Fibonacci Sequence",
-      description:
-        "Generate the first N Fibonacci numbers.",
-      difficulty: "INTERMEDIATE",
-    },
-    {
-      title: "String Frequency",
-      description:
-        "Count the frequency of every character in a string.",
-      difficulty: "INTERMEDIATE",
-    },
+  const algorithms = [
+    "Linear Search",
+    "Binary Search",
+    "Bubble Sort",
+    "Selection Sort",
+    "Insertion Sort",
+    "Array Update",
+    "Stack",
+    "Queue",
   ];
 
   return (
-    <main className="content-page">
-      <div className="page-header">
-        <div className="small-label">
-          PRACTICE ARENA
+    <main className="page-shell">
+      <PageHeader
+        eyebrow="PRACTICE"
+        title="Practice Programming & Algorithms"
+        description="Solve questions and learn from your mistakes."
+      />
+
+      <section className="content-card">
+        <h2>Programming Practice</h2>
+
+        <LevelButtons
+          level={level}
+          setLevel={setLevel}
+        />
+
+        <LanguageButtons
+          language={language}
+          setLanguage={setLanguage}
+        />
+
+        <div className="form-group top-gap">
+          <label>
+            PRACTICE QUESTION
+          </label>
+
+          <textarea
+            value={practiceQuestion}
+            onChange={(event) =>
+              setPracticeQuestion(
+                event.target.value
+              )
+            }
+            placeholder="Enter a programming or algorithm problem..."
+            rows={5}
+          />
+        </div>
+      </section>
+
+      <section className="content-card">
+        <div className="eyebrow">
+          ALGORITHM PRACTICE
         </div>
 
-        <h1>
-          Improve Your Coding Skills
-        </h1>
+        <h2>
+          Practice Algorithms
+        </h2>
 
-        <p>
-          Solve programming challenges
-          and strengthen your
-          problem-solving skills.
+        <p className="section-description">
+          Choose an algorithm and generate a
+          beginner-friendly practice question.
         </p>
-      </div>
 
-      <div className="challenge-grid">
-        {challenges.map((challenge) => (
-          <div
-            className="challenge-card"
-            key={challenge.title}
-          >
-            <div className="challenge-top">
-              <span>
-                {challenge.difficulty}
-              </span>
+        <div className="topic-grid">
+          {algorithms.map(
+            (algorithm) => (
+              <button
+                key={algorithm}
+                type="button"
+                className="topic-card topic-button"
+                onClick={() =>
+                  generatePractice(
+                    algorithm
+                  )
+                }
+              >
+                <strong>
+                  {algorithm}
+                </strong>
+
+                <span>
+                  Generate practice
+                </span>
+              </button>
+            )
+          )}
+        </div>
+
+        {practiceResult && (
+          <ResultPanel title="PRACTICE QUESTION">
+            <div className="ai-text">
+              {practiceResult}
             </div>
+          </ResultPanel>
+        )}
 
-            <h2>{challenge.title}</h2>
+        <div className="form-group">
+          <label>
+            YOUR ANSWER
+          </label>
 
-            <p>{challenge.description}</p>
+          <textarea
+            value={practiceAnswer}
+            onChange={(event) =>
+              setPracticeAnswer(
+                event.target.value
+              )
+            }
+            placeholder="Write your answer or algorithm steps here..."
+            rows={7}
+          />
+        </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                setCodeTopic(
-                  challenge.description
-                );
-
-                setPage("generator");
-              }}
-            >
-              SOLVE WITH AI →
-            </button>
-          </div>
-        ))}
-      </div>
+        <button
+          type="button"
+          className="primary-button"
+          disabled={practiceLoading}
+          onClick={evaluatePractice}
+        >
+          {practiceLoading
+            ? "CHECKING..."
+            : "CHECK MY ANSWER"}
+        </button>
+      </section>
     </main>
   );
 }
 
-/* =========================================================
-   FOOTER
-   ========================================================= */
+// ======================================================
+// ALGORITHM GENERATOR PAGE
+// ======================================================
 
-function Footer({ setPage }) {
+function AlgorithmGeneratorPage({
+  level,
+  setLevel,
+  language,
+  setLanguage,
+  codeStyle,
+  setCodeStyle,
+  algorithmTopic,
+  setAlgorithmTopic,
+  includeAlgorithmCode,
+  setIncludeAlgorithmCode,
+  generatedAlgorithm,
+  generatedAlgorithmCode,
+  algorithmGenerating,
+  generateAlgorithm,
+}) {
   return (
-    <footer className="footer">
-      <div>
-        <div className="footer-brand">
-          <span className="brand-mark">
-            &lt;/&gt;
-          </span>
+    <main className="page-shell">
+      <PageHeader
+        eyebrow="ALGORITHM GENERATOR"
+        title="Generate Exam-Ready Algorithms"
+        description="Create clean algorithm notes with variables, comments, steps, pseudocode and optional program code."
+      />
 
-          <strong>CodeMentor AI</strong>
+      <section className="content-card">
+        <h2>Learning Level</h2>
+
+        <LevelButtons
+          level={level}
+          setLevel={setLevel}
+        />
+
+        <h2 className="top-gap">
+          Program Language
+        </h2>
+
+        <LanguageButtons
+          language={language}
+          setLanguage={setLanguage}
+        />
+
+        <h2 className="top-gap">
+          Code Style
+        </h2>
+
+        <StyleButtons
+          codeStyle={codeStyle}
+          setCodeStyle={setCodeStyle}
+        />
+
+        <div className="form-group top-gap">
+          <label>
+            ENTER ALGORITHM / PROBLEM
+          </label>
+
+          <textarea
+            value={algorithmTopic}
+            onChange={(event) =>
+              setAlgorithmTopic(
+                event.target.value
+              )
+            }
+            placeholder="Example: Array update operation"
+            rows={7}
+          />
         </div>
 
-        <p>
-          Learn programming. Build
-          projects. Master code with AI.
-        </p>
+        <label className="checkbox-row">
+          <input
+            type="checkbox"
+            checked={includeAlgorithmCode}
+            onChange={(event) =>
+              setIncludeAlgorithmCode(
+                event.target.checked
+              )
+            }
+          />
+
+          <span>
+            Also generate the corresponding program
+            code
+          </span>
+        </label>
+
+        <button
+          type="button"
+          className="primary-button full-width"
+          disabled={algorithmGenerating}
+          onClick={generateAlgorithm}
+        >
+          {algorithmGenerating
+            ? "GENERATING ALGORITHM..."
+            : "GENERATE ALGORITHM"}
+        </button>
+      </section>
+
+      {generatedAlgorithm && (
+        <section className="content-card">
+          <div className="algorithm-paper">
+            <div className="algorithm-paper-title">
+              ALGORITHM
+            </div>
+
+            <pre className="algorithm-output">
+              {generatedAlgorithm}
+            </pre>
+          </div>
+        </section>
+      )}
+
+      {generatedAlgorithmCode && (
+        <section className="content-card">
+          <div className="section-title-row">
+            <div>
+              <div className="eyebrow">
+                CORRESPONDING PROGRAM
+              </div>
+
+              <h2>
+                Generated Algorithm Code
+              </h2>
+            </div>
+          </div>
+
+          <pre className="code-output">
+            {generatedAlgorithmCode}
+          </pre>
+
+          <p className="helper-text">
+            Copy this code to the separate Algorithm
+            Code Runner to execute it.
+          </p>
+        </section>
+      )}
+    </main>
+  );
+}
+
+// ======================================================
+// ALGORITHM CODE RUNNER
+// ======================================================
+
+function AlgorithmRunnerPage({
+  language,
+  setLanguage,
+  codeStyle,
+  setCodeStyle,
+  algorithmCode,
+  setAlgorithmCode,
+  algorithmInput,
+  setAlgorithmInput,
+  runnerResult,
+  runnerRunning,
+  runAlgorithmCode,
+  clearAlgorithmRunner,
+}) {
+  return (
+    <main className="page-shell">
+      <PageHeader
+        eyebrow="ALGORITHM CODE RUNNER"
+        title="Run Algorithm Programs"
+        description="A completely separate runner dedicated to algorithm-related programs."
+      />
+
+      <section className="runner-warning">
+        <div className="runner-warning-icon">
+          ALGO
+        </div>
+
+        <div>
+          <strong>
+            Dedicated Algorithm Execution
+          </strong>
+
+          <p>
+            This is separate from Code Generator
+            and Code Lab. Paste your algorithm program
+            here and execute it using Judge0.
+          </p>
+        </div>
+      </section>
+
+      <section className="content-card">
+        <h2>
+          Programming Language
+        </h2>
+
+        <LanguageButtons
+          language={language}
+          setLanguage={setLanguage}
+        />
+
+        <h2 className="top-gap">
+          Code Style
+        </h2>
+
+        <StyleButtons
+          codeStyle={codeStyle}
+          setCodeStyle={setCodeStyle}
+        />
+
+        <div className="editor-label">
+          ALGORITHM PROGRAM CODE
+        </div>
+
+        <textarea
+          className="code-editor algorithm-editor"
+          value={algorithmCode}
+          onChange={(event) =>
+            setAlgorithmCode(
+              event.target.value
+            )
+          }
+          spellCheck={false}
+          placeholder={`Paste your algorithm program here...
+
+Example:
+#include <stdio.h>
+
+int main(void)
+{
+    int a[5] = {10, 20, 30, 40, 50};
+
+    // algorithm logic
+
+    return 0;
+}`}
+        />
+
+        <div className="editor-label top-gap">
+          INPUT
+        </div>
+
+        <textarea
+          className="input-editor"
+          value={algorithmInput}
+          onChange={(event) =>
+            setAlgorithmInput(
+              event.target.value
+            )
+          }
+          rows={6}
+          placeholder="Enter input for your algorithm program..."
+          spellCheck={false}
+        />
+
+        <div className="action-row">
+          <button
+            type="button"
+            className="primary-button"
+            disabled={runnerRunning}
+            onClick={runAlgorithmCode}
+          >
+            {runnerRunning
+              ? "RUNNING ALGORITHM..."
+              : "RUN ALGORITHM CODE"}
+          </button>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={clearAlgorithmRunner}
+          >
+            CLEAR
+          </button>
+        </div>
+      </section>
+
+      {runnerResult && (
+        <section className="content-card">
+          <ResultPanel title="ALGORITHM EXECUTION RESULT">
+            <div className="runner-status">
+              {runnerResult.status}
+            </div>
+
+            {runnerResult.stdout && (
+              <pre className="terminal-output">
+                {runnerResult.stdout}
+              </pre>
+            )}
+
+            {runnerResult.stderr && (
+              <pre className="error-output">
+                {runnerResult.stderr}
+              </pre>
+            )}
+
+            {runnerResult.compileOutput && (
+              <pre className="error-output">
+                {runnerResult.compileOutput}
+              </pre>
+            )}
+
+            {runnerResult.message && (
+              <pre className="error-output">
+                {runnerResult.message}
+              </pre>
+            )}
+          </ResultPanel>
+        </section>
+      )}
+    </main>
+  );
+}
+
+// ======================================================
+// FOOTER
+// ======================================================
+
+function Footer() {
+  return (
+    <footer className="site-footer">
+      <div>
+        <CodeIcon />
+        <strong>
+          CodeMentor AI
+        </strong>
       </div>
 
-      <div className="footer-links">
-        <button
-          type="button"
-          onClick={() => setPage("learn")}
-        >
-          Learn
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setPage("teacher")}
-        >
-          AI Teacher
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setPage("generator")}
-        >
-          Generator
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setPage("lab")}
-        >
-          Code Lab
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setPage("practice")}
-        >
-          Practice
-        </button>
-      </div>
-
-      <div className="copyright">
-        © {new Date().getFullYear()} CodeMentor AI
-      </div>
+      <span>
+        Learn • Generate • Practice • Execute
+      </span>
     </footer>
   );
 }
 
-/* =========================================================
-   MAIN APP
-   ========================================================= */
+// ======================================================
+// APP
+// ======================================================
 
 function App() {
-  const [page, setPage] = useState("home");
+  const [
+    page,
+    setPage,
+  ] = useState("home");
 
-  const [language, setLanguage] =
-    useState("Python");
+  // ----------------------------------------------------
+  // General state
+  // ----------------------------------------------------
 
-  const [level, setLevel] =
-    useState("Beginner");
+  const [
+    level,
+    setLevel,
+  ] = useState("Beginner");
 
-  const [codeStyle, setCodeStyle] =
-    useState("Modern Standard");
+  const [
+    language,
+    setLanguage,
+  ] = useState("C");
 
-  const [question, setQuestion] =
-    useState("");
+  const [
+    codeStyle,
+    setCodeStyle,
+  ] = useState("Modern Standard");
 
-  const [answer, setAnswer] =
-    useState("");
+  // ----------------------------------------------------
+  // Teacher
+  // ----------------------------------------------------
 
-  const [busy, setBusy] =
-    useState(false);
+  const [
+    teacherQuestion,
+    setTeacherQuestion,
+  ] = useState("");
 
-  const [codeTopic, setCodeTopic] =
-    useState("");
+  const [
+    teacherAnswer,
+    setTeacherAnswer,
+  ] = useState("");
 
-  const [generatedCode, setGeneratedCode] =
-    useState("");
+  const [
+    teacherLoading,
+    setTeacherLoading,
+  ] = useState(false);
 
-  const [generatedAnswer, setGeneratedAnswer] =
-    useState("");
+  const [
+    algorithmMode,
+    setAlgorithmMode,
+  ] = useState(false);
 
-  const [generatorBusy, setGeneratorBusy] =
-    useState(false);
+  // ----------------------------------------------------
+  // Learn algorithms
+  // ----------------------------------------------------
 
-  const [code, setCode] = useState(
-    LANGUAGES.find(
-      (item) => item.name === "Python"
-    )?.starter || ""
+  const [
+    algorithmTopic,
+    setAlgorithmTopic,
+  ] = useState("");
+
+  const [
+    algorithmAnswer,
+    setAlgorithmAnswer,
+  ] = useState("");
+
+  const [
+    algorithmLoading,
+    setAlgorithmLoading,
+  ] = useState(false);
+
+  // ----------------------------------------------------
+  // Code Generator
+  // ----------------------------------------------------
+
+  const [
+    topic,
+    setTopic,
+  ] = useState(
+    "Write a program to find an element in an array"
   );
 
-  const [stdin, setStdin] =
-    useState("");
+  const [
+    generatedCode,
+    setGeneratedCode,
+  ] = useState("");
 
-  const [output, setOutput] =
-    useState("");
+  const [
+    generatedExplanation,
+    setGeneratedExplanation,
+  ] = useState("");
 
-  const [running, setRunning] =
-    useState(false);
+  const [
+    generating,
+    setGenerating,
+  ] = useState(false);
 
-  /* =======================================================
-     CHANGE LANGUAGE
-     ======================================================= */
+  // ----------------------------------------------------
+  // Code Lab
+  // ----------------------------------------------------
 
-  function changeLanguage(
-    newLanguage,
-    resetEditor = true
-  ) {
-    setLanguage(newLanguage);
+  const [
+    labCode,
+    setLabCode,
+  ] = useState("");
 
-    if (resetEditor) {
-      const selected = LANGUAGES.find(
-        (item) => item.name === newLanguage
-      );
+  const [
+    labInput,
+    setLabInput,
+  ] = useState("");
 
-      if (selected) {
-        setCode(selected.starter);
-      }
-    }
+  const [
+    labResult,
+    setLabResult,
+  ] = useState(null);
+
+  const [
+    labRunning,
+    setLabRunning,
+  ] = useState(false);
+
+  // ----------------------------------------------------
+  // Practice
+  // ----------------------------------------------------
+
+  const [
+    practiceQuestion,
+    setPracticeQuestion,
+  ] = useState("");
+
+  const [
+    practiceAnswer,
+    setPracticeAnswer,
+  ] = useState("");
+
+  const [
+    practiceResult,
+    setPracticeResult,
+  ] = useState("");
+
+  const [
+    practiceLoading,
+    setPracticeLoading,
+  ] = useState(false);
+
+  // ----------------------------------------------------
+  // Algorithm Generator
+  // ----------------------------------------------------
+
+  const [
+    includeAlgorithmCode,
+    setIncludeAlgorithmCode,
+  ] = useState(true);
+
+  const [
+    generatedAlgorithm,
+    setGeneratedAlgorithm,
+  ] = useState("");
+
+  const [
+    generatedAlgorithmCode,
+    setGeneratedAlgorithmCode,
+  ] = useState("");
+
+  const [
+    algorithmGenerating,
+    setAlgorithmGenerating,
+  ] = useState(false);
+
+  // ----------------------------------------------------
+  // Algorithm Runner
+  // ----------------------------------------------------
+
+  const [
+    algorithmCode,
+    setAlgorithmCode,
+  ] = useState("");
+
+  const [
+    algorithmInput,
+    setAlgorithmInput,
+  ] = useState("");
+
+  const [
+    runnerResult,
+    setRunnerResult,
+  ] = useState(null);
+
+  const [
+    runnerRunning,
+    setRunnerRunning,
+  ] = useState(false);
+
+  // ----------------------------------------------------
+  // Navigation
+  // ----------------------------------------------------
+
+  function navigate(nextPage) {
+    setPage(nextPage);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }
 
-  /* =======================================================
-     AI TEACHER
-     ======================================================= */
+  // ----------------------------------------------------
+  // Teacher request
+  // ----------------------------------------------------
 
-  async function askTeacher(customQuestion) {
-    const q = (
-      customQuestion ?? question
-    ).trim();
-
-    if (!q) {
-      setAnswer(
-        "Please enter a programming question first."
-      );
+  async function askTeacher() {
+    if (
+      !teacherQuestion.trim()
+    ) {
       return;
     }
 
-    setBusy(true);
-    setAnswer("");
+    setTeacherLoading(true);
+    setTeacherAnswer("");
 
     try {
-      const response = await fetch(
-        `${API}/api/ai/teach`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            language,
-            level,
-            question: q,
-          }),
-        }
-      );
+      const response =
+        await fetch(
+          `${API}/api/ai/teach`,
+          {
+            method: "POST",
 
-      const raw =
-        await response.text();
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-      let data;
-
-      try {
-        data = JSON.parse(raw);
-      } catch {
-        throw new Error(
-          "The backend returned an invalid response. Make sure the CodeMentor AI backend is running."
+            body: JSON.stringify({
+              language,
+              level,
+              question:
+                teacherQuestion.trim(),
+              algorithmMode,
+            }),
+          }
         );
-      }
+
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
           data.error ||
-            "AI request failed."
+            "AI Teacher request failed."
         );
       }
 
-      setAnswer(
-        data.answer ||
-          "No answer was returned."
+      setTeacherAnswer(
+        data.answer || ""
       );
     } catch (error) {
-      setAnswer(
+      setTeacherAnswer(
         `Error: ${error.message}`
       );
     } finally {
-      setBusy(false);
+      setTeacherLoading(false);
     }
   }
 
-  /* =======================================================
-     CODE GENERATOR
-     ======================================================= */
+  // ----------------------------------------------------
+  // Algorithm learning request
+  // ----------------------------------------------------
 
-  async function generateCode(
-    customTopic
+  async function askAlgorithm(
+    customTopic,
+    mode = "teach"
   ) {
-    const topic = (
-      customTopic ?? codeTopic
-    ).trim();
+    const selectedTopic =
+      String(
+        customTopic || ""
+      ).trim();
 
-    if (!topic) {
-      setGeneratedAnswer(
-        "Please enter a programming problem first."
-      );
+    if (!selectedTopic) {
       return;
     }
 
-    setGeneratorBusy(true);
-    setGeneratedCode("");
-    setGeneratedAnswer("");
+    setAlgorithmLoading(true);
+    setAlgorithmAnswer("");
 
     try {
-      const response = await fetch(
-        `${API}/api/ai/generate-code`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            language,
-            level,
-            codeStyle,
-            topic,
-          }),
-        }
-      );
+      const response =
+        await fetch(
+          `${API}/api/ai/algorithm`,
+          {
+            method: "POST",
 
-      const raw =
-        await response.text();
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-      let data;
+            body: JSON.stringify({
+              topic:
+                selectedTopic,
+              level,
+              mode,
+            }),
+          }
+        );
 
-      try {
-        data = JSON.parse(raw);
-      } catch {
+      const data =
+        await response.json();
+
+      if (!response.ok) {
         throw new Error(
-          "The backend returned an invalid response. Make sure the CodeMentor AI backend is running."
+          data.error ||
+            "Algorithm learning failed."
         );
       }
+
+      setAlgorithmAnswer(
+        data.answer || ""
+      );
+    } catch (error) {
+      setAlgorithmAnswer(
+        `Error: ${error.message}`
+      );
+    } finally {
+      setAlgorithmLoading(false);
+    }
+  }
+
+  // ----------------------------------------------------
+  // Generate programming code
+  // ----------------------------------------------------
+
+  async function generateCode() {
+    if (!topic.trim()) {
+      return;
+    }
+
+    setGenerating(true);
+    setGeneratedCode("");
+    setGeneratedExplanation("");
+
+    try {
+      const response =
+        await fetch(
+          `${API}/api/ai/generate-code`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              language,
+              level,
+              codeStyle,
+              topic: topic.trim(),
+            }),
+          }
+        );
+
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -1207,117 +1741,59 @@ function App() {
         );
       }
 
-      /*
-       * The backend may return:
-       *
-       * data.code
-       * data.explanation
-       *
-       * Keep this flexible so the frontend
-       * works with the current API.
-       */
-
       setGeneratedCode(
         data.code || ""
       );
 
-      setGeneratedAnswer(
-        data.explanation ||
-          "Code generated successfully."
+      setGeneratedExplanation(
+        data.explanation || ""
       );
     } catch (error) {
-      setGeneratedAnswer(
+      setGeneratedCode(
         `Error: ${error.message}`
       );
     } finally {
-      setGeneratorBusy(false);
+      setGenerating(false);
     }
   }
 
-  /* =======================================================
-     COPY GENERATED CODE
-     ======================================================= */
+  // ----------------------------------------------------
+  // Run Code Lab
+  // ----------------------------------------------------
 
-  async function copyGeneratedCode() {
-    if (!generatedCode) {
+  async function runLabCode() {
+    if (!labCode.trim()) {
       return;
     }
+
+    setLabRunning(true);
+    setLabResult(null);
 
     try {
-      await navigator.clipboard.writeText(
-        generatedCode
-      );
+      const response =
+        await fetch(
+          `${API}/api/code/run`,
+          {
+            method: "POST",
 
-      window.alert(
-        `${language} code copied successfully!`
-      );
-    } catch {
-      window.alert(
-        "Unable to copy the code."
-      );
-    }
-  }
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
 
-  /* =======================================================
-     SEND GENERATED CODE TO CODE LAB
-     ======================================================= */
-
-  function sendGeneratedToLab() {
-    if (!generatedCode) {
-      return;
-    }
-
-    setCode(generatedCode);
-    setStdin("");
-    setOutput("");
-    setPage("lab");
-  }
-
-  /* =======================================================
-     RUN CODE
-     ======================================================= */
-
-  async function runCode() {
-    if (!code.trim()) {
-      setOutput(
-        "Please enter some code first."
-      );
-      return;
-    }
-
-    setRunning(true);
-    setOutput("");
-
-    try {
-      const response = await fetch(
-        `${API}/api/code/run`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            language,
-            code,
-            stdin,
-            codeStyle,
-          }),
-        }
-      );
-
-      const raw =
-        await response.text();
-
-      let data;
-
-      try {
-        data = JSON.parse(raw);
-      } catch {
-        throw new Error(
-          "The backend returned an invalid response. Make sure the backend is running."
+            body: JSON.stringify({
+              language,
+              code:
+                labCode,
+              stdin:
+                labInput,
+              codeStyle,
+            }),
+          }
         );
-      }
+
+      const data =
+        await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -1326,209 +1802,615 @@ function App() {
         );
       }
 
-      /*
-       * Show ONLY actual execution output.
-       * No fake STATUS / TIME / MEMORY text.
-       */
-
-      if (data.stdout) {
-        setOutput(
-          data.stdout.trimEnd()
-        );
-      } else if (data.compileOutput) {
-        setOutput(
-          data.compileOutput.trimEnd()
-        );
-      } else if (data.stderr) {
-        setOutput(
-          data.stderr.trimEnd()
-        );
-      } else if (data.message) {
-        setOutput(
-          data.message.trimEnd()
-        );
-      } else {
-        setOutput("");
-      }
+      setLabResult(data);
     } catch (error) {
-      setOutput(
-        `Execution error:\n${error.message}`
-      );
+      setLabResult({
+        status: "ERROR",
+        stderr: error.message,
+        stdout: "",
+        compileOutput: "",
+        message: "",
+      });
     } finally {
-      setRunning(false);
+      setLabRunning(false);
     }
   }
 
-  /* =======================================================
-     RENDER PAGE
-     ======================================================= */
+  function clearLab() {
+    setLabCode("");
+    setLabInput("");
+    setLabResult(null);
+  }
 
-  function renderPage() {
-    if (page === "learn") {
-      return (
-        <LearnPage
-          language={language}
-          setLanguage={setLanguage}
-          setCode={setCode}
-          setPage={setPage}
-        />
-      );
-    }
+  // ----------------------------------------------------
+  // Practice generation
+  // ----------------------------------------------------
 
-    if (page === "teacher") {
-      return (
-        <TeacherPage
-          language={language}
-          setLanguage={setLanguage}
-          level={level}
-          setLevel={setLevel}
-          question={question}
-          setQuestion={setQuestion}
-          answer={answer}
-          busy={busy}
-          askTeacher={askTeacher}
-        />
-      );
-    }
+  async function generatePractice(
+    algorithm
+  ) {
+    setPracticeLoading(true);
+    setPracticeResult("");
 
-    if (page === "generator") {
-      return (
-        <GeneratorPage
-          language={language}
-          setLanguage={(newLanguage) =>
-            changeLanguage(
-              newLanguage,
-              false
-            )
+    try {
+      const response =
+        await fetch(
+          `${API}/api/ai/algorithm`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              topic:
+                algorithm,
+              level,
+              mode: "practice",
+            }),
           }
-          level={level}
-          setLevel={setLevel}
-          codeStyle={codeStyle}
-          setCodeStyle={setCodeStyle}
-          codeTopic={codeTopic}
-          setCodeTopic={setCodeTopic}
-          generatedCode={generatedCode}
-          generatedAnswer={generatedAnswer}
-          generatorBusy={generatorBusy}
-          generateCode={generateCode}
-          copyGeneratedCode={
-            copyGeneratedCode
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Practice generation failed."
+        );
+      }
+
+      setPracticeResult(
+        data.answer || ""
+      );
+
+      setPracticeQuestion(
+        algorithm
+      );
+    } catch (error) {
+      setPracticeResult(
+        `Error: ${error.message}`
+      );
+    } finally {
+      setPracticeLoading(false);
+    }
+  }
+
+  // ----------------------------------------------------
+  // Evaluate practice answer
+  // ----------------------------------------------------
+
+  async function evaluatePractice() {
+    if (
+      !practiceQuestion.trim() &&
+      !practiceAnswer.trim()
+    ) {
+      return;
+    }
+
+    setPracticeLoading(true);
+
+    try {
+      const response =
+        await fetch(
+          `${API}/api/ai/algorithm`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              topic:
+                practiceQuestion.trim() ||
+                "Algorithm practice",
+              level,
+              mode: "practice",
+              userAnswer:
+                practiceAnswer.trim(),
+            }),
           }
-          sendGeneratedToLab={
-            sendGeneratedToLab
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Answer evaluation failed."
+        );
+      }
+
+      setPracticeResult(
+        data.answer || ""
+      );
+    } catch (error) {
+      setPracticeResult(
+        `Error: ${error.message}`
+      );
+    } finally {
+      setPracticeLoading(false);
+    }
+  }
+
+  // ----------------------------------------------------
+  // Algorithm Generator
+  // ----------------------------------------------------
+
+  async function generateAlgorithm() {
+    if (
+      !algorithmTopic.trim()
+    ) {
+      return;
+    }
+
+    setAlgorithmGenerating(true);
+    setGeneratedAlgorithm("");
+    setGeneratedAlgorithmCode("");
+
+    try {
+      const response =
+        await fetch(
+          `${API}/api/ai/generate-algorithm`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              topic:
+                algorithmTopic.trim(),
+              level,
+              language,
+              codeStyle,
+              includeCode:
+                includeAlgorithmCode,
+            }),
           }
-        />
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Algorithm generation failed."
+        );
+      }
+
+      setGeneratedAlgorithm(
+        data.algorithm || ""
       );
+
+      setGeneratedAlgorithmCode(
+        data.code || ""
+      );
+    } catch (error) {
+      setGeneratedAlgorithm(
+        `Error: ${error.message}`
+      );
+    } finally {
+      setAlgorithmGenerating(false);
+    }
+  }
+
+  // ----------------------------------------------------
+  // Algorithm runner
+  // ----------------------------------------------------
+
+  async function runAlgorithmCode() {
+    if (
+      !algorithmCode.trim()
+    ) {
+      return;
     }
 
-    if (page === "lab") {
-      return (
-        <LabPage
-          language={language}
-          setLanguage={setLanguage}
-          codeStyle={codeStyle}
-          setCodeStyle={setCodeStyle}
-          code={code}
-          setCode={setCode}
-          stdin={stdin}
-          setStdin={setStdin}
-          output={output}
-          running={running}
-          runCode={runCode}
-        />
-      );
-    }
+    setRunnerRunning(true);
+    setRunnerResult(null);
 
-    if (page === "practice") {
-      return (
-        <PracticePage
-          setCodeTopic={setCodeTopic}
-          setPage={setPage}
-        />
-      );
-    }
+    try {
+      const response =
+        await fetch(
+          `${API}/api/code/run`,
+          {
+            method: "POST",
 
-    return (
-      <HomePage setPage={setPage} />
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              language,
+              code:
+                algorithmCode,
+              stdin:
+                algorithmInput,
+              codeStyle,
+            }),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Algorithm code execution failed."
+        );
+      }
+
+      setRunnerResult(data);
+    } catch (error) {
+      setRunnerResult({
+        status: "ERROR",
+        stderr: error.message,
+        stdout: "",
+        compileOutput: "",
+        message: "",
+      });
+    } finally {
+      setRunnerRunning(false);
+    }
+  }
+
+  function clearAlgorithmRunner() {
+    setAlgorithmCode("");
+    setAlgorithmInput("");
+    setRunnerResult(null);
+  }
+
+  // ----------------------------------------------------
+  // NAVIGATION ITEMS
+  // ----------------------------------------------------
+
+  const navigationItems = [
+    {
+      key: "home",
+      label: "Home",
+    },
+    {
+      key: "learn",
+      label: "Learn",
+    },
+    {
+      key: "teacher",
+      label: "AI Teacher",
+    },
+    {
+      key: "generator",
+      label: "Code Generator",
+    },
+    {
+      key: "lab",
+      label: "Code Lab",
+    },
+    {
+      key: "practice",
+      label: "Practice",
+    },
+    {
+      key: "algorithm-generator",
+      label: "Algorithm Generator",
+    },
+    {
+      key: "algorithm-runner",
+      label: "Algorithm Code Runner",
+    },
+  ];
+
+  // ----------------------------------------------------
+  // PAGE SELECTOR
+  // ----------------------------------------------------
+
+  let currentPage = null;
+
+  if (page === "home") {
+    currentPage = (
+      <HomePage
+        navigate={navigate}
+      />
     );
   }
 
-  /* =======================================================
-     APP UI
-     ======================================================= */
+  if (page === "learn") {
+    currentPage = (
+      <LearnPage
+        level={level}
+        setLevel={setLevel}
+        algorithmTopic={
+          algorithmTopic
+        }
+        setAlgorithmTopic={
+          setAlgorithmTopic
+        }
+        algorithmAnswer={
+          algorithmAnswer
+        }
+        algorithmLoading={
+          algorithmLoading
+        }
+        askAlgorithm={
+          askAlgorithm
+        }
+      />
+    );
+  }
+
+  if (page === "teacher") {
+    currentPage = (
+      <TeacherPage
+        level={level}
+        setLevel={setLevel}
+        language={language}
+        setLanguage={setLanguage}
+        teacherQuestion={
+          teacherQuestion
+        }
+        setTeacherQuestion={
+          setTeacherQuestion
+        }
+        teacherAnswer={
+          teacherAnswer
+        }
+        teacherLoading={
+          teacherLoading
+        }
+        askTeacher={
+          askTeacher
+        }
+        algorithmMode={
+          algorithmMode
+        }
+        setAlgorithmMode={
+          setAlgorithmMode
+        }
+      />
+    );
+  }
+
+  if (page === "generator") {
+    currentPage = (
+      <GeneratorPage
+        level={level}
+        setLevel={setLevel}
+        language={language}
+        setLanguage={setLanguage}
+        codeStyle={codeStyle}
+        setCodeStyle={setCodeStyle}
+        topic={topic}
+        setTopic={setTopic}
+        generatedCode={
+          generatedCode
+        }
+        generatedExplanation={
+          generatedExplanation
+        }
+        generating={
+          generating
+        }
+        generateCode={
+          generateCode
+        }
+      />
+    );
+  }
+
+  if (page === "lab") {
+    currentPage = (
+      <LabPage
+        language={language}
+        setLanguage={setLanguage}
+        codeStyle={codeStyle}
+        setCodeStyle={setCodeStyle}
+        labCode={labCode}
+        setLabCode={setLabCode}
+        labInput={labInput}
+        setLabInput={setLabInput}
+        labResult={labResult}
+        labRunning={labRunning}
+        runLabCode={runLabCode}
+        clearLab={clearLab}
+      />
+    );
+  }
+
+  if (page === "practice") {
+    currentPage = (
+      <PracticePage
+        level={level}
+        setLevel={setLevel}
+        language={language}
+        setLanguage={setLanguage}
+        practiceQuestion={
+          practiceQuestion
+        }
+        setPracticeQuestion={
+          setPracticeQuestion
+        }
+        practiceAnswer={
+          practiceAnswer
+        }
+        setPracticeAnswer={
+          setPracticeAnswer
+        }
+        practiceResult={
+          practiceResult
+        }
+        practiceLoading={
+          practiceLoading
+        }
+        generatePractice={
+          generatePractice
+        }
+        evaluatePractice={
+          evaluatePractice
+        }
+      />
+    );
+  }
+
+  if (
+    page ===
+    "algorithm-generator"
+  ) {
+    currentPage = (
+      <AlgorithmGeneratorPage
+        level={level}
+        setLevel={setLevel}
+        language={language}
+        setLanguage={setLanguage}
+        codeStyle={codeStyle}
+        setCodeStyle={setCodeStyle}
+        algorithmTopic={
+          algorithmTopic
+        }
+        setAlgorithmTopic={
+          setAlgorithmTopic
+        }
+        includeAlgorithmCode={
+          includeAlgorithmCode
+        }
+        setIncludeAlgorithmCode={
+          setIncludeAlgorithmCode
+        }
+        generatedAlgorithm={
+          generatedAlgorithm
+        }
+        generatedAlgorithmCode={
+          generatedAlgorithmCode
+        }
+        algorithmGenerating={
+          algorithmGenerating
+        }
+        generateAlgorithm={
+          generateAlgorithm
+        }
+      />
+    );
+  }
+
+  if (
+    page ===
+    "algorithm-runner"
+  ) {
+    currentPage = (
+      <AlgorithmRunnerPage
+        language={language}
+        setLanguage={setLanguage}
+        codeStyle={codeStyle}
+        setCodeStyle={setCodeStyle}
+        algorithmCode={
+          algorithmCode
+        }
+        setAlgorithmCode={
+          setAlgorithmCode
+        }
+        algorithmInput={
+          algorithmInput
+        }
+        setAlgorithmInput={
+          setAlgorithmInput
+        }
+        runnerResult={
+          runnerResult
+        }
+        runnerRunning={
+          runnerRunning
+        }
+        runAlgorithmCode={
+          runAlgorithmCode
+        }
+        clearAlgorithmRunner={
+          clearAlgorithmRunner
+        }
+      />
+    );
+  }
+
+  // ----------------------------------------------------
+  // APP UI
+  // ----------------------------------------------------
 
   return (
     <div className="app">
-      <header className="navbar">
-        <button
-          type="button"
+      <header className="site-header">
+        <div
           className="brand"
           onClick={() =>
-            setPage("home")
+            navigate("home")
           }
         >
-          <span className="brand-mark">
-            &lt;/&gt;
+          <CodeIcon />
+
+          <span className="brand-name">
+            CodeMentor
           </span>
 
-          <span>
-            <strong>CodeMentor</strong>
-            <small>AI</small>
+          <span className="brand-ai">
+            AI
           </span>
-        </button>
+        </div>
 
-        <nav className="nav-links">
-          {[
-            ["home", "Home"],
-            ["learn", "Learn"],
-            ["teacher", "AI Teacher"],
-            [
-              "generator",
-              "Code Generator",
-            ],
-            ["lab", "Code Lab"],
-            ["practice", "Practice"],
-          ].map(([id, label]) => (
-            <button
-              type="button"
-              key={id}
-              className={
-                page === id
-                  ? "nav-link active"
-                  : "nav-link"
-              }
-              onClick={() =>
-                setPage(id)
-              }
-            >
-              {label}
-            </button>
-          ))}
+        <nav className="main-nav">
+          {navigationItems.map(
+            (item) => (
+              <button
+                key={item.key}
+                type="button"
+                className={
+                  page === item.key
+                    ? "nav-button active"
+                    : "nav-button"
+                }
+                onClick={() =>
+                  navigate(
+                    item.key
+                  )
+                }
+              >
+                {item.label}
+              </button>
+            )
+          )}
         </nav>
 
         <button
           type="button"
-          className="nav-cta"
+          className="header-action"
           onClick={() =>
-            setPage("generator")
+            navigate("generator")
           }
         >
           GENERATE CODE
         </button>
       </header>
 
-      {renderPage()}
+      <div className="page-content">
+        {currentPage}
+      </div>
 
-      <Footer setPage={setPage} />
+      <Footer />
     </div>
   );
 }
 
-/* =========================================================
-   START REACT
-   ========================================================= */
+// ======================================================
+// START APP
+// ======================================================
 
-ReactDOM.createRoot(
+createRoot(
   document.getElementById("root")
 ).render(
   <React.StrictMode>
