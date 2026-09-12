@@ -1,6 +1,5 @@
 import React, {
   useState,
-  useEffect,
 } from "react";
 
 import {
@@ -27,6 +26,12 @@ const LEVELS = [
   "Advanced",
 ];
 
+const ALGORITHM_LEVELS = [
+  "Beginner",
+  "Intermediate",
+  "Advance",
+];
+
 const LANGUAGES = [
   "C",
   "C++",
@@ -41,7 +46,7 @@ const STYLES = [
 ];
 
 // ======================================================
-// ICON
+// BRAND ICON
 // ======================================================
 
 function CodeIcon() {
@@ -49,115 +54,6 @@ function CodeIcon() {
     <span className="brand-code-icon">
       {"</>"}
     </span>
-  );
-}
-
-// ======================================================
-// LEVEL BUTTONS
-// ======================================================
-
-function LevelButtons({
-  level,
-  setLevel,
-}) {
-  return (
-    <div className="button-row">
-      {LEVELS.map((item) => (
-        <button
-          key={item}
-          type="button"
-          className={
-            level === item
-              ? "choice-button active"
-              : "choice-button"
-          }
-          onClick={() =>
-            setLevel(item)
-          }
-        >
-          {item}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ======================================================
-// LANGUAGE BUTTONS
-// ======================================================
-
-function LanguageButtons({
-  language,
-  setLanguage,
-}) {
-  return (
-    <div className="language-grid">
-      {LANGUAGES.map((item) => (
-        <button
-          key={item}
-          type="button"
-          className={
-            language === item
-              ? "language-button active"
-              : "language-button"
-          }
-          onClick={() =>
-            setLanguage(item)
-          }
-        >
-          <span className="language-symbol">
-            {item === "C"
-              ? "C"
-              : item === "C++"
-              ? "C++"
-              : item === "Python"
-              ? "Py"
-              : item === "Java"
-              ? "Ja"
-              : "JS"}
-          </span>
-
-          <span>{item}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ======================================================
-// STYLE BUTTONS
-// ======================================================
-
-function StyleButtons({
-  codeStyle,
-  setCodeStyle,
-}) {
-  return (
-    <div className="style-grid">
-      {STYLES.map((item) => (
-        <button
-          key={item}
-          type="button"
-          className={
-            codeStyle === item
-              ? "style-button active"
-              : "style-button"
-          }
-          onClick={() =>
-            setCodeStyle(item)
-          }
-        >
-          <span className="style-icon">
-            {item ===
-            "Legacy Turbo C"
-              ? "</>"
-              : "✓"}
-          </span>
-
-          <span>{item}</span>
-        </button>
-      ))}
-    </div>
   );
 }
 
@@ -188,6 +84,157 @@ function PageHeader({
 }
 
 // ======================================================
+// LEVEL BUTTONS
+// ======================================================
+
+function LevelButtons({
+  level,
+  setLevel,
+}) {
+  return (
+    <div className="button-row">
+      {LEVELS.map(
+        (item) => (
+          <button
+            key={item}
+            type="button"
+            className={
+              level === item
+                ? "choice-button active"
+                : "choice-button"
+            }
+            onClick={() =>
+              setLevel(item)
+            }
+          >
+            {item}
+          </button>
+        )
+      )}
+    </div>
+  );
+}
+
+// ======================================================
+// ALGORITHM LEVEL BUTTONS
+// ======================================================
+
+function AlgorithmLevelButtons({
+  level,
+  setLevel,
+}) {
+  return (
+    <div className="button-row">
+      {ALGORITHM_LEVELS.map(
+        (item) => (
+          <button
+            key={item}
+            type="button"
+            className={
+              level === item
+                ? "choice-button active"
+                : "choice-button"
+            }
+            onClick={() =>
+              setLevel(item)
+            }
+          >
+            {item}
+          </button>
+        )
+      )}
+    </div>
+  );
+}
+
+// ======================================================
+// LANGUAGE BUTTONS
+// ======================================================
+
+function LanguageButtons({
+  language,
+  setLanguage,
+}) {
+  return (
+    <div className="language-grid">
+      {LANGUAGES.map(
+        (item) => (
+          <button
+            key={item}
+            type="button"
+            className={
+              language === item
+                ? "language-button active"
+                : "language-button"
+            }
+            onClick={() =>
+              setLanguage(item)
+            }
+          >
+            <span className="language-symbol">
+              {item === "C"
+                ? "C"
+                : item === "C++"
+                ? "C++"
+                : item === "Python"
+                ? "Py"
+                : item === "Java"
+                ? "Ja"
+                : "JS"}
+            </span>
+
+            <span>
+              {item}
+            </span>
+          </button>
+        )
+      )}
+    </div>
+  );
+}
+
+// ======================================================
+// STYLE BUTTONS
+// ======================================================
+
+function StyleButtons({
+  codeStyle,
+  setCodeStyle,
+}) {
+  return (
+    <div className="style-grid">
+      {STYLES.map(
+        (item) => (
+          <button
+            key={item}
+            type="button"
+            className={
+              codeStyle === item
+                ? "style-button active"
+                : "style-button"
+            }
+            onClick={() =>
+              setCodeStyle(item)
+            }
+          >
+            <span className="style-icon">
+              {item ===
+              "Legacy Turbo C"
+                ? "</>"
+                : "✓"}
+            </span>
+
+            <span>
+              {item}
+            </span>
+          </button>
+        )
+      )}
+    </div>
+  );
+}
+
+// ======================================================
 // RESULT PANEL
 // ======================================================
 
@@ -209,7 +256,7 @@ function ResultPanel({
 }
 
 // ======================================================
-// HOME PAGE
+// HOME
 // ======================================================
 
 function HomePage({
@@ -219,18 +266,23 @@ function HomePage({
     <main className="page-shell home-page">
       <section className="hero-section">
         <div className="hero-badge">
-          AI-POWERED PROGRAMMING LEARNING
+          AI-POWERED PROGRAMMING &
+          ALGORITHM LEARNING
         </div>
 
         <h1>
           Welcome to{" "}
-          <span>CodeMentor AI</span>
+          <span>
+            CodeMentor AI
+          </span>
         </h1>
 
         <p>
-          Learn programming, understand algorithms,
-          generate code, practice problems and run
-          programs in one beginner-friendly platform.
+          Learn programming, understand
+          algorithms, generate code,
+          practice problems and run
+          programs in one beginner-friendly
+          platform.
         </p>
 
         <div className="hero-actions">
@@ -238,7 +290,9 @@ function HomePage({
             type="button"
             className="primary-button"
             onClick={() =>
-              navigate("generator")
+              navigate(
+                "generator"
+              )
             }
           >
             GENERATE CODE
@@ -248,7 +302,9 @@ function HomePage({
             type="button"
             className="secondary-button"
             onClick={() =>
-              navigate("algorithm-generator")
+              navigate(
+                "algorithm-generator"
+              )
             }
           >
             ALGORITHM GENERATOR
@@ -258,7 +314,9 @@ function HomePage({
             type="button"
             className="secondary-button"
             onClick={() =>
-              navigate("algorithm-runner")
+              navigate(
+                "algorithm-runner"
+              )
             }
           >
             ALGORITHM CODE RUNNER
@@ -272,11 +330,14 @@ function HomePage({
             01
           </div>
 
-          <h3>AI Teacher</h3>
+          <h3>
+            AI Teacher
+          </h3>
 
           <p>
-            Ask programming and algorithm questions
-            and learn in simple language.
+            Ask programming and algorithm
+            questions and learn in simple
+            language.
           </p>
         </div>
 
@@ -285,11 +346,13 @@ function HomePage({
             02
           </div>
 
-          <h3>Learn</h3>
+          <h3>
+            Learn
+          </h3>
 
           <p>
-            Study programming concepts and algorithms
-            step-by-step.
+            Learn programming and
+            algorithms step-by-step.
           </p>
         </div>
 
@@ -298,11 +361,13 @@ function HomePage({
             03
           </div>
 
-          <h3>Practice</h3>
+          <h3>
+            Practice
+          </h3>
 
           <p>
-            Improve your skills with programming and
-            algorithm practice.
+            Practice programming and
+            algorithm problems.
           </p>
         </div>
 
@@ -311,11 +376,13 @@ function HomePage({
             04
           </div>
 
-          <h3>Algorithm Generator</h3>
+          <h3>
+            Algorithm Generator
+          </h3>
 
           <p>
-            Generate exam-ready algorithms with
-            variables, steps and pseudocode.
+            Generate easy,
+            exam-ready algorithms.
           </p>
         </div>
 
@@ -324,11 +391,13 @@ function HomePage({
             05
           </div>
 
-          <h3>Algorithm Code Runner</h3>
+          <h3>
+            Algorithm Code Runner
+          </h3>
 
           <p>
-            Run algorithm programs with real Judge0
-            execution.
+            Run algorithm programs using
+            real Judge0 execution.
           </p>
         </div>
       </section>
@@ -359,7 +428,7 @@ function LearnPage({
     "Classes",
   ];
 
-  const algorithmTopics = [
+  const algorithms = [
     "Linear Search",
     "Binary Search",
     "Bubble Sort",
@@ -376,13 +445,15 @@ function LearnPage({
   return (
     <main className="page-shell">
       <PageHeader
-        eyebrow="LEARNING CENTER"
+        eyebrow="LEARN"
         title="Learn Programming & Algorithms"
-        description="Learn difficult concepts in simple, beginner-friendly language."
+        description="Understand difficult concepts using simple explanations."
       />
 
       <section className="content-card">
-        <h2>Learning Level</h2>
+        <h2>
+          Programming Learning Level
+        </h2>
 
         <LevelButtons
           level={level}
@@ -391,30 +462,29 @@ function LearnPage({
       </section>
 
       <section className="content-card">
-        <div className="section-title-row">
-          <div>
-            <div className="eyebrow">
-              PROGRAMMING LEARNING
-            </div>
-
-            <h2>
-              Core Programming Topics
-            </h2>
-          </div>
+        <div className="eyebrow">
+          PROGRAMMING LEARNING
         </div>
+
+        <h2>
+          Core Programming Topics
+        </h2>
 
         <div className="topic-grid">
           {programmingTopics.map(
             (topic) => (
               <div
-                key={topic}
                 className="topic-card"
+                key={topic}
               >
-                <strong>{topic}</strong>
+                <strong>
+                  {topic}
+                </strong>
 
                 <span>
-                  Learn {topic.toLowerCase()} with
-                  simple examples.
+                  Learn{" "}
+                  {topic.toLowerCase()}
+                  with easy examples.
                 </span>
               </div>
             )
@@ -440,27 +510,32 @@ function LearnPage({
         </div>
 
         <p className="section-description">
-          Select an algorithm below and learn its
-          meaning, idea, variables, steps, example
-          and complexity in very easy language.
+          Select an algorithm to learn
+          its meaning, idea, variables,
+          steps, example and complexity.
         </p>
 
         <div className="topic-grid">
-          {algorithmTopics.map(
-            (topic) => (
+          {algorithms.map(
+            (algorithm) => (
               <button
-                key={topic}
+                key={algorithm}
                 type="button"
                 className="topic-card topic-button"
                 onClick={() => {
-                  setAlgorithmTopic(topic);
+                  setAlgorithmTopic(
+                    algorithm
+                  );
+
                   askAlgorithm(
-                    topic,
+                    algorithm,
                     "teach"
                   );
                 }}
               >
-                <strong>{topic}</strong>
+                <strong>
+                  {algorithm}
+                </strong>
 
                 <span>
                   Click to learn
@@ -476,27 +551,33 @@ function LearnPage({
           </label>
 
           <textarea
-            value={algorithmTopic}
-            onChange={(event) =>
+            value={
+              algorithmTopic
+            }
+            onChange={(
+              event
+            ) =>
               setAlgorithmTopic(
                 event.target.value
               )
             }
-            placeholder="Example: Explain binary search algorithm in very easy language"
-            rows={4}
+            placeholder="Example: Explain Binary Search in very easy language"
+            rows={5}
           />
         </div>
 
         <button
           type="button"
           className="primary-button"
+          disabled={
+            algorithmLoading
+          }
           onClick={() =>
             askAlgorithm(
               algorithmTopic,
               "teach"
             )
           }
-          disabled={algorithmLoading}
         >
           {algorithmLoading
             ? "TEACHING..."
@@ -504,9 +585,13 @@ function LearnPage({
         </button>
 
         {algorithmAnswer && (
-          <ResultPanel title="ALGORITHM LESSON">
+          <ResultPanel
+            title="ALGORITHM LESSON"
+          >
             <div className="ai-text">
-              {algorithmAnswer}
+              {
+                algorithmAnswer
+              }
             </div>
           </ResultPanel>
         )}
@@ -516,7 +601,7 @@ function LearnPage({
 }
 
 // ======================================================
-// AI TEACHER PAGE
+// AI TEACHER
 // ======================================================
 
 function TeacherPage({
@@ -537,7 +622,7 @@ function TeacherPage({
       <PageHeader
         eyebrow="AI TEACHER"
         title="Learn With Your AI Teacher"
-        description="Ask anything about programming or algorithms and get a clear explanation."
+        description="Ask programming or algorithm questions and receive simple explanations."
       />
 
       <section className="content-card">
@@ -545,12 +630,14 @@ function TeacherPage({
           <button
             type="button"
             className={
-              !algorithmMode
-                ? "mode-button active"
-                : "mode-button"
+              algorithmMode
+                ? "mode-button"
+                : "mode-button active"
             }
             onClick={() =>
-              setAlgorithmMode(false)
+              setAlgorithmMode(
+                false
+              )
             }
           >
             PROGRAMMING TEACHER
@@ -564,7 +651,9 @@ function TeacherPage({
                 : "mode-button"
             }
             onClick={() =>
-              setAlgorithmMode(true)
+              setAlgorithmMode(
+                true
+              )
             }
           >
             ALGORITHM TEACHER
@@ -573,7 +662,9 @@ function TeacherPage({
       </section>
 
       <section className="content-card">
-        <h2>Learning Level</h2>
+        <h2>
+          Learning Level
+        </h2>
 
         <LevelButtons
           level={level}
@@ -587,8 +678,12 @@ function TeacherPage({
             </h2>
 
             <LanguageButtons
-              language={language}
-              setLanguage={setLanguage}
+              language={
+                language
+              }
+              setLanguage={
+                setLanguage
+              }
             />
           </>
         )}
@@ -601,15 +696,20 @@ function TeacherPage({
           </label>
 
           <textarea
-            value={teacherQuestion}
-            onChange={(event) =>
+            value={
+              teacherQuestion
+            }
+            onChange={(
+              event
+            ) =>
               setTeacherQuestion(
-                event.target.value
+                event.target
+                  .value
               )
             }
             placeholder={
               algorithmMode
-                ? "Example: Explain binary search algorithm in very easy language"
+                ? "Example: Explain Binary Search in very easy language"
                 : "Example: Explain arrays in C with a simple example"
             }
             rows={8}
@@ -619,8 +719,12 @@ function TeacherPage({
         <button
           type="button"
           className="primary-button"
-          disabled={teacherLoading}
-          onClick={askTeacher}
+          disabled={
+            teacherLoading
+          }
+          onClick={
+            askTeacher
+          }
         >
           {teacherLoading
             ? "THINKING..."
@@ -636,7 +740,9 @@ function TeacherPage({
             }
           >
             <div className="ai-text">
-              {teacherAnswer}
+              {
+                teacherAnswer
+              }
             </div>
           </ResultPanel>
         )}
@@ -646,7 +752,7 @@ function TeacherPage({
 }
 
 // ======================================================
-// CODE GENERATOR PAGE
+// CODE GENERATOR
 // ======================================================
 
 function GeneratorPage({
@@ -668,11 +774,13 @@ function GeneratorPage({
       <PageHeader
         eyebrow="CODE GENERATOR"
         title="Generate Programming Code"
-        description="Generate one complete program at a time with beginner-friendly comments."
+        description="Generate complete programs one language at a time."
       />
 
       <section className="content-card">
-        <h2>Learning Level</h2>
+        <h2>
+          Learning Level
+        </h2>
 
         <LevelButtons
           level={level}
@@ -685,7 +793,9 @@ function GeneratorPage({
 
         <LanguageButtons
           language={language}
-          setLanguage={setLanguage}
+          setLanguage={
+            setLanguage
+          }
         />
 
         <h2 className="top-gap">
@@ -693,16 +803,24 @@ function GeneratorPage({
         </h2>
 
         <StyleButtons
-          codeStyle={codeStyle}
-          setCodeStyle={setCodeStyle}
+          codeStyle={
+            codeStyle
+          }
+          setCodeStyle={
+            setCodeStyle
+          }
         />
 
         <div className="selection-summary">
           <span className="summary-dot" />
           {language}
-          <span>•</span>
+          <span>
+            •
+          </span>
           {level}
-          <span>•</span>
+          <span>
+            •
+          </span>
           {codeStyle}
         </div>
 
@@ -713,8 +831,13 @@ function GeneratorPage({
 
           <textarea
             value={topic}
-            onChange={(event) =>
-              setTopic(event.target.value)
+            onChange={(
+              event
+            ) =>
+              setTopic(
+                event.target
+                  .value
+              )
             }
             placeholder="Example: Write a program to find an element in an array"
             rows={8}
@@ -724,8 +847,12 @@ function GeneratorPage({
         <button
           type="button"
           className="primary-button full-width"
-          disabled={generating}
-          onClick={generateCode}
+          disabled={
+            generating
+          }
+          onClick={
+            generateCode
+          }
         >
           {generating
             ? "GENERATING..."
@@ -737,22 +864,34 @@ function GeneratorPage({
             <div className="selection-summary result-summary">
               <span className="summary-dot" />
               {language}
-              <span>•</span>
+              <span>
+                •
+              </span>
               {level}
-              <span>•</span>
+              <span>
+                •
+              </span>
               {codeStyle}
             </div>
 
-            <ResultPanel title="GENERATED CODE">
+            <ResultPanel
+              title="GENERATED CODE"
+            >
               <pre className="code-output">
-                {generatedCode}
+                {
+                  generatedCode
+                }
               </pre>
             </ResultPanel>
 
             {generatedExplanation && (
-              <ResultPanel title="EXPLANATION">
+              <ResultPanel
+                title="EXPLANATION"
+              >
                 <div className="ai-text">
-                  {generatedExplanation}
+                  {
+                    generatedExplanation
+                  }
                 </div>
               </ResultPanel>
             )}
@@ -764,7 +903,7 @@ function GeneratorPage({
 }
 
 // ======================================================
-// CODE LAB PAGE
+// CODE LAB
 // ======================================================
 
 function LabPage({
@@ -786,15 +925,21 @@ function LabPage({
       <PageHeader
         eyebrow="CODE LAB"
         title="Run & Test Your Code"
-        description="Use the Code Lab for normal programming code execution."
+        description="Run your normal programming code with real execution."
       />
 
       <section className="content-card">
-        <h2>Programming Language</h2>
+        <h2>
+          Programming Language
+        </h2>
 
         <LanguageButtons
-          language={language}
-          setLanguage={setLanguage}
+          language={
+            language
+          }
+          setLanguage={
+            setLanguage
+          }
         />
 
         <h2 className="top-gap">
@@ -802,8 +947,12 @@ function LabPage({
         </h2>
 
         <StyleButtons
-          codeStyle={codeStyle}
-          setCodeStyle={setCodeStyle}
+          codeStyle={
+            codeStyle
+          }
+          setCodeStyle={
+            setCodeStyle
+          }
         />
 
         <div className="editor-label">
@@ -813,11 +962,16 @@ function LabPage({
         <textarea
           className="code-editor"
           value={labCode}
-          onChange={(event) =>
-            setLabCode(event.target.value)
+          onChange={(
+            event
+          ) =>
+            setLabCode(
+              event.target
+                .value
+            )
           }
-          spellCheck={false}
           placeholder="Paste or write your code here..."
+          spellCheck={false}
         />
 
         <div className="editor-label top-gap">
@@ -827,8 +981,13 @@ function LabPage({
         <textarea
           className="input-editor"
           value={labInput}
-          onChange={(event) =>
-            setLabInput(event.target.value)
+          onChange={(
+            event
+          ) =>
+            setLabInput(
+              event.target
+                .value
+            )
           }
           placeholder="Enter program input here..."
           rows={5}
@@ -839,8 +998,12 @@ function LabPage({
           <button
             type="button"
             className="primary-button"
-            disabled={labRunning}
-            onClick={runLabCode}
+            disabled={
+              labRunning
+            }
+            onClick={
+              runLabCode
+            }
           >
             {labRunning
               ? "RUNNING..."
@@ -850,39 +1013,53 @@ function LabPage({
           <button
             type="button"
             className="secondary-button"
-            onClick={clearLab}
+            onClick={
+              clearLab
+            }
           >
             CLEAR
           </button>
         </div>
 
         {labResult && (
-          <ResultPanel title="ACTUAL OUTPUT">
+          <ResultPanel
+            title="ACTUAL OUTPUT"
+          >
             <div className="runner-status">
-              {labResult.status}
+              {
+                labResult.status
+              }
             </div>
 
             {labResult.stdout && (
               <pre className="terminal-output">
-                {labResult.stdout}
+                {
+                  labResult.stdout
+                }
               </pre>
             )}
 
             {labResult.stderr && (
               <pre className="error-output">
-                {labResult.stderr}
+                {
+                  labResult.stderr
+                }
               </pre>
             )}
 
             {labResult.compileOutput && (
               <pre className="error-output">
-                {labResult.compileOutput}
+                {
+                  labResult.compileOutput
+                }
               </pre>
             )}
 
             {labResult.message && (
               <pre className="error-output">
-                {labResult.message}
+                {
+                  labResult.message
+                }
               </pre>
             )}
           </ResultPanel>
@@ -893,14 +1070,12 @@ function LabPage({
 }
 
 // ======================================================
-// PRACTICE PAGE
+// PRACTICE
 // ======================================================
 
 function PracticePage({
   level,
   setLevel,
-  language,
-  setLanguage,
   practiceQuestion,
   setPracticeQuestion,
   practiceAnswer,
@@ -926,32 +1101,34 @@ function PracticePage({
       <PageHeader
         eyebrow="PRACTICE"
         title="Practice Programming & Algorithms"
-        description="Solve questions and learn from your mistakes."
+        description="Practice problems and learn from your mistakes."
       />
 
       <section className="content-card">
-        <h2>Programming Practice</h2>
+        <h2>
+          Learning Level
+        </h2>
 
         <LevelButtons
           level={level}
           setLevel={setLevel}
         />
 
-        <LanguageButtons
-          language={language}
-          setLanguage={setLanguage}
-        />
-
-        <div className="form-group top-gap">
+        <div className="form-group">
           <label>
             PRACTICE QUESTION
           </label>
 
           <textarea
-            value={practiceQuestion}
-            onChange={(event) =>
+            value={
+              practiceQuestion
+            }
+            onChange={(
+              event
+            ) =>
               setPracticeQuestion(
-                event.target.value
+                event.target
+                  .value
               )
             }
             placeholder="Enter a programming or algorithm problem..."
@@ -968,11 +1145,6 @@ function PracticePage({
         <h2>
           Practice Algorithms
         </h2>
-
-        <p className="section-description">
-          Choose an algorithm and generate a
-          beginner-friendly practice question.
-        </p>
 
         <div className="topic-grid">
           {algorithms.map(
@@ -1000,9 +1172,13 @@ function PracticePage({
         </div>
 
         {practiceResult && (
-          <ResultPanel title="PRACTICE QUESTION">
+          <ResultPanel
+            title="PRACTICE RESULT"
+          >
             <div className="ai-text">
-              {practiceResult}
+              {
+                practiceResult
+              }
             </div>
           </ResultPanel>
         )}
@@ -1013,10 +1189,15 @@ function PracticePage({
           </label>
 
           <textarea
-            value={practiceAnswer}
-            onChange={(event) =>
+            value={
+              practiceAnswer
+            }
+            onChange={(
+              event
+            ) =>
               setPracticeAnswer(
-                event.target.value
+                event.target
+                  .value
               )
             }
             placeholder="Write your answer or algorithm steps here..."
@@ -1027,8 +1208,12 @@ function PracticePage({
         <button
           type="button"
           className="primary-button"
-          disabled={practiceLoading}
-          onClick={evaluatePractice}
+          disabled={
+            practiceLoading
+          }
+          onClick={
+            evaluatePractice
+          }
         >
           {practiceLoading
             ? "CHECKING..."
@@ -1040,22 +1225,15 @@ function PracticePage({
 }
 
 // ======================================================
-// ALGORITHM GENERATOR PAGE
+// ALGORITHM GENERATOR
 // ======================================================
 
 function AlgorithmGeneratorPage({
-  level,
-  setLevel,
-  language,
-  setLanguage,
-  codeStyle,
-  setCodeStyle,
+  algorithmLevel,
+  setAlgorithmLevel,
   algorithmTopic,
   setAlgorithmTopic,
-  includeAlgorithmCode,
-  setIncludeAlgorithmCode,
   generatedAlgorithm,
-  generatedAlgorithmCode,
   algorithmGenerating,
   generateAlgorithm,
 }) {
@@ -1063,78 +1241,58 @@ function AlgorithmGeneratorPage({
     <main className="page-shell">
       <PageHeader
         eyebrow="ALGORITHM GENERATOR"
-        title="Generate Exam-Ready Algorithms"
-        description="Create clean algorithm notes with variables, comments, steps, pseudocode and optional program code."
+        title="Generate Easy, Exam-Ready Algorithms"
+        description="Write an algorithm problem or instructions and generate a clean algorithm."
       />
 
-      <section className="content-card">
-        <h2>Learning Level</h2>
-
-        <LevelButtons
-          level={level}
-          setLevel={setLevel}
-        />
-
-        <h2 className="top-gap">
-          Program Language
+      <section className="content-card algorithm-generator-card">
+        <h2>
+          Learning level
         </h2>
 
-        <LanguageButtons
-          language={language}
-          setLanguage={setLanguage}
-        />
-
-        <h2 className="top-gap">
-          Code Style
-        </h2>
-
-        <StyleButtons
-          codeStyle={codeStyle}
-          setCodeStyle={setCodeStyle}
+        <AlgorithmLevelButtons
+          level={
+            algorithmLevel
+          }
+          setLevel={
+            setAlgorithmLevel
+          }
         />
 
         <div className="form-group top-gap">
           <label>
-            ENTER ALGORITHM / PROBLEM
+            ENTER ALGORITHM PROBLEM / INSTRUCTIONS
           </label>
 
           <textarea
-            value={algorithmTopic}
-            onChange={(event) =>
+            value={
+              algorithmTopic
+            }
+            onChange={(
+              event
+            ) =>
               setAlgorithmTopic(
-                event.target.value
+                event.target
+                  .value
               )
             }
-            placeholder="Example: Array update operation"
-            rows={7}
+            placeholder="Enter algorithm or problem here..."
+            rows={8}
           />
         </div>
-
-        <label className="checkbox-row">
-          <input
-            type="checkbox"
-            checked={includeAlgorithmCode}
-            onChange={(event) =>
-              setIncludeAlgorithmCode(
-                event.target.checked
-              )
-            }
-          />
-
-          <span>
-            Also generate the corresponding program
-            code
-          </span>
-        </label>
 
         <button
           type="button"
           className="primary-button full-width"
-          disabled={algorithmGenerating}
-          onClick={generateAlgorithm}
+          disabled={
+            algorithmGenerating
+          }
+          onClick={
+            generateAlgorithm
+          }
         >
           {algorithmGenerating
-            ? "GENERATING ALGORITHM..."
+            ? "GENERATING..."
             : "GENERATE ALGORITHM"}
         </button>
       </section>
@@ -1143,38 +1301,15 @@ function AlgorithmGeneratorPage({
         <section className="content-card">
           <div className="algorithm-paper">
             <div className="algorithm-paper-title">
-              ALGORITHM
+              GENERATED ALGORITHM
             </div>
 
             <pre className="algorithm-output">
-              {generatedAlgorithm}
+              {
+                generatedAlgorithm
+              }
             </pre>
           </div>
-        </section>
-      )}
-
-      {generatedAlgorithmCode && (
-        <section className="content-card">
-          <div className="section-title-row">
-            <div>
-              <div className="eyebrow">
-                CORRESPONDING PROGRAM
-              </div>
-
-              <h2>
-                Generated Algorithm Code
-              </h2>
-            </div>
-          </div>
-
-          <pre className="code-output">
-            {generatedAlgorithmCode}
-          </pre>
-
-          <p className="helper-text">
-            Copy this code to the separate Algorithm
-            Code Runner to execute it.
-          </p>
         </section>
       )}
     </main>
@@ -1204,7 +1339,7 @@ function AlgorithmRunnerPage({
       <PageHeader
         eyebrow="ALGORITHM CODE RUNNER"
         title="Run Algorithm Programs"
-        description="A completely separate runner dedicated to algorithm-related programs."
+        description="A completely separate environment for running algorithm-related programs."
       />
 
       <section className="runner-warning">
@@ -1218,9 +1353,8 @@ function AlgorithmRunnerPage({
           </strong>
 
           <p>
-            This is separate from Code Generator
-            and Code Lab. Paste your algorithm program
-            here and execute it using Judge0.
+            This runner is separate from
+            Code Generator and Code Lab.
           </p>
         </div>
       </section>
@@ -1231,8 +1365,12 @@ function AlgorithmRunnerPage({
         </h2>
 
         <LanguageButtons
-          language={language}
-          setLanguage={setLanguage}
+          language={
+            language
+          }
+          setLanguage={
+            setLanguage
+          }
         />
 
         <h2 className="top-gap">
@@ -1240,8 +1378,12 @@ function AlgorithmRunnerPage({
         </h2>
 
         <StyleButtons
-          codeStyle={codeStyle}
-          setCodeStyle={setCodeStyle}
+          codeStyle={
+            codeStyle
+          }
+          setCodeStyle={
+            setCodeStyle
+          }
         />
 
         <div className="editor-label">
@@ -1250,26 +1392,19 @@ function AlgorithmRunnerPage({
 
         <textarea
           className="code-editor algorithm-editor"
-          value={algorithmCode}
-          onChange={(event) =>
+          value={
+            algorithmCode
+          }
+          onChange={(
+            event
+          ) =>
             setAlgorithmCode(
-              event.target.value
+              event.target
+                .value
             )
           }
+          placeholder={`Paste your algorithm program here...`}
           spellCheck={false}
-          placeholder={`Paste your algorithm program here...
-
-Example:
-#include <stdio.h>
-
-int main(void)
-{
-    int a[5] = {10, 20, 30, 40, 50};
-
-    // algorithm logic
-
-    return 0;
-}`}
         />
 
         <div className="editor-label top-gap">
@@ -1278,14 +1413,19 @@ int main(void)
 
         <textarea
           className="input-editor"
-          value={algorithmInput}
-          onChange={(event) =>
+          value={
+            algorithmInput
+          }
+          onChange={(
+            event
+          ) =>
             setAlgorithmInput(
-              event.target.value
+              event.target
+                .value
             )
           }
-          rows={6}
           placeholder="Enter input for your algorithm program..."
+          rows={6}
           spellCheck={false}
         />
 
@@ -1293,8 +1433,12 @@ int main(void)
           <button
             type="button"
             className="primary-button"
-            disabled={runnerRunning}
-            onClick={runAlgorithmCode}
+            disabled={
+              runnerRunning
+            }
+            onClick={
+              runAlgorithmCode
+            }
           >
             {runnerRunning
               ? "RUNNING ALGORITHM..."
@@ -1304,7 +1448,9 @@ int main(void)
           <button
             type="button"
             className="secondary-button"
-            onClick={clearAlgorithmRunner}
+            onClick={
+              clearAlgorithmRunner
+            }
           >
             CLEAR
           </button>
@@ -1313,32 +1459,44 @@ int main(void)
 
       {runnerResult && (
         <section className="content-card">
-          <ResultPanel title="ALGORITHM EXECUTION RESULT">
+          <ResultPanel
+            title="ALGORITHM EXECUTION RESULT"
+          >
             <div className="runner-status">
-              {runnerResult.status}
+              {
+                runnerResult.status
+              }
             </div>
 
             {runnerResult.stdout && (
               <pre className="terminal-output">
-                {runnerResult.stdout}
+                {
+                  runnerResult.stdout
+                }
               </pre>
             )}
 
             {runnerResult.stderr && (
               <pre className="error-output">
-                {runnerResult.stderr}
+                {
+                  runnerResult.stderr
+                }
               </pre>
             )}
 
             {runnerResult.compileOutput && (
               <pre className="error-output">
-                {runnerResult.compileOutput}
+                {
+                  runnerResult.compileOutput
+                }
               </pre>
             )}
 
             {runnerResult.message && (
               <pre className="error-output">
-                {runnerResult.message}
+                {
+                  runnerResult.message
+                }
               </pre>
             )}
           </ResultPanel>
@@ -1357,6 +1515,7 @@ function Footer() {
     <footer className="site-footer">
       <div>
         <CodeIcon />
+
         <strong>
           CodeMentor AI
         </strong>
@@ -1374,32 +1533,52 @@ function Footer() {
 // ======================================================
 
 function App() {
+  // ----------------------------------------------------
+  // NAVIGATION
+  // ----------------------------------------------------
+
   const [
     page,
     setPage,
-  ] = useState("home");
+  ] = useState(
+    "home"
+  );
 
   // ----------------------------------------------------
-  // General state
+  // NORMAL LEVEL
   // ----------------------------------------------------
 
   const [
     level,
     setLevel,
-  ] = useState("Beginner");
+  ] = useState(
+    "Beginner"
+  );
+
+  // ----------------------------------------------------
+  // LANGUAGE
+  // ----------------------------------------------------
 
   const [
     language,
     setLanguage,
-  ] = useState("C");
+  ] = useState(
+    "C"
+  );
+
+  // ----------------------------------------------------
+  // CODE STYLE
+  // ----------------------------------------------------
 
   const [
     codeStyle,
     setCodeStyle,
-  ] = useState("Modern Standard");
+  ] = useState(
+    "Modern Standard"
+  );
 
   // ----------------------------------------------------
-  // Teacher
+  // AI TEACHER
   // ----------------------------------------------------
 
   const [
@@ -1420,10 +1599,12 @@ function App() {
   const [
     algorithmMode,
     setAlgorithmMode,
-  ] = useState(false);
+  ] = useState(
+    false
+  );
 
   // ----------------------------------------------------
-  // Learn algorithms
+  // ALGORITHM LEARNING
   // ----------------------------------------------------
 
   const [
@@ -1442,7 +1623,7 @@ function App() {
   ] = useState(false);
 
   // ----------------------------------------------------
-  // Code Generator
+  // CODE GENERATOR
   // ----------------------------------------------------
 
   const [
@@ -1468,7 +1649,7 @@ function App() {
   ] = useState(false);
 
   // ----------------------------------------------------
-  // Code Lab
+  // CODE LAB
   // ----------------------------------------------------
 
   const [
@@ -1492,7 +1673,7 @@ function App() {
   ] = useState(false);
 
   // ----------------------------------------------------
-  // Practice
+  // PRACTICE
   // ----------------------------------------------------
 
   const [
@@ -1516,22 +1697,19 @@ function App() {
   ] = useState(false);
 
   // ----------------------------------------------------
-  // Algorithm Generator
+  // ALGORITHM GENERATOR
   // ----------------------------------------------------
 
   const [
-    includeAlgorithmCode,
-    setIncludeAlgorithmCode,
-  ] = useState(true);
+    algorithmLevel,
+    setAlgorithmLevel,
+  ] = useState(
+    "Beginner"
+  );
 
   const [
     generatedAlgorithm,
     setGeneratedAlgorithm,
-  ] = useState("");
-
-  const [
-    generatedAlgorithmCode,
-    setGeneratedAlgorithmCode,
   ] = useState("");
 
   const [
@@ -1540,7 +1718,7 @@ function App() {
   ] = useState(false);
 
   // ----------------------------------------------------
-  // Algorithm Runner
+  // ALGORITHM CODE RUNNER
   // ----------------------------------------------------
 
   const [
@@ -1563,12 +1741,16 @@ function App() {
     setRunnerRunning,
   ] = useState(false);
 
-  // ----------------------------------------------------
-  // Navigation
-  // ----------------------------------------------------
+  // ====================================================
+  // NAVIGATION
+  // ====================================================
 
-  function navigate(nextPage) {
-    setPage(nextPage);
+  function navigate(
+    nextPage
+  ) {
+    setPage(
+      nextPage
+    );
 
     window.scrollTo({
       top: 0,
@@ -1576,9 +1758,9 @@ function App() {
     });
   }
 
-  // ----------------------------------------------------
-  // Teacher request
-  // ----------------------------------------------------
+  // ====================================================
+  // AI TEACHER
+  // ====================================================
 
   async function askTeacher() {
     if (
@@ -1587,8 +1769,13 @@ function App() {
       return;
     }
 
-    setTeacherLoading(true);
-    setTeacherAnswer("");
+    setTeacherLoading(
+      true
+    );
+
+    setTeacherAnswer(
+      ""
+    );
 
     try {
       const response =
@@ -1602,20 +1789,23 @@ function App() {
                 "application/json",
             },
 
-            body: JSON.stringify({
-              language,
-              level,
-              question:
-                teacherQuestion.trim(),
-              algorithmMode,
-            }),
+            body:
+              JSON.stringify({
+                language,
+                level,
+                question:
+                  teacherQuestion.trim(),
+                algorithmMode,
+              }),
           }
         );
 
       const data =
         await response.json();
 
-      if (!response.ok) {
+      if (
+        !response.ok
+      ) {
         throw new Error(
           data.error ||
             "AI Teacher request failed."
@@ -1630,17 +1820,19 @@ function App() {
         `Error: ${error.message}`
       );
     } finally {
-      setTeacherLoading(false);
+      setTeacherLoading(
+        false
+      );
     }
   }
 
-  // ----------------------------------------------------
-  // Algorithm learning request
-  // ----------------------------------------------------
+  // ====================================================
+  // ALGORITHM LEARNING
+  // ====================================================
 
   async function askAlgorithm(
     customTopic,
-    mode = "teach"
+    mode
   ) {
     const selectedTopic =
       String(
@@ -1651,8 +1843,13 @@ function App() {
       return;
     }
 
-    setAlgorithmLoading(true);
-    setAlgorithmAnswer("");
+    setAlgorithmLoading(
+      true
+    );
+
+    setAlgorithmAnswer(
+      ""
+    );
 
     try {
       const response =
@@ -1666,19 +1863,22 @@ function App() {
                 "application/json",
             },
 
-            body: JSON.stringify({
-              topic:
-                selectedTopic,
-              level,
-              mode,
-            }),
+            body:
+              JSON.stringify({
+                topic:
+                  selectedTopic,
+                level,
+                mode,
+              }),
           }
         );
 
       const data =
         await response.json();
 
-      if (!response.ok) {
+      if (
+        !response.ok
+      ) {
         throw new Error(
           data.error ||
             "Algorithm learning failed."
@@ -1693,22 +1893,34 @@ function App() {
         `Error: ${error.message}`
       );
     } finally {
-      setAlgorithmLoading(false);
+      setAlgorithmLoading(
+        false
+      );
     }
   }
 
-  // ----------------------------------------------------
-  // Generate programming code
-  // ----------------------------------------------------
+  // ====================================================
+  // CODE GENERATOR
+  // ====================================================
 
   async function generateCode() {
-    if (!topic.trim()) {
+    if (
+      !topic.trim()
+    ) {
       return;
     }
 
-    setGenerating(true);
-    setGeneratedCode("");
-    setGeneratedExplanation("");
+    setGenerating(
+      true
+    );
+
+    setGeneratedCode(
+      ""
+    );
+
+    setGeneratedExplanation(
+      ""
+    );
 
     try {
       const response =
@@ -1722,19 +1934,23 @@ function App() {
                 "application/json",
             },
 
-            body: JSON.stringify({
-              language,
-              level,
-              codeStyle,
-              topic: topic.trim(),
-            }),
+            body:
+              JSON.stringify({
+                language,
+                level,
+                codeStyle,
+                topic:
+                  topic.trim(),
+              }),
           }
         );
 
       const data =
         await response.json();
 
-      if (!response.ok) {
+      if (
+        !response.ok
+      ) {
         throw new Error(
           data.error ||
             "Code generation failed."
@@ -1746,28 +1962,38 @@ function App() {
       );
 
       setGeneratedExplanation(
-        data.explanation || ""
+        data.explanation ||
+          ""
       );
     } catch (error) {
       setGeneratedCode(
         `Error: ${error.message}`
       );
     } finally {
-      setGenerating(false);
+      setGenerating(
+        false
+      );
     }
   }
 
-  // ----------------------------------------------------
-  // Run Code Lab
-  // ----------------------------------------------------
+  // ====================================================
+  // CODE LAB
+  // ====================================================
 
   async function runLabCode() {
-    if (!labCode.trim()) {
+    if (
+      !labCode.trim()
+    ) {
       return;
     }
 
-    setLabRunning(true);
-    setLabResult(null);
+    setLabRunning(
+      true
+    );
+
+    setLabResult(
+      null
+    );
 
     try {
       const response =
@@ -1781,56 +2007,81 @@ function App() {
                 "application/json",
             },
 
-            body: JSON.stringify({
-              language,
-              code:
-                labCode,
-              stdin:
-                labInput,
-              codeStyle,
-            }),
+            body:
+              JSON.stringify({
+                language,
+                code:
+                  labCode,
+                stdin:
+                  labInput,
+                codeStyle,
+              }),
           }
         );
 
       const data =
         await response.json();
 
-      if (!response.ok) {
+      if (
+        !response.ok
+      ) {
         throw new Error(
           data.error ||
             "Code execution failed."
         );
       }
 
-      setLabResult(data);
+      setLabResult(
+        data
+      );
     } catch (error) {
       setLabResult({
-        status: "ERROR",
-        stderr: error.message,
-        stdout: "",
-        compileOutput: "",
-        message: "",
+        status:
+          "ERROR",
+        stdout:
+          "",
+        stderr:
+          error.message,
+        compileOutput:
+          "",
+        message:
+          "",
       });
     } finally {
-      setLabRunning(false);
+      setLabRunning(
+        false
+      );
     }
   }
 
   function clearLab() {
-    setLabCode("");
-    setLabInput("");
-    setLabResult(null);
+    setLabCode(
+      ""
+    );
+
+    setLabInput(
+      ""
+    );
+
+    setLabResult(
+      null
+    );
   }
 
-  // ----------------------------------------------------
-  // Practice generation
-  // ----------------------------------------------------
+  // ====================================================
+  // PRACTICE
+  // ====================================================
 
   async function generatePractice(
     algorithm
   ) {
-    setPracticeLoading(true);
-    setPracticeResult("");
+    setPracticeLoading(
+      true
+    );
+
+    setPracticeResult(
+      ""
+    );
 
     try {
       const response =
@@ -1844,19 +2095,23 @@ function App() {
                 "application/json",
             },
 
-            body: JSON.stringify({
-              topic:
-                algorithm,
-              level,
-              mode: "practice",
-            }),
+            body:
+              JSON.stringify({
+                topic:
+                  algorithm,
+                level,
+                mode:
+                  "practice",
+              }),
           }
         );
 
       const data =
         await response.json();
 
-      if (!response.ok) {
+      if (
+        !response.ok
+      ) {
         throw new Error(
           data.error ||
             "Practice generation failed."
@@ -1875,13 +2130,11 @@ function App() {
         `Error: ${error.message}`
       );
     } finally {
-      setPracticeLoading(false);
+      setPracticeLoading(
+        false
+      );
     }
   }
-
-  // ----------------------------------------------------
-  // Evaluate practice answer
-  // ----------------------------------------------------
 
   async function evaluatePractice() {
     if (
@@ -1891,7 +2144,9 @@ function App() {
       return;
     }
 
-    setPracticeLoading(true);
+    setPracticeLoading(
+      true
+    );
 
     try {
       const response =
@@ -1905,22 +2160,26 @@ function App() {
                 "application/json",
             },
 
-            body: JSON.stringify({
-              topic:
-                practiceQuestion.trim() ||
-                "Algorithm practice",
-              level,
-              mode: "practice",
-              userAnswer:
-                practiceAnswer.trim(),
-            }),
+            body:
+              JSON.stringify({
+                topic:
+                  practiceQuestion.trim() ||
+                  "Algorithm practice",
+                level,
+                mode:
+                  "practice",
+                userAnswer:
+                  practiceAnswer.trim(),
+              }),
           }
         );
 
       const data =
         await response.json();
 
-      if (!response.ok) {
+      if (
+        !response.ok
+      ) {
         throw new Error(
           data.error ||
             "Answer evaluation failed."
@@ -1935,13 +2194,15 @@ function App() {
         `Error: ${error.message}`
       );
     } finally {
-      setPracticeLoading(false);
+      setPracticeLoading(
+        false
+      );
     }
   }
 
-  // ----------------------------------------------------
-  // Algorithm Generator
-  // ----------------------------------------------------
+  // ====================================================
+  // ALGORITHM GENERATOR
+  // ====================================================
 
   async function generateAlgorithm() {
     if (
@@ -1950,9 +2211,13 @@ function App() {
       return;
     }
 
-    setAlgorithmGenerating(true);
-    setGeneratedAlgorithm("");
-    setGeneratedAlgorithmCode("");
+    setAlgorithmGenerating(
+      true
+    );
+
+    setGeneratedAlgorithm(
+      ""
+    );
 
     try {
       const response =
@@ -1966,22 +2231,22 @@ function App() {
                 "application/json",
             },
 
-            body: JSON.stringify({
-              topic:
-                algorithmTopic.trim(),
-              level,
-              language,
-              codeStyle,
-              includeCode:
-                includeAlgorithmCode,
-            }),
+            body:
+              JSON.stringify({
+                topic:
+                  algorithmTopic.trim(),
+                level:
+                  algorithmLevel,
+              }),
           }
         );
 
       const data =
         await response.json();
 
-      if (!response.ok) {
+      if (
+        !response.ok
+      ) {
         throw new Error(
           data.error ||
             "Algorithm generation failed."
@@ -1991,22 +2256,20 @@ function App() {
       setGeneratedAlgorithm(
         data.algorithm || ""
       );
-
-      setGeneratedAlgorithmCode(
-        data.code || ""
-      );
     } catch (error) {
       setGeneratedAlgorithm(
         `Error: ${error.message}`
       );
     } finally {
-      setAlgorithmGenerating(false);
+      setAlgorithmGenerating(
+        false
+      );
     }
   }
 
-  // ----------------------------------------------------
-  // Algorithm runner
-  // ----------------------------------------------------
+  // ====================================================
+  // ALGORITHM CODE RUNNER
+  // ====================================================
 
   async function runAlgorithmCode() {
     if (
@@ -2015,8 +2278,13 @@ function App() {
       return;
     }
 
-    setRunnerRunning(true);
-    setRunnerResult(null);
+    setRunnerRunning(
+      true
+    );
+
+    setRunnerResult(
+      null
+    );
 
     try {
       const response =
@@ -2030,318 +2298,400 @@ function App() {
                 "application/json",
             },
 
-            body: JSON.stringify({
-              language,
-              code:
-                algorithmCode,
-              stdin:
-                algorithmInput,
-              codeStyle,
-            }),
+            body:
+              JSON.stringify({
+                language,
+                code:
+                  algorithmCode,
+                stdin:
+                  algorithmInput,
+                codeStyle,
+              }),
           }
         );
 
       const data =
         await response.json();
 
-      if (!response.ok) {
+      if (
+        !response.ok
+      ) {
         throw new Error(
           data.error ||
             "Algorithm code execution failed."
         );
       }
 
-      setRunnerResult(data);
+      setRunnerResult(
+        data
+      );
     } catch (error) {
       setRunnerResult({
-        status: "ERROR",
-        stderr: error.message,
-        stdout: "",
-        compileOutput: "",
-        message: "",
+        status:
+          "ERROR",
+        stdout:
+          "",
+        stderr:
+          error.message,
+        compileOutput:
+          "",
+        message:
+          "",
       });
     } finally {
-      setRunnerRunning(false);
+      setRunnerRunning(
+        false
+      );
     }
   }
 
   function clearAlgorithmRunner() {
-    setAlgorithmCode("");
-    setAlgorithmInput("");
-    setRunnerResult(null);
+    setAlgorithmCode(
+      ""
+    );
+
+    setAlgorithmInput(
+      ""
+    );
+
+    setRunnerResult(
+      null
+    );
   }
 
-  // ----------------------------------------------------
+  // ====================================================
   // NAVIGATION ITEMS
-  // ----------------------------------------------------
+  // ====================================================
 
   const navigationItems = [
     {
       key: "home",
       label: "Home",
     },
+
     {
       key: "learn",
       label: "Learn",
     },
+
     {
       key: "teacher",
       label: "AI Teacher",
     },
+
     {
       key: "generator",
       label: "Code Generator",
     },
+
     {
       key: "lab",
       label: "Code Lab",
     },
+
     {
       key: "practice",
       label: "Practice",
     },
+
     {
-      key: "algorithm-generator",
-      label: "Algorithm Generator",
+      key:
+        "algorithm-generator",
+      label:
+        "Algorithm Generator",
     },
+
     {
-      key: "algorithm-runner",
-      label: "Algorithm Code Runner",
+      key:
+        "algorithm-runner",
+      label:
+        "Algorithm Code Runner",
     },
   ];
 
-  // ----------------------------------------------------
-  // PAGE SELECTOR
-  // ----------------------------------------------------
+  // ====================================================
+  // PAGE
+  // ====================================================
 
-  let currentPage = null;
+  let currentPage;
 
-  if (page === "home") {
-    currentPage = (
-      <HomePage
-        navigate={navigate}
-      />
-    );
+  switch (page) {
+    case "learn":
+      currentPage = (
+        <LearnPage
+          level={
+            level
+          }
+          setLevel={
+            setLevel
+          }
+          algorithmTopic={
+            algorithmTopic
+          }
+          setAlgorithmTopic={
+            setAlgorithmTopic
+          }
+          algorithmAnswer={
+            algorithmAnswer
+          }
+          algorithmLoading={
+            algorithmLoading
+          }
+          askAlgorithm={
+            askAlgorithm
+          }
+        />
+      );
+      break;
+
+    case "teacher":
+      currentPage = (
+        <TeacherPage
+          level={
+            level
+          }
+          setLevel={
+            setLevel
+          }
+          language={
+            language
+          }
+          setLanguage={
+            setLanguage
+          }
+          teacherQuestion={
+            teacherQuestion
+          }
+          setTeacherQuestion={
+            setTeacherQuestion
+          }
+          teacherAnswer={
+            teacherAnswer
+          }
+          teacherLoading={
+            teacherLoading
+          }
+          askTeacher={
+            askTeacher
+          }
+          algorithmMode={
+            algorithmMode
+          }
+          setAlgorithmMode={
+            setAlgorithmMode
+          }
+        />
+      );
+      break;
+
+    case "generator":
+      currentPage = (
+        <GeneratorPage
+          level={
+            level
+          }
+          setLevel={
+            setLevel
+          }
+          language={
+            language
+          }
+          setLanguage={
+            setLanguage
+          }
+          codeStyle={
+            codeStyle
+          }
+          setCodeStyle={
+            setCodeStyle
+          }
+          topic={
+            topic
+          }
+          setTopic={
+            setTopic
+          }
+          generatedCode={
+            generatedCode
+          }
+          generatedExplanation={
+            generatedExplanation
+          }
+          generating={
+            generating
+          }
+          generateCode={
+            generateCode
+          }
+        />
+      );
+      break;
+
+    case "lab":
+      currentPage = (
+        <LabPage
+          language={
+            language
+          }
+          setLanguage={
+            setLanguage
+          }
+          codeStyle={
+            codeStyle
+          }
+          setCodeStyle={
+            setCodeStyle
+          }
+          labCode={
+            labCode
+          }
+          setLabCode={
+            setLabCode
+          }
+          labInput={
+            labInput
+          }
+          setLabInput={
+            setLabInput
+          }
+          labResult={
+            labResult
+          }
+          labRunning={
+            labRunning
+          }
+          runLabCode={
+            runLabCode
+          }
+          clearLab={
+            clearLab
+          }
+        />
+      );
+      break;
+
+    case "practice":
+      currentPage = (
+        <PracticePage
+          level={
+            level
+          }
+          setLevel={
+            setLevel
+          }
+          practiceQuestion={
+            practiceQuestion
+          }
+          setPracticeQuestion={
+            setPracticeQuestion
+          }
+          practiceAnswer={
+            practiceAnswer
+          }
+          setPracticeAnswer={
+            setPracticeAnswer
+          }
+          practiceResult={
+            practiceResult
+          }
+          practiceLoading={
+            practiceLoading
+          }
+          generatePractice={
+            generatePractice
+          }
+          evaluatePractice={
+            evaluatePractice
+          }
+        />
+      );
+      break;
+
+    case "algorithm-generator":
+      currentPage = (
+        <AlgorithmGeneratorPage
+          algorithmLevel={
+            algorithmLevel
+          }
+          setAlgorithmLevel={
+            setAlgorithmLevel
+          }
+          algorithmTopic={
+            algorithmTopic
+          }
+          setAlgorithmTopic={
+            setAlgorithmTopic
+          }
+          generatedAlgorithm={
+            generatedAlgorithm
+          }
+          algorithmGenerating={
+            algorithmGenerating
+          }
+          generateAlgorithm={
+            generateAlgorithm
+          }
+        />
+      );
+      break;
+
+    case "algorithm-runner":
+      currentPage = (
+        <AlgorithmRunnerPage
+          language={
+            language
+          }
+          setLanguage={
+            setLanguage
+          }
+          codeStyle={
+            codeStyle
+          }
+          setCodeStyle={
+            setCodeStyle
+          }
+          algorithmCode={
+            algorithmCode
+          }
+          setAlgorithmCode={
+            setAlgorithmCode
+          }
+          algorithmInput={
+            algorithmInput
+          }
+          setAlgorithmInput={
+            setAlgorithmInput
+          }
+          runnerResult={
+            runnerResult
+          }
+          runnerRunning={
+            runnerRunning
+          }
+          runAlgorithmCode={
+            runAlgorithmCode
+          }
+          clearAlgorithmRunner={
+            clearAlgorithmRunner
+          }
+        />
+      );
+      break;
+
+    default:
+      currentPage = (
+        <HomePage
+          navigate={
+            navigate
+          }
+        />
+      );
+      break;
   }
 
-  if (page === "learn") {
-    currentPage = (
-      <LearnPage
-        level={level}
-        setLevel={setLevel}
-        algorithmTopic={
-          algorithmTopic
-        }
-        setAlgorithmTopic={
-          setAlgorithmTopic
-        }
-        algorithmAnswer={
-          algorithmAnswer
-        }
-        algorithmLoading={
-          algorithmLoading
-        }
-        askAlgorithm={
-          askAlgorithm
-        }
-      />
-    );
-  }
-
-  if (page === "teacher") {
-    currentPage = (
-      <TeacherPage
-        level={level}
-        setLevel={setLevel}
-        language={language}
-        setLanguage={setLanguage}
-        teacherQuestion={
-          teacherQuestion
-        }
-        setTeacherQuestion={
-          setTeacherQuestion
-        }
-        teacherAnswer={
-          teacherAnswer
-        }
-        teacherLoading={
-          teacherLoading
-        }
-        askTeacher={
-          askTeacher
-        }
-        algorithmMode={
-          algorithmMode
-        }
-        setAlgorithmMode={
-          setAlgorithmMode
-        }
-      />
-    );
-  }
-
-  if (page === "generator") {
-    currentPage = (
-      <GeneratorPage
-        level={level}
-        setLevel={setLevel}
-        language={language}
-        setLanguage={setLanguage}
-        codeStyle={codeStyle}
-        setCodeStyle={setCodeStyle}
-        topic={topic}
-        setTopic={setTopic}
-        generatedCode={
-          generatedCode
-        }
-        generatedExplanation={
-          generatedExplanation
-        }
-        generating={
-          generating
-        }
-        generateCode={
-          generateCode
-        }
-      />
-    );
-  }
-
-  if (page === "lab") {
-    currentPage = (
-      <LabPage
-        language={language}
-        setLanguage={setLanguage}
-        codeStyle={codeStyle}
-        setCodeStyle={setCodeStyle}
-        labCode={labCode}
-        setLabCode={setLabCode}
-        labInput={labInput}
-        setLabInput={setLabInput}
-        labResult={labResult}
-        labRunning={labRunning}
-        runLabCode={runLabCode}
-        clearLab={clearLab}
-      />
-    );
-  }
-
-  if (page === "practice") {
-    currentPage = (
-      <PracticePage
-        level={level}
-        setLevel={setLevel}
-        language={language}
-        setLanguage={setLanguage}
-        practiceQuestion={
-          practiceQuestion
-        }
-        setPracticeQuestion={
-          setPracticeQuestion
-        }
-        practiceAnswer={
-          practiceAnswer
-        }
-        setPracticeAnswer={
-          setPracticeAnswer
-        }
-        practiceResult={
-          practiceResult
-        }
-        practiceLoading={
-          practiceLoading
-        }
-        generatePractice={
-          generatePractice
-        }
-        evaluatePractice={
-          evaluatePractice
-        }
-      />
-    );
-  }
-
-  if (
-    page ===
-    "algorithm-generator"
-  ) {
-    currentPage = (
-      <AlgorithmGeneratorPage
-        level={level}
-        setLevel={setLevel}
-        language={language}
-        setLanguage={setLanguage}
-        codeStyle={codeStyle}
-        setCodeStyle={setCodeStyle}
-        algorithmTopic={
-          algorithmTopic
-        }
-        setAlgorithmTopic={
-          setAlgorithmTopic
-        }
-        includeAlgorithmCode={
-          includeAlgorithmCode
-        }
-        setIncludeAlgorithmCode={
-          setIncludeAlgorithmCode
-        }
-        generatedAlgorithm={
-          generatedAlgorithm
-        }
-        generatedAlgorithmCode={
-          generatedAlgorithmCode
-        }
-        algorithmGenerating={
-          algorithmGenerating
-        }
-        generateAlgorithm={
-          generateAlgorithm
-        }
-      />
-    );
-  }
-
-  if (
-    page ===
-    "algorithm-runner"
-  ) {
-    currentPage = (
-      <AlgorithmRunnerPage
-        language={language}
-        setLanguage={setLanguage}
-        codeStyle={codeStyle}
-        setCodeStyle={setCodeStyle}
-        algorithmCode={
-          algorithmCode
-        }
-        setAlgorithmCode={
-          setAlgorithmCode
-        }
-        algorithmInput={
-          algorithmInput
-        }
-        setAlgorithmInput={
-          setAlgorithmInput
-        }
-        runnerResult={
-          runnerResult
-        }
-        runnerRunning={
-          runnerRunning
-        }
-        runAlgorithmCode={
-          runAlgorithmCode
-        }
-        clearAlgorithmRunner={
-          clearAlgorithmRunner
-        }
-      />
-    );
-  }
-
-  // ----------------------------------------------------
+  // ====================================================
   // APP UI
-  // ----------------------------------------------------
+  // ====================================================
 
   return (
     <div className="app">
@@ -2349,7 +2699,9 @@ function App() {
         <div
           className="brand"
           onClick={() =>
-            navigate("home")
+            navigate(
+              "home"
+            )
           }
         >
           <CodeIcon />
@@ -2367,10 +2719,13 @@ function App() {
           {navigationItems.map(
             (item) => (
               <button
-                key={item.key}
+                key={
+                  item.key
+                }
                 type="button"
                 className={
-                  page === item.key
+                  page ===
+                  item.key
                     ? "nav-button active"
                     : "nav-button"
                 }
@@ -2380,7 +2735,9 @@ function App() {
                   )
                 }
               >
-                {item.label}
+                {
+                  item.label
+                }
               </button>
             )
           )}
@@ -2390,7 +2747,9 @@ function App() {
           type="button"
           className="header-action"
           onClick={() =>
-            navigate("generator")
+            navigate(
+              "generator"
+            )
           }
         >
           GENERATE CODE
@@ -2398,7 +2757,9 @@ function App() {
       </header>
 
       <div className="page-content">
-        {currentPage}
+        {
+          currentPage
+        }
       </div>
 
       <Footer />
@@ -2407,11 +2768,13 @@ function App() {
 }
 
 // ======================================================
-// START APP
+// START
 // ======================================================
 
 createRoot(
-  document.getElementById("root")
+  document.getElementById(
+    "root"
+  )
 ).render(
   <React.StrictMode>
     <App />
