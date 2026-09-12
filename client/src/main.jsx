@@ -541,7 +541,9 @@ function LearnPage({
       );
 
     if (selected) {
-      setCode(selected.starter);
+      setCode(
+        selected.starter
+      );
     }
 
     setPage("teacher");
