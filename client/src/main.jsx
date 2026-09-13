@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./styles.css";
 
@@ -1071,6 +1071,70 @@ function LabPage({
   detectedStyle,
   clearLab,
 }) {
+  // Android WebView fix:
+  // Keep the INPUT textarea uncontrolled so React does not rewrite
+  // its value on every keystroke. Rewriting a focused textarea on
+  // every Android input event can cause the WebView to jump the
+  // whole page to the bottom.
+  const stdinRef = useRef(null);
+
+  // Synchronize INPUT when its value changes from outside the
+  // textarea, for example CLEAR or another part of the app.
+  useEffect(() => {
+    const textarea = stdinRef.current;
+
+    if (!textarea) {
+      return;
+    }
+
+    // Never rewrite the DOM value while the user is typing.
+    if (document.activeElement === textarea) {
+      return;
+    }
+
+    const nextValue = stdin || "";
+
+    if (textarea.value !== nextValue) {
+      textarea.value = nextValue;
+    }
+  }, [stdin]);
+
+  function handleStdinChange(event) {
+    const textarea = event.currentTarget;
+
+    // Save the current page position before React rerenders.
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const selectionStart = textarea.selectionStart;
+    const selectionEnd = textarea.selectionEnd;
+
+    // Keep the parent state updated for RUN CODE.
+    // The textarea itself remains uncontrolled.
+    setStdin(textarea.value);
+
+    // Restore the Android WebView position after the state update.
+    requestAnimationFrame(() => {
+      window.scrollTo({
+        left: scrollX,
+        top: scrollY,
+        behavior: "auto",
+      });
+
+      try {
+        textarea.focus({
+          preventScroll: true,
+        });
+
+        textarea.setSelectionRange(
+          selectionStart,
+          selectionEnd
+        );
+      } catch {
+        // Ignore Android WebView focus/selection errors.
+      }
+    });
+  }
+
   return (
     <main className="content-page lab-page">
       <div className="page-header">
@@ -1122,9 +1186,7 @@ function LabPage({
           <button
             type="button"
             className="run-button"
-            onClick={
-              runCode
-            }
+            onClick={runCode}
             disabled={running}
           >
             {running
@@ -1135,9 +1197,7 @@ function LabPage({
           <button
             type="button"
             className="clear-button"
-            onClick={
-              clearLab
-            }
+            onClick={clearLab}
           >
             CLEAR
           </button>
@@ -1153,9 +1213,7 @@ function LabPage({
               className="code-editor"
               value={code}
               onChange={(event) =>
-                setCode(
-                  event.target.value
-                )
+                setCode(event.target.value)
               }
               spellCheck="false"
               placeholder="Paste or write C, C++, Python, Java or JavaScript code here..."
@@ -1168,15 +1226,15 @@ function LabPage({
             </div>
 
             <textarea
+              ref={stdinRef}
               className="stdin-editor"
-              value={stdin}
-              onChange={(event) =>
-                setStdin(
-                  event.target.value
-                )
-              }
+              defaultValue={stdin}
+              onChange={handleStdinChange}
               placeholder="Enter program input here..."
               spellCheck="false"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
             />
 
             <div className="editor-title output-title">
@@ -1193,10 +1251,6 @@ function LabPage({
     </main>
   );
 }
-
-// ============================================================
-// PRACTICE
-// ============================================================
 
 function PracticePage({
   page,
