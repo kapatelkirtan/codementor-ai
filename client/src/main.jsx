@@ -1077,6 +1077,17 @@ function LabPage({
   // every Android input event can cause the WebView to jump the
   // whole page to the bottom.
   const stdinRef = useRef(null);
+  const codeRef = useRef(null);
+
+  // Synchronize SOURCE CODE when its value changes from outside the
+  // textarea, for example CLEAR or another part of the app.
+  useEffect(() => {
+    const textarea = codeRef.current;
+    if (!textarea) return;
+    if (document.activeElement === textarea) return;
+    const nextValue = code || ""; 
+    if (textarea.value !== nextValue) textarea.value = nextValue;
+  }, [code]);
 
   // Synchronize INPUT when its value changes from outside the
   // textarea, for example CLEAR or another part of the app.
@@ -1208,11 +1219,11 @@ function LabPage({
             </div>
 
             <textarea
+              ref={codeRef}
               className="code-editor"
-              value={code}
-              onChange={(event) =>
-                setCode(event.target.value)
-              }
+              defaultValue={code}
+              onChange={() => {}}
+              onBlur={(event) => setCode(event.currentTarget.value)}
               spellCheck="false"
               placeholder="Paste or write C, C++, Python, Java or JavaScript code here..."
             />
@@ -2808,5 +2819,7 @@ ReactDOM.createRoot(
     <App />
   </React.StrictMode>
 );
+
+
 
 
