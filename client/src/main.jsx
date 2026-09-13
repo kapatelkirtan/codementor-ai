@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./styles.css";
 
@@ -206,7 +206,7 @@ function StyleButtons({
         }
       >
         <span className="style-icon">
-          ✓
+          ?
         </span>
 
         <span>
@@ -252,7 +252,7 @@ function CopyButton({
       }
     >
       {copied
-        ? "COPIED ✓"
+        ? "COPIED ?"
         : label}
     </button>
   );
@@ -269,7 +269,7 @@ function HomePage({
     <main className="home-page">
       <section className="hero">
         <div className="hero-badge">
-          <span>✦</span>
+          <span>?</span>
           AI-POWERED PROGRAMMING EDUCATION
         </div>
 
@@ -380,7 +380,7 @@ function HomePage({
                 setPage("teacher")
               }
             >
-              OPEN AI TEACHER →
+              OPEN AI TEACHER ?
             </button>
           </div>
 
@@ -405,7 +405,7 @@ function HomePage({
                 setPage("generator")
               }
             >
-              OPEN GENERATOR →
+              OPEN GENERATOR ?
             </button>
           </div>
 
@@ -430,7 +430,7 @@ function HomePage({
                 setPage("lab")
               }
             >
-              OPEN CODE LAB →
+              OPEN CODE LAB ?
             </button>
           </div>
 
@@ -457,7 +457,7 @@ function HomePage({
                 )
               }
             >
-              GENERATE ALGORITHM →
+              GENERATE ALGORITHM ?
             </button>
           </div>
 
@@ -481,7 +481,7 @@ function HomePage({
                 setPage("practice")
               }
             >
-              START PRACTICE →
+              START PRACTICE ?
             </button>
           </div>
         </div>
@@ -578,7 +578,7 @@ function LearnPage({
                 </p>
 
                 <span>
-                  START LEARNING →
+                  START LEARNING ?
                 </span>
               </button>
             )
@@ -661,7 +661,7 @@ function LearnPage({
         >
           {algorithmBusy
             ? "AI IS THINKING..."
-            : "✦ TEACH ME ALGORITHM"}
+            : "? TEACH ME ALGORITHM"}
         </button>
 
         {algorithmAnswer && (
@@ -764,7 +764,7 @@ function TeacherPage({
         >
           {busy
             ? "AI IS THINKING..."
-            : "✦ ASK AI TEACHER"}
+            : "? ASK AI TEACHER"}
         </button>
 
         {answer && (
@@ -874,7 +874,7 @@ function GeneratorPage({
             {language}
           </strong>
 
-          <span>•</span>
+          <span>�</span>
 
           <span>
             {level}
@@ -882,7 +882,7 @@ function GeneratorPage({
 
           {showStyle && (
             <>
-              <span>•</span>
+              <span>�</span>
 
               <span>
                 {codeStyle}
@@ -973,7 +973,7 @@ function GeneratorPage({
 
         <div className="generator-note">
           <strong>
-            ✓ ONE LANGUAGE AT A TIME
+            ? ONE LANGUAGE AT A TIME
           </strong>
 
           <span>
@@ -997,7 +997,7 @@ function GeneratorPage({
         >
           {generatorBusy
             ? "GENERATING CODE..."
-            : `✦ GENERATE ${language.toUpperCase()} CODE`}
+            : `? GENERATE ${language.toUpperCase()} CODE`}
         </button>
 
         {generatedCode && (
@@ -1045,7 +1045,7 @@ function GeneratorPage({
                   sendGeneratedToLab
                 }
               >
-                RUN IN CODE LAB →
+                RUN IN CODE LAB ?
               </button>
             </div>
           </section>
@@ -1108,9 +1108,7 @@ function LabPage({
     const selectionStart = textarea.selectionStart;
     const selectionEnd = textarea.selectionEnd;
 
-    // Keep the parent state updated for RUN CODE.
-    // The textarea itself remains uncontrolled.
-    setStdin(textarea.value);
+    // Do not update React state while typing.`r`n    // State is synchronized when the field loses focus.
 
     // Restore the Android WebView position after the state update.
     requestAnimationFrame(() => {
@@ -1173,7 +1171,7 @@ function LabPage({
                 {detectedLanguage}
               </strong>
 
-              <span>•</span>
+              <span>�</span>
 
               <strong>
                 {detectedStyle}
@@ -1191,7 +1189,7 @@ function LabPage({
           >
             {running
               ? "RUNNING..."
-              : "▶ RUN CODE"}
+              : "? RUN CODE"}
           </button>
 
           <button
@@ -1230,6 +1228,7 @@ function LabPage({
               className="stdin-editor"
               defaultValue={stdin}
               onChange={handleStdinChange}
+              onBlur={(event) => setStdin(event.currentTarget.value)}
               placeholder="Enter program input here..."
               spellCheck="false"
               autoComplete="off"
@@ -1329,7 +1328,7 @@ function PracticePage({
           <strong>
             {language}
           </strong>{" "}
-          · Level:{" "}
+          � Level:{" "}
           <strong>
             {level}
           </strong>
@@ -1646,7 +1645,7 @@ function Footer({
       </div>
 
       <div className="copyright">
-        © {new Date().getFullYear()}{" "}
+        � {new Date().getFullYear()}{" "}
         CodeMentor AI
       </div>
     </footer>
@@ -2809,3 +2808,5 @@ ReactDOM.createRoot(
     <App />
   </React.StrictMode>
 );
+
+
