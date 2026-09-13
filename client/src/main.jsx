@@ -1213,6 +1213,9 @@ function CodeGeneratorPage({
   const [selectedLanguage, setSelectedLanguage] =
     useState("Python");
 
+  const [cCppStyle, setCCppStyle] =
+    useState("modern");
+
   const [solutions, setSolutions] =
     useState({
       C: "",
@@ -1254,7 +1257,11 @@ function CodeGeneratorPage({
             body: JSON.stringify({
               topic,
               level,
-              codeStyle,
+              codeStyle:
+                selectedLanguage === "C" ||
+                selectedLanguage === "C++"
+                  ? cCppStyle
+                  : codeStyle,
             }),
           }
         );
@@ -1272,6 +1279,58 @@ function CodeGeneratorPage({
 
       showToast(
         "Code generated in all five languages."
+      );
+    } catch (error) {
+      showToast(
+        getErrorMessage(error)
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function regenerateCppStyle(nextStyle) {
+    const topic =
+      topicRef.current?.value?.trim() ||
+      generatedTopic;
+
+    if (!topic || loading) {
+      return;
+    }
+
+    setCCppStyle(nextStyle);
+    setLoading(true);
+
+    try {
+      const data =
+        await apiRequest(
+          "/api/ai/generate-code",
+          {
+            method: "POST",
+
+            body: JSON.stringify({
+              topic,
+              level,
+              codeStyle: nextStyle,
+            }),
+          }
+        );
+
+      const nextSolutions =
+        normalizeSolutions(data);
+
+      setSolutions(
+        nextSolutions
+      );
+
+      setGeneratedTopic(
+        topic
+      );
+
+      showToast(
+        nextStyle === "legacy"
+          ? "Legacy Turbo C/Turbo C++ code generated."
+          : "Modern C/C++ code generated."
       );
     } catch (error) {
       showToast(
@@ -1553,6 +1612,70 @@ function CodeGeneratorPage({
                     )
                   )}
                 </div>
+
+                {(selectedLanguage === "C" ||
+                  selectedLanguage === "C++") && (
+                  <div
+                    style={{
+                      marginTop: 12,
+                      padding: 10,
+                      border: "1px solid var(--border)",
+                      borderRadius: 10,
+                      background: "var(--panel)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        marginBottom: 8,
+                        color: "var(--muted)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      {selectedLanguage} Code Style
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        className={`btn btn-small ${
+                          cCppStyle === "modern"
+                            ? "btn-primary"
+                            : "btn-secondary"
+                        }`}
+                        onClick={() =>
+                          regenerateCppStyle("modern")
+                        }
+                        disabled={loading || cCppStyle === "modern"}
+                      >
+                        Modern Style
+                      </button>
+
+                      <button
+                        type="button"
+                        className={`btn btn-small ${
+                          cCppStyle === "legacy"
+                            ? "btn-primary"
+                            : "btn-secondary"
+                        }`}
+                        onClick={() =>
+                          regenerateCppStyle("legacy")
+                        }
+                        disabled={loading || cCppStyle === "legacy"}
+                      >
+                        Legacy Turbo C Style
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <pre className="solution-code">
