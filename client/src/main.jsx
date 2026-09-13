@@ -2470,6 +2470,41 @@ function AlgorithmPage({
   const [loading, setLoading] =
     useState(false);
 
+  function getAlgorithmCopyText() {
+    if (!algorithm) return "";
+
+    const lines = [
+      `Algorithm: ${algorithm.title}`,
+      "",
+      algorithm.name,
+      algorithm.operation || "",
+      "",
+      "Variables:",
+      ...algorithm.variables,
+      "",
+      "Steps:",
+      ...algorithm.steps,
+    ];
+
+    return lines.join("\n").trim();
+  }
+
+  async function copyAlgorithm() {
+    const text = getAlgorithmCopyText();
+
+    if (!text) {
+      showToast("No algorithm to copy.");
+      return;
+    }
+
+    try {
+      await copyText(text);
+      showToast("Algorithm copied to clipboard.");
+    } catch (error) {
+      showToast(getErrorMessage(error));
+    }
+  }
+
   async function generateAlgorithm() {
     const topic =
       topicRef.current?.value?.trim();
@@ -2661,6 +2696,22 @@ function AlgorithmPage({
         {algorithm && !loading && (
           <section className="card">
             <div className="card-body">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  marginBottom: 16,
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={copyAlgorithm}
+                >
+                  📋 Copy Algorithm
+                </button>
+              </div>
+
               <div className="algorithm-notebook">
                 <h2
                   style={{
