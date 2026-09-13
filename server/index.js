@@ -8,19 +8,31 @@ const fs = require("fs");
 const app = express();
 const PORT = Number(process.env.PORT || 8787);
 
-app.use(cors({ origin: true, credentials: false }));
+app.use(
+  cors({
+    origin: true,
+    credentials: false,
+  })
+);
+
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+const GEMINI_API_KEY =
+  process.env.GEMINI_API_KEY || "";
+
 const GEMINI_MODEL =
-  process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+  process.env.GEMINI_MODEL ||
+  "gemini-3.5-flash-lite";
 
 const GEMINI_URL =
-  `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
+  `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+    GEMINI_MODEL
+  )}:generateContent`;
 
 const JUDGE0_URL =
-  process.env.JUDGE0_URL || "https://ce.judge0.com";
+  process.env.JUDGE0_URL ||
+  "https://ce.judge0.com";
 
 const DOWNLOAD_DIR = path.join(
   __dirname,
@@ -33,10 +45,17 @@ const EXE_FILE = path.join(
   "CodeMentor-AI-Setup.exe"
 );
 
-if (!fs.existsSync(DOWNLOAD_DIR)) {
-  fs.mkdirSync(DOWNLOAD_DIR, {
-    recursive: true,
-  });
+if (
+  !fs.existsSync(
+    DOWNLOAD_DIR
+  )
+) {
+  fs.mkdirSync(
+    DOWNLOAD_DIR,
+    {
+      recursive: true,
+    }
+  );
 }
 
 const LANGUAGES = {
@@ -67,7 +86,9 @@ const LANGUAGES = {
 };
 
 const ALL_LANGUAGES =
-  Object.keys(LANGUAGES);
+  Object.keys(
+    LANGUAGES
+  );
 
 const LANGUAGE_ALIASES = {
   c: "C",
@@ -89,26 +110,31 @@ const LANGUAGE_ALIASES = {
 };
 
 const SYSTEM_PROMPT = `
-You are CodeMentor AI, an expert programming teacher and code generator.
+You are CodeMentor AI.
 
-You support:
+You are an expert programming teacher,
+programming code generator and
+computer science algorithm teacher.
+
+Supported programming languages:
 C
 C++
 Python
 Java
 JavaScript
 
-Always solve the exact problem requested by the student.
+Always answer the exact request.
 
-Never claim that code was executed unless an actual Judge0 result is supplied.
+Never claim that code was executed
+unless an actual execution result
+was supplied by the backend.
 
-Never invent execution output.
-
-When asked for code, provide complete programs with correct input/output behavior.
+Never invent execution results.
 `.trim();
 
 const COMMENT_RULE = `
-Add short, useful beginner-friendly comments using valid syntax for the selected language.
+Use short, useful comments where appropriate.
+Comments must use valid syntax for the selected language.
 `.trim();
 
 function safeString(
@@ -128,9 +154,10 @@ function safeString(
 function normalizeLanguage(
   language
 ) {
-  const value = safeString(language)
-    .trim()
-    .toLowerCase();
+  const value =
+    safeString(language)
+      .trim()
+      .toLowerCase();
 
   return (
     LANGUAGE_ALIASES[value] ||
@@ -141,41 +168,55 @@ function normalizeLanguage(
 function sleep(ms) {
   return new Promise(
     (resolve) =>
-      setTimeout(resolve, ms)
+      setTimeout(
+        resolve,
+        ms
+      )
   );
 }
 
-function retryableStatus(status) {
+function retryableStatus(
+  status
+) {
   return [
     429,
     500,
     502,
     503,
     504,
-  ].includes(Number(status));
+  ].includes(
+    Number(status)
+  );
 }
+
+/* =========================================================
+   GEMINI
+   ========================================================= */
 
 async function askAI(
   instruction,
   options = {}
 ) {
   if (!GEMINI_API_KEY) {
-    const error = new Error(
-      "Gemini AI is not configured. Add GEMINI_API_KEY to the server environment."
-    );
+    const error =
+      new Error(
+        "Gemini AI is not configured. Add GEMINI_API_KEY to the server environment."
+      );
 
     error.status = 503;
 
     throw error;
   }
 
-  const maxAttempts = Number(
-    options.maxAttempts || 5
-  );
+  const maxAttempts =
+    Number(
+      options.maxAttempts || 5
+    );
 
   const temperature =
-    options.temperature ??
-    0.15;
+    options.temperature !== undefined
+      ? options.temperature
+      : 0.15;
 
   const maxOutputTokens =
     options.maxOutputTokens ||
@@ -241,10 +282,13 @@ async function askAI(
       let data = {};
 
       try {
-        data = raw
-          ? JSON.parse(raw)
-          : {};
-      } catch (error) {
+        data =
+          raw
+            ? JSON.parse(raw)
+            : {};
+      } catch (
+        parseError
+      ) {
         lastError =
           new Error(
             `Gemini returned invalid JSON: ${raw.slice(
@@ -301,7 +345,9 @@ async function askAI(
             `Gemini ${response.status}; retry ${attempt + 1}/${maxAttempts} in ${delay}ms`
           );
 
-          await sleep(delay);
+          await sleep(
+            delay
+          );
 
           continue;
         }
@@ -310,7 +356,8 @@ async function askAI(
       }
 
       const text =
-        data?.candidates?.[0]
+        data
+          ?.candidates?.[0]
           ?.content?.parts
           ?.map(
             (part) =>
@@ -318,7 +365,9 @@ async function askAI(
           )
           .join("") || "";
 
-      if (!text.trim()) {
+      if (
+        !text.trim()
+      ) {
         lastError =
           new Error(
             "Gemini returned an empty response."
@@ -345,7 +394,8 @@ async function askAI(
 
       return text.trim();
     } catch (error) {
-      lastError = error;
+      lastError =
+        error;
 
       if (
         retryableStatus(
@@ -366,7 +416,9 @@ async function askAI(
           `Gemini retryable failure; retry ${attempt + 1}/${maxAttempts} in ${delay}ms`
         );
 
-        await sleep(delay);
+        await sleep(
+          delay
+        );
 
         continue;
       }
@@ -383,9 +435,17 @@ async function askAI(
   );
 }
 
-function extractBlocks(text) {
+/* =========================================================
+   GENERAL HELPERS
+   ========================================================= */
+
+function extractBlocks(
+  text
+) {
   return [
-    ...safeString(text).matchAll(
+    ...safeString(
+      text
+    ).matchAll(
       /```(?:[a-zA-Z0-9_+#.+-]*)?\s*\n?([\s\S]*?)```/g
     ),
   ]
@@ -411,7 +471,8 @@ function extractLanguageSolutions(
   };
 
   const sections = {
-    C: /===\s*C\s*===([\s\S]*?)(?====\s*C\+\+\s*===|$)/i,
+    C:
+      /===\s*C\s*===([\s\S]*?)(?====\s*C\+\+\s*===|$)/i,
 
     "C++":
       /===\s*C\+\+\s*===([\s\S]*?)(?====\s*Python\s*===|$)/i,
@@ -448,7 +509,9 @@ function extractLanguageSolutions(
   }
 
   const blocks =
-    extractBlocks(source);
+    extractBlocks(
+      source
+    );
 
   ALL_LANGUAGES.forEach(
     (
@@ -456,17 +519,59 @@ function extractLanguageSolutions(
       index
     ) => {
       if (
-        !solutions[language] &&
+        !solutions[
+          language
+        ] &&
         blocks[index]
       ) {
-        solutions[language] =
-          blocks[index];
+        solutions[
+          language
+        ] = blocks[index];
       }
     }
   );
 
   return solutions;
 }
+
+function extractJsonObject(
+  text
+) {
+  const raw =
+    safeString(
+      text
+    ).trim();
+
+  try {
+    return JSON.parse(raw);
+  } catch (_) {}
+
+  const start =
+    raw.indexOf("{");
+
+  const end =
+    raw.lastIndexOf("}");
+
+  if (
+    start >= 0 &&
+    end > start
+  ) {
+    try {
+      return JSON.parse(
+        raw.slice(
+          start,
+          end + 1
+        )
+      );
+    } catch (_) {}
+  }
+
+  return null;
+}
+
+/* =========================================================
+   LANGUAGE DETECTION
+   ========================================================= */
 
 function detectLanguage(
   code
@@ -570,6 +675,65 @@ function detectStyle(
   return "Modern Standard";
 }
 
+/* =========================================================
+   JUDGE0
+   ========================================================= */
+
+function judgeHeaders() {
+  const headers = {
+    "Content-Type":
+      "application/json",
+  };
+
+  if (
+    process.env.JUDGE0_API_KEY
+  ) {
+    headers[
+      "X-Auth-Token"
+    ] =
+      process.env.JUDGE0_API_KEY;
+  }
+
+  if (
+    process.env.JUDGE0_AUTH_USER
+  ) {
+    headers[
+      "X-Auth-User"
+    ] =
+      process.env.JUDGE0_AUTH_USER;
+  }
+
+  return headers;
+}
+
+async function judgeFetch(
+  pathname,
+  options = {}
+) {
+  const base =
+    (
+      process.env
+        .JUDGE0_URL ||
+      JUDGE0_URL
+    ).replace(
+      /\/$/,
+      ""
+    );
+
+  return fetch(
+    base + pathname,
+    {
+      ...options,
+
+      headers: {
+        ...judgeHeaders(),
+        ...(options.headers ||
+          {}),
+      },
+    }
+  );
+}
+
 function prepareLegacyCode(
   code,
   language
@@ -647,61 +811,6 @@ function prepareLegacyCode(
   return runnable.trim();
 }
 
-function judgeHeaders() {
-  const headers = {
-    "Content-Type":
-      "application/json",
-  };
-
-  if (
-    process.env.JUDGE0_API_KEY
-  ) {
-    headers[
-      "X-Auth-Token"
-    ] =
-      process.env.JUDGE0_API_KEY;
-  }
-
-  if (
-    process.env.JUDGE0_AUTH_USER
-  ) {
-    headers[
-      "X-Auth-User"
-    ] =
-      process.env.JUDGE0_AUTH_USER;
-  }
-
-  return headers;
-}
-
-async function judgeFetch(
-  pathname,
-  options = {}
-) {
-  const base =
-    (
-      process.env
-        .JUDGE0_URL ||
-      JUDGE0_URL
-    ).replace(
-      /\/$/,
-      ""
-    );
-
-  return fetch(
-    base + pathname,
-    {
-      ...options,
-
-      headers: {
-        ...judgeHeaders(),
-        ...(options.headers ||
-          {}),
-      },
-    }
-  );
-}
-
 async function runJudge0(
   language,
   code,
@@ -717,7 +826,9 @@ async function runJudge0(
   }
 
   if (
-    !safeString(code).trim()
+    !safeString(
+      code
+    ).trim()
   ) {
     throw new Error(
       "Code is empty."
@@ -760,11 +871,10 @@ async function runJudge0(
     );
 
   if (!submit.ok) {
-    const body =
-      await submit.text();
-
     throw new Error(
-      `Judge0 submission failed (${submit.status}): ${body.slice(
+      `Judge0 submission failed (${submit.status}): ${(
+        await submit.text()
+      ).slice(
         0,
         500
       )}`
@@ -774,7 +884,9 @@ async function runJudge0(
   const submission =
     await submit.json();
 
-  if (!submission?.token) {
+  if (
+    !submission?.token
+  ) {
     throw new Error(
       "Judge0 did not return a submission token."
     );
@@ -815,6 +927,10 @@ async function runJudge0(
   );
 }
 
+/* =========================================================
+   CODE GENERATION
+   ========================================================= */
+
 function buildCodeGenerationPrompt({
   topic,
   level,
@@ -852,7 +968,7 @@ void main();
 
 Use simple classic C syntax suitable for Turbo C.
 
-Do not use modern C99/C11-only features unless unavoidable.
+Do not use C99/C11-only features when possible.
 `
     : `
 C STYLE: MODERN STANDARD C.
@@ -870,8 +986,9 @@ getch()
 void main()
 `;
 
-  const cppRules = legacy
-    ? `
+  const cppRules =
+    legacy
+      ? `
 C++ STYLE: LEGACY TURBO C++.
 
 Use:
@@ -893,14 +1010,16 @@ range-based for loops
 lambda functions
 C++11 or newer syntax
 `
-    : `
+      : `
 C++ STYLE: MODERN STANDARD C++.
 
 Use:
 #include <iostream>
 int main()
 
-Use std::cin and std::cout.
+Use:
+std::cin
+std::cout
 
 Do NOT use:
 iostream.h
@@ -909,7 +1028,7 @@ clrscr()
 getch()
 void main()
 
-Modern C++ features may be used when useful.
+Modern C++ features are allowed where useful.
 `;
 
   return `
@@ -945,162 +1064,181 @@ The Java program must be complete and runnable.
 
 IMPORTANT JAVASCRIPT:
 
-JavaScript MUST be runnable with Node.js using built-in functionality only.
+JavaScript MUST run with Node.js.
 
 ${COMMENT_RULE}
 
-Each language must solve EXACTLY the same problem.
+Each language must solve exactly the same problem.
 
 Use standard input when input is needed.
 
 Do not claim execution.
 
-Return exactly:
+Return:
 
 === C ===
-\`\`\`c
+
 complete C program
-\`\`\`
 
 === C++ ===
-\`\`\`cpp
+
 complete C++ program
-\`\`\`
 
 === Python ===
-\`\`\`python
+
 complete Python 3 program
-\`\`\`
 
 === Java ===
-\`\`\`java
+
 complete Java program
-\`\`\`
 
 === JavaScript ===
-\`\`\`javascript
+
 complete Node.js program
-\`\`\`
 
 === HOW IT WORKS ===
-explain the solution
+
+brief explanation
 
 === EXAMPLE INPUT ===
+
 example input
 
 === EXPECTED OUTPUT ===
+
 expected output
 
 === IMPORTANT POINTS ===
-important learning points
 
-Do not claim execution.
+important learning points
 `.trim();
 }
+
+/* =========================================================
+   ALGORITHM GENERATION
+   ========================================================= */
 
 function buildAlgorithmPrompt({
   topic,
   level,
 }) {
   return `
-Algorithm problem:
+You are CodeMentor AI.
+
+Create a simple exam-ready handwritten-style algorithm for:
+
 ${topic}
 
-Learner level:
+Student level:
 ${level || "Beginner"}
 
-Create an exam-ready algorithm for this problem and provide the SAME solution in:
+IMPORTANT:
 
-C
-C++
-Python
-Java
-JavaScript
+Return ONLY valid JSON.
 
-IMPORTANT C:
+Do NOT generate:
+- C code
+- C++ code
+- Python code
+- Java code
+- JavaScript code
 
-Use LEGACY TURBO C STYLE.
+Do NOT provide:
+- explanation paragraphs
+- code implementations
+- complexity
+- examples
+- extra teaching text
+- Markdown fences
 
-Use:
-#include <stdio.h>
+The output must contain ONLY:
 
-When useful, use:
-#include <conio.h>
-clrscr();
-getch();
-void main();
+1. Algorithm title
+2. Algorithm operation/name
+3. Operation comment in square brackets
+4. Variables
+5. Steps
 
-Avoid modern C99/C11-only features when possible.
+Use terminology suitable for school/college practical notebooks.
 
-IMPORTANT C++:
+VARIABLES MUST use Roman-number labels:
 
-Use LEGACY TURBO C++ STYLE.
+(i)
+(ii)
+(iii)
+(iv)
+(v)
 
-Use:
-#include <iostream.h>
+Each variable should have a short description.
 
-When useful, use:
-#include <conio.h>
-clrscr();
-getch();
-void main();
+STEPS MUST contain square-bracket comments.
 
-Do NOT use:
+Example style:
 
-STL vector
-STL string
-auto
-range-based for
-lambda
-C++11 or newer syntax
+Step-1: [Traverse array, if OLDX found, replace it]
 
-Use simple arrays, loops and functions.
+FOR i = 0 TO SIZE - 1 DO
+    IF ARR[i] = OLDX THEN
+        ARR[i] <- NEWX
+    END IF
+END FOR
 
-Python must use Python 3.
+Step-2: [Finish]
 
-Java must use public class Main.
+RETURN
 
-JavaScript must run with Node.js.
+Use uppercase algorithm keywords:
 
-Return exactly:
+FOR
+TO
+DO
+IF
+THEN
+END IF
+END FOR
+WHILE
+END WHILE
+RETURN
 
-=== ALGORITHM ===
-step-by-step algorithm and pseudocode
+Keep every step concise.
 
-=== C ===
-\`\`\`c
-legacy Turbo C code
-\`\`\`
+Use arrows like:
+<-
+=
+>
 
-=== C++ ===
-\`\`\`cpp
-legacy Turbo C++ code
-\`\`\`
+Do not add prose outside the JSON.
 
-=== Python ===
-\`\`\`python
-Python 3 code
-\`\`\`
+Return exactly this structure:
 
-=== Java ===
-\`\`\`java
-Java code
-\`\`\`
-
-=== JavaScript ===
-\`\`\`javascript
-Node.js code
-\`\`\`
-
-=== COMPLEXITY ===
-time and space complexity
-
-=== EXAMPLE ===
-example input and expected output
-
-Do not claim execution.
+{
+  "title": "Array Update Operation",
+  "name": "ARR-UPDATE(ARR, OLDX, NEWX)",
+  "operation": "[Replaces OLDX with NEWX in the given array ARR]",
+  "variables": [
+    "(i) ARR: Represents an array",
+    "(ii) SIZE: Represents total number of elements of an array",
+    "(iii) OLDX: Represents element to be replaced",
+    "(iv) NEWX: Represents new element",
+    "(v) i: Loop-control variable"
+  ],
+  "steps": [
+    "Step-1: [Traverse array, if OLDX found, replace it]",
+    "FOR i = 0 TO SIZE - 1 DO",
+    "    IF ARR[i] = OLDX THEN",
+    "        ARR[i] <- NEWX",
+    "    END IF",
+    "END FOR",
+    "Step-2: [Finish]",
+    "RETURN"
+  ]
+}
 `.trim();
 }
+
+/* =========================================================
+   HEALTH
+   ========================================================= */
 
 app.get(
   "/api/health",
@@ -1122,7 +1260,9 @@ app.get(
         GEMINI_MODEL,
 
       judge0Configured:
-        Boolean(JUDGE0_URL),
+        Boolean(
+          JUDGE0_URL
+        ),
 
       supportedLanguages:
         ALL_LANGUAGES,
@@ -1130,14 +1270,21 @@ app.get(
       features: {
         codeGeneration: true,
         fiveLanguages: true,
+
         algorithmSystem: true,
         algorithmGenerator: true,
         algorithmPractice: true,
+
         codeExecution: true,
-        automaticCodeDetection: true,
+        automaticCodeDetection:
+          true,
+
         aiTeacher: true,
         practice: true,
-        desktopExeDownload: true,
+
+        desktopExeDownload:
+          true,
+
         geminiRetry: true,
       },
 
@@ -1179,6 +1326,10 @@ app.get(
   }
 );
 
+/* =========================================================
+   AI TEACHER
+   ========================================================= */
+
 app.post(
   "/api/ai/teach",
   async (req, res) => {
@@ -1202,38 +1353,24 @@ app.post(
           });
       }
 
-      if (
-        safeString(question)
-          .length > 8000
-      ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Question is too long.",
-          });
-      }
-
       const answer =
         await askAI(`
 Programming language:
 ${language || "General programming"}
 
-Learner level:
+Student level:
 ${level || "Beginner"}
 
 Student question:
-${question.trim()}
+${question}
 
-Teach the student clearly.
+Teach clearly and step by step.
 
-If the student asks for a program, provide a complete runnable program in the selected language.
+If code is requested, provide a complete program.
 
 ${COMMENT_RULE}
 
-Include explanation and examples when useful.
-
-If you provide expected output, clearly label it EXPECTED OUTPUT and do not claim that it was actually executed.
+Do not claim execution.
 `);
 
       res.json({
@@ -1257,6 +1394,10 @@ If you provide expected output, clearly label it EXPECTED OUTPUT and do not clai
   }
 );
 
+/* =========================================================
+   CODE ANALYSIS
+   ========================================================= */
+
 app.post(
   "/api/ai/code",
   async (req, res) => {
@@ -1268,7 +1409,9 @@ app.post(
       } = req.body || {};
 
       if (
-        !safeString(code).trim()
+        !safeString(
+          code
+        ).trim()
       ) {
         return res
           .status(400)
@@ -1286,20 +1429,19 @@ ${language || "Unknown"}
 Task:
 ${action || "Explain and fix this code"}
 
-Analyze only this code.
+Code:
+
+${code}
+
+Analyze the code.
+
+Explain mistakes and fixes.
+
+For C and C++, recognize both:
+- Modern standard code
+- Legacy Turbo C/Turbo C++ code
 
 Do not claim execution.
-
---- CODE START ---
-${code}
---- CODE END ---
-
-If there is an error:
-1. Explain the error.
-2. Explain how to fix it.
-3. Provide corrected code when useful.
-
-For C or C++, recognize both modern code and legacy Turbo C/Turbo C++ code.
 `);
 
       res.json({
@@ -1323,6 +1465,10 @@ For C or C++, recognize both modern code and legacy Turbo C/Turbo C++ code.
   }
 );
 
+/* =========================================================
+   CODE GENERATION
+   ========================================================= */
+
 app.post(
   "/api/ai/generate-code",
   async (req, res) => {
@@ -1335,7 +1481,9 @@ app.post(
       } = req.body || {};
 
       if (
-        !safeString(topic).trim()
+        !safeString(
+          topic
+        ).trim()
       ) {
         return res
           .status(400)
@@ -1348,15 +1496,22 @@ app.post(
       const answer =
         await askAI(
           buildCodeGenerationPrompt({
-            topic: topic.trim(),
+            topic:
+              topic.trim(),
+
             level,
+
             codeStyle,
           }),
           {
-            temperature: 0.12,
+            temperature:
+              0.12,
+
             maxOutputTokens:
               16000,
-            maxAttempts: 5,
+
+            maxAttempts:
+              5,
           }
         );
 
@@ -1370,41 +1525,13 @@ app.post(
           language
         );
 
-      let code = "";
-
-      if (
-        normalized === "C"
-      ) {
-        code =
-          solutions.C;
-      } else if (
-        normalized === "C++"
-      ) {
-        code =
-          solutions["C++"];
-      } else if (
-        normalized ===
-        "Python"
-      ) {
-        code =
-          solutions.Python;
-      } else if (
-        normalized === "Java"
-      ) {
-        code =
-          solutions.Java;
-      } else if (
-        normalized ===
-        "JavaScript"
-      ) {
-        code =
-          solutions.JavaScript;
-      } else {
-        code =
-          solutions.Python ||
-          solutions.C ||
-          "";
-      }
+      const code =
+        solutions[
+          normalized
+        ] ||
+        solutions.Python ||
+        solutions.C ||
+        "";
 
       res.json({
         success: true,
@@ -1444,6 +1571,10 @@ app.post(
   }
 );
 
+/* =========================================================
+   ALGORITHM TEACHER
+   ========================================================= */
+
 app.post(
   "/api/ai/algorithm",
   async (req, res) => {
@@ -1468,21 +1599,19 @@ app.post(
 
       const answer =
         await askAI(`
-Algorithm learner level:
+Algorithm level:
 ${level || "Beginner"}
 
 Question:
-${question.trim()}
+${question}
 
-Explain the algorithm in very easy language.
-
-Include:
-- idea
-- step-by-step approach
+Explain:
+- algorithm idea
+- steps
 - pseudocode
 - time complexity
 - space complexity
-- small example
+- example
 
 Do not claim execution.
 `);
@@ -1508,6 +1637,10 @@ Do not claim execution.
   }
 );
 
+/* =========================================================
+   NOTEBOOK-STYLE ALGORITHM GENERATOR
+   ========================================================= */
+
 app.post(
   "/api/ai/generate-algorithm",
   async (req, res) => {
@@ -1518,92 +1651,91 @@ app.post(
       } = req.body || {};
 
       if (
-        !safeString(topic).trim()
+        !safeString(
+          topic
+        ).trim()
       ) {
         return res
           .status(400)
           .json({
             error:
-              "Enter an algorithm problem.",
+              "Enter an algorithm topic or problem.",
           });
       }
 
       const answer =
         await askAI(
           buildAlgorithmPrompt({
-            topic: topic.trim(),
+            topic:
+              topic.trim(),
+
             level,
           }),
           {
-            temperature: 0.12,
+            temperature:
+              0.12,
+
             maxOutputTokens:
-              18000,
-            maxAttempts: 5,
+              8000,
+
+            maxAttempts:
+              5,
           }
         );
 
-      const solutions =
-        extractLanguageSolutions(
+      const parsed =
+        extractJsonObject(
           answer
         );
 
-      const algorithm =
-        answer.match(
-          /===\s*ALGORITHM\s*===([\s\S]*?)(?====\s*C\s*===)/i
-        )?.[1]
-          ?.trim() || "";
+      if (!parsed) {
+        return res
+          .status(502)
+          .json({
+            success: false,
+            error:
+              "AI returned an invalid algorithm format. Please try again.",
+          });
+      }
 
-      const complexity =
-        answer.match(
-          /===\s*COMPLEXITY\s*===([\s\S]*?)(?====\s*EXAMPLE\s*===|$)/i
-        )?.[1]
-          ?.trim() || "";
+      const variables =
+        Array.isArray(
+          parsed.variables
+        )
+          ? parsed.variables.map(
+              (item) =>
+                String(item)
+            )
+          : [];
 
-      const example =
-        answer.match(
-          /===\s*EXAMPLE\s*===([\s\S]*?)$/i
-        )?.[1]
-          ?.trim() || "";
+      const steps =
+        Array.isArray(
+          parsed.steps
+        )
+          ? parsed.steps.map(
+              (item) =>
+                String(item)
+            )
+          : [];
 
       res.json({
         success: true,
 
         title:
+          parsed.title ||
           topic.trim(),
 
-        problem:
+        name:
+          parsed.name ||
           topic.trim(),
 
-        algorithm,
+        operation:
+          parsed.operation ||
+          "",
 
-        complexity,
+        variables,
 
-        example,
-
-        code: {
-          c:
-            solutions.C,
-
-          cpp:
-            solutions["C++"],
-
-          python:
-            solutions.Python,
-
-          java:
-            solutions.Java,
-
-          javascript:
-            solutions
-              .JavaScript,
-        },
-
-        solutions,
-
-        languages:
-          ALL_LANGUAGES,
-
-        answer,
+        steps,
       });
     } catch (error) {
       console.error(error);
@@ -1622,6 +1754,10 @@ app.post(
   }
 );
 
+/* =========================================================
+   ALGORITHM PRACTICE
+   ========================================================= */
+
 app.post(
   "/api/ai/algorithm-practice",
   async (req, res) => {
@@ -1633,7 +1769,9 @@ app.post(
       } = req.body || {};
 
       if (
-        !safeString(topic).trim()
+        !safeString(
+          topic
+        ).trim()
       ) {
         return res
           .status(400)
@@ -1659,16 +1797,14 @@ ${
   "(No answer written.)"
 }
 
-Evaluate the student's algorithm.
+Evaluate the student's answer.
 
-Explain:
-1. What is correct.
-2. What is missing.
-3. What is wrong.
-4. The corrected algorithm.
-5. Time complexity.
-6. Space complexity.
-7. One improvement tip.
+Include:
+- correct parts
+- missing parts
+- mistakes
+- corrected algorithm
+- one improvement tip
 
 Do not claim execution.
 `);
@@ -1694,6 +1830,10 @@ Do not claim execution.
   }
 );
 
+/* =========================================================
+   PRACTICE
+   ========================================================= */
+
 app.post(
   "/api/ai/practice",
   async (req, res) => {
@@ -1711,18 +1851,18 @@ Create a programming practice problem.
 Language:
 ${language || "Python"}
 
-Learner level:
+Level:
 ${level || "Beginner"}
 
 Topic:
 ${topic || "Basic programming"}
 
 Include:
-- Problem statement
-- Input
-- Expected output
-- Constraints
-- Hint
+Problem
+Input
+Expected Output
+Constraints
+Hint
 
 Do not claim execution.
 `);
@@ -1748,6 +1888,10 @@ Do not claim execution.
   }
 );
 
+/* =========================================================
+   CODE RUNNER
+   ========================================================= */
+
 app.post(
   "/api/code/run",
   async (req, res) => {
@@ -1764,9 +1908,13 @@ app.post(
         );
 
       const detected =
-        LANGUAGES[requested]
+        LANGUAGES[
+          requested
+        ]
           ? requested
-          : detectLanguage(code);
+          : detectLanguage(
+              code
+            );
 
       const result =
         await runJudge0(
@@ -1782,7 +1930,9 @@ app.post(
           detected,
 
         languageKey:
-          LANGUAGES[detected]?.key ||
+          LANGUAGES[
+            detected
+          ]?.key ||
           detected.toLowerCase(),
 
         codeStyle:
@@ -1797,10 +1947,12 @@ app.post(
           "Unknown",
 
         stdout:
-          result.stdout || "",
+          result.stdout ||
+          "",
 
         stderr:
-          result.stderr || "",
+          result.stderr ||
+          "",
 
         compile_output:
           result.compile_output ||
@@ -1811,16 +1963,20 @@ app.post(
           "",
 
         message:
-          result.message || "",
+          result.message ||
+          "",
 
         time:
-          result.time || null,
+          result.time ||
+          null,
 
         memory:
-          result.memory || null,
+          result.memory ||
+          null,
 
         output:
-          result.stdout || "",
+          result.stdout ||
+          "",
       });
     } catch (error) {
       console.error(error);
@@ -1836,6 +1992,10 @@ app.post(
     }
   }
 );
+
+/* =========================================================
+   LEGACY ALGORITHM RUN ENDPOINT
+   ========================================================= */
 
 app.post(
   "/api/algorithm/run",
@@ -1853,9 +2013,13 @@ app.post(
         );
 
       const detected =
-        LANGUAGES[requested]
+        LANGUAGES[
+          requested
+        ]
           ? requested
-          : detectLanguage(code);
+          : detectLanguage(
+              code
+            );
 
       const result =
         await runJudge0(
@@ -1871,7 +2035,9 @@ app.post(
           detected,
 
         languageKey:
-          LANGUAGES[detected]?.key ||
+          LANGUAGES[
+            detected
+          ]?.key ||
           detected.toLowerCase(),
 
         codeStyle:
@@ -1886,10 +2052,12 @@ app.post(
           "Unknown",
 
         stdout:
-          result.stdout || "",
+          result.stdout ||
+          "",
 
         stderr:
-          result.stderr || "",
+          result.stderr ||
+          "",
 
         compile_output:
           result.compile_output ||
@@ -1900,16 +2068,20 @@ app.post(
           "",
 
         message:
-          result.message || "",
+          result.message ||
+          "",
 
         time:
-          result.time || null,
+          result.time ||
+          null,
 
         memory:
-          result.memory || null,
+          result.memory ||
+          null,
 
         output:
-          result.stdout || "",
+          result.stdout ||
+          "",
       });
     } catch (error) {
       console.error(error);
@@ -1925,6 +2097,10 @@ app.post(
     }
   }
 );
+
+/* =========================================================
+   DESKTOP EXE DOWNLOAD
+   ========================================================= */
 
 app.use(
   "/downloads",
@@ -1960,17 +2136,27 @@ app.get(
   }
 );
 
+/* =========================================================
+   404
+   ========================================================= */
+
 app.use(
   (req, res) => {
-    res.status(404).json({
-      success: false,
-      error:
-        "API endpoint not found.",
-      path:
-        req.originalUrl,
-    });
+    res
+      .status(404)
+      .json({
+        success: false,
+        error:
+          "API endpoint not found.",
+        path:
+          req.originalUrl,
+      });
   }
 );
+
+/* =========================================================
+   START
+   ========================================================= */
 
 app.listen(
   PORT,

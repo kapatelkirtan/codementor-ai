@@ -85,11 +85,6 @@ const NAV_ITEMS = [
     label: "Algorithms",
     icon: "🧠",
   },
-  {
-    id: "algorithm-runner",
-    label: "Algorithm Runner",
-    icon: "▶",
-  },
 ];
 
 /* =========================================================
@@ -542,13 +537,6 @@ function App() {
               openLab={openLab}
             />
           )}
-
-          {page ===
-            "algorithm-runner" && (
-            <AlgorithmRunnerPage
-              showToast={showToast}
-            />
-          )}
         </main>
       </div>
 
@@ -822,11 +810,11 @@ function HomePage({
 
         <FeatureCard
           icon="▶"
-          title="Algorithm Runner"
+          title=""
           text="Run algorithm implementations and inspect their output."
           onClick={() =>
             setPage(
-              "algorithm-runner"
+              
             )
           }
         />
@@ -2470,19 +2458,14 @@ function PracticePage({
 
 function AlgorithmPage({
   showToast,
-  openLab,
 }) {
-  const topicRef =
-    useRef(null);
+  const topicRef = useRef(null);
 
   const [level, setLevel] =
     useState("beginner");
 
   const [algorithm, setAlgorithm] =
     useState(null);
-
-  const [selectedLanguage, setSelectedLanguage] =
-    useState("Python");
 
   const [loading, setLoading] =
     useState(false);
@@ -2497,7 +2480,6 @@ function AlgorithmPage({
       );
 
       topicRef.current?.focus();
-
       return;
     }
 
@@ -2517,52 +2499,29 @@ function AlgorithmPage({
           }
         );
 
-      const solutions =
-        normalizeSolutions(data);
-
       setAlgorithm({
         title:
-          data.title ||
-          topic,
+          data.title || topic,
 
-        problem:
-          data.problem ||
-          topic,
+        name:
+          data.name || topic,
 
-        idea:
-          data.idea ||
-          data.explanation ||
-          "",
+        operation:
+          data.operation || "",
+
+        variables:
+          Array.isArray(data.variables)
+            ? data.variables
+            : [],
 
         steps:
-          Array.isArray(
-            data.steps
-          )
+          Array.isArray(data.steps)
             ? data.steps
             : [],
-
-        pseudocode:
-          data.pseudocode ||
-          "",
-
-        complexity:
-          data.complexity || {
-            time: "Not specified",
-            space: "Not specified",
-          },
-
-        examples:
-          Array.isArray(
-            data.examples
-          )
-            ? data.examples
-            : [],
-
-        solutions,
       });
 
       showToast(
-        "Algorithm generated in all five languages."
+        "Algorithm generated."
       );
     } catch (error) {
       showToast(
@@ -2573,11 +2532,6 @@ function AlgorithmPage({
     }
   }
 
-  const selectedCode =
-    algorithm?.solutions?.[
-      selectedLanguage
-    ] || "";
-
   return (
     <div className="content-page">
       <div className="page-header">
@@ -2586,9 +2540,7 @@ function AlgorithmPage({
         </h1>
 
         <p className="page-subtitle">
-          Generate algorithm explanations,
-          pseudocode, complexity and code in
-          five programming languages.
+          Generate simple exam-ready algorithms in notebook style.
         </p>
       </div>
 
@@ -2600,20 +2552,19 @@ function AlgorithmPage({
             </h2>
 
             <p className="card-description">
-              Describe the algorithm or
-              problem you want to learn.
+              Enter the algorithm or operation you want to generate.
             </p>
           </div>
 
           <div className="card-body">
             <label className="label">
-              Topic / Problem
+              Topic / Operation
             </label>
 
             <textarea
               ref={topicRef}
               className="textarea"
-              placeholder="Example: Binary Search, Merge Sort, Dijkstra's Algorithm..."
+              placeholder="Example: Array Update Operation"
               spellCheck="false"
               autoComplete="off"
               autoCorrect="off"
@@ -2683,9 +2634,7 @@ function AlgorithmPage({
             </div>
 
             <div className="empty-state-text">
-              Enter an algorithm topic to
-              generate the explanation and
-              implementations.
+              Enter a topic or operation and click Generate.
             </div>
           </div>
         )}
@@ -2704,581 +2653,134 @@ function AlgorithmPage({
             </div>
 
             <div className="empty-state-text">
-              Creating explanation,
-              pseudocode, complexity and five
-              implementations.
+              Creating title, variables and steps.
             </div>
           </div>
         )}
 
         {algorithm && !loading && (
           <section className="card">
-            <div className="card-header">
-              <h2 className="card-title">
-                {algorithm.title}
-              </h2>
-
-              <p className="card-description">
-                {algorithm.problem}
-              </p>
-            </div>
-
             <div className="card-body">
-              <h3>
-                Idea
-              </h3>
-
-              <p className="algorithm-description">
-                {algorithm.idea}
-              </p>
-
-              {algorithm.steps.length >
-                0 && (
-                <>
-                  <h3
-                    style={{
-                      marginTop: 24,
-                    }}
-                  >
-                    Steps
-                  </h3>
-
-                  <ol className="algorithm-steps">
-                    {algorithm.steps.map(
-                      (
-                        step,
-                        index
-                      ) => (
-                        <li
-                          key={
-                            index
-                          }
-                          className="algorithm-step"
-                        >
-                          {step}
-                        </li>
-                      )
-                    )}
-                  </ol>
-                </>
-              )}
-
-              {algorithm.pseudocode && (
-                <>
-                  <h3
-                    style={{
-                      marginTop: 24,
-                    }}
-                  >
-                    Pseudocode
-                  </h3>
-
-                  <pre className="solution-code">
-                    {
-                      algorithm.pseudocode
-                    }
-                  </pre>
-                </>
-              )}
-
-              <h3
-                style={{
-                  marginTop: 24,
-                }}
-              >
-                Complexity
-              </h3>
-
-              <div className="complexity-grid">
-                <div className="complexity-card">
-                  <div className="complexity-label">
-                    TIME
-                  </div>
-
-                  <div className="complexity-value">
-                    {
-                      algorithm
-                        .complexity
-                        .time
-                    }
-                  </div>
-                </div>
-
-                <div className="complexity-card">
-                  <div className="complexity-label">
-                    SPACE
-                  </div>
-
-                  <div className="complexity-value">
-                    {
-                      algorithm
-                        .complexity
-                        .space
-                    }
-                  </div>
-                </div>
-              </div>
-
-              <h3
-                style={{
-                  marginTop: 28,
-                }}
-              >
-                Code Implementations
-              </h3>
-
-              <div className="language-tabs">
-                {LANGUAGES.map(
-                  (item) => (
-                    <button
-                      key={item.key}
-                      type="button"
-                      className={`language-tab ${
-                        selectedLanguage ===
-                        item.name
-                          ? "active"
-                          : ""
-                      }`}
-                      onClick={() =>
-                        setSelectedLanguage(
-                          item.name
-                        )
-                      }
-                    >
-                      {item.name}
-                    </button>
-                  )
-                )}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 12,
-                }}
-              >
-                <div
-                  className="solution-header"
+              <div className="algorithm-notebook">
+                <h2
                   style={{
-                    border:
-                      "1px solid var(--border)",
-                    borderBottom: 0,
-                    borderRadius:
-                      "12px 12px 0 0",
+                    marginTop: 0,
+                    marginBottom: 8,
                   }}
                 >
-                  <strong>
-                    {selectedLanguage}
-                  </strong>
+                  Algorithm: {algorithm.title}
+                </h2>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 8,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <button
-                      type="button"
-                      className="btn btn-small btn-secondary"
-                      onClick={() =>
-                        copyText(
-                          selectedCode
-                        ).then(() =>
-                          showToast(
-                            `${selectedLanguage} code copied.`
-                          )
-                        )
-                      }
-                    >
-                      Copy
-                    </button>
-
-                    <button
-                      type="button"
-                      className="btn btn-small btn-primary"
-                      onClick={() =>
-                        openLab(
-                          LANGUAGES.find(
-                            (item) =>
-                              item.name ===
-                              selectedLanguage
-                          )?.key ||
-                            "python",
-                          selectedCode
-                        )
-                      }
-                    >
-                      Open in Code Lab
-                    </button>
-                  </div>
+                <div
+                  style={{
+                    fontFamily:
+                      "var(--mono)",
+                    fontWeight: 700,
+                    fontSize: 15,
+                    marginBottom: 6,
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  Algorithm:
                 </div>
 
-                <pre className="solution-code">
-                  {selectedCode ||
-                    "No implementation returned."}
-                </pre>
-              </div>
+                <div
+                  style={{
+                    fontFamily:
+                      "var(--mono)",
+                    fontWeight: 700,
+                    whiteSpace: "pre-wrap",
+                    marginBottom: 4,
+                  }}
+                >
+                  {algorithm.name}
+                </div>
 
-              {algorithm.examples
-                .length > 0 && (
-                <>
-                  <h3
-                    style={{
-                      marginTop: 28,
-                    }}
-                  >
-                    Examples
-                  </h3>
-
+                {algorithm.operation && (
                   <div
-                    className="grid"
                     style={{
-                      marginTop: 12,
+                      fontFamily:
+                        "var(--mono)",
+                      whiteSpace: "pre-wrap",
+                      marginBottom: 22,
                     }}
                   >
-                    {algorithm.examples.map(
-                      (
-                        example,
-                        index
-                      ) => (
+                    {algorithm.operation}
+                  </div>
+                )}
+
+                <h3
+                  style={{
+                    marginBottom: 10,
+                  }}
+                >
+                  Variables:
+                </h3>
+
+                <div
+                  style={{
+                    fontFamily:
+                      "var(--mono)",
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.75,
+                  }}
+                >
+                  {algorithm.variables.length >
+                  0 ? (
+                    algorithm.variables.map(
+                      (variable, index) => (
                         <div
-                          key={
-                            index
-                          }
-                          className="question-box"
+                          key={index}
                         >
-                          <strong>
-                            Example{" "}
-                            {index + 1}
-                          </strong>
-
-                          <div
-                            style={{
-                              marginTop: 8,
-                            }}
-                          >
-                            <b>
-                              Input:
-                            </b>{" "}
-                            {
-                              example.input
-                            }
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: 5,
-                            }}
-                          >
-                            <b>
-                              Output:
-                            </b>{" "}
-                            {
-                              example.output
-                            }
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: 8,
-                              color:
-                                "var(--muted)",
-                            }}
-                          >
-                            {
-                              example.explanation
-                            }
-                          </div>
+                          {variable}
                         </div>
                       )
-                    )}
-                  </div>
-                </>
-              )}
+                    )
+                  ) : (
+                    <div>
+                      No variables specified.
+                    </div>
+                  )}
+                </div>
+
+                <h3
+                  style={{
+                    marginTop: 24,
+                    marginBottom: 10,
+                  }}
+                >
+                  Steps:
+                </h3>
+
+                <div
+                  className="algorithm-handwritten"
+                >
+                  {algorithm.steps.length >
+                  0 ? (
+                    algorithm.steps.map(
+                      (step, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            whiteSpace:
+                              "pre-wrap",
+                            minHeight: 24,
+                          }}
+                        >
+                          {step}
+                        </div>
+                      )
+                    )
+                  ) : (
+                    <div>
+                      No steps returned.
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </section>
         )}
-      </div>
-    </div>
-  );
-}
-
-/* =========================================================
-   ALGORITHM RUNNER
-   ========================================================= */
-
-function AlgorithmRunnerPage({
-  showToast,
-}) {
-  const codeRef =
-    useRef(null);
-
-  const inputRef =
-    useRef(null);
-
-  const [language, setLanguage] =
-    useState("python");
-
-  const [output, setOutput] =
-    useState("");
-
-  const [running, setRunning] =
-    useState(false);
-
-  const [status, setStatus] =
-    useState(null);
-
-  useEffect(() => {
-    if (
-      codeRef.current &&
-      !codeRef.current.value
-    ) {
-      codeRef.current.value =
-        DEFAULT_CODE[
-          language
-        ] || "";
-    }
-  }, [language]);
-
-  function changeLanguage(
-    nextLanguage
-  ) {
-    setLanguage(
-      nextLanguage
-    );
-
-    setOutput("");
-    setStatus(null);
-
-    if (
-      codeRef.current
-    ) {
-      codeRef.current.value =
-        DEFAULT_CODE[
-          nextLanguage
-        ] || "";
-    }
-  }
-
-  async function runAlgorithm() {
-    const code =
-      codeRef.current?.value ||
-      "";
-
-    const input =
-      inputRef.current?.value ||
-      "";
-
-    if (!code.trim()) {
-      showToast(
-        "Enter algorithm code first."
-      );
-
-      return;
-    }
-
-    setRunning(true);
-    setStatus("running");
-    setOutput(
-      "Running algorithm..."
-    );
-
-    try {
-      const data =
-        await apiRequest(
-          "/api/algorithm/run",
-          {
-            method: "POST",
-
-            body: JSON.stringify({
-              language,
-              code,
-              stdin: input,
-            }),
-          }
-        );
-
-      setOutput(
-        getRunOutput(data)
-      );
-
-      if (
-        data?.stderr ||
-        data?.compile_output
-      ) {
-        setStatus("error");
-      } else {
-        setStatus("success");
-      }
-    } catch (error) {
-      setOutput(
-        `Execution Error\n\n${getErrorMessage(
-          error
-        )}`
-      );
-
-      setStatus("error");
-
-      showToast(
-        "Algorithm execution failed."
-      );
-    } finally {
-      setRunning(false);
-    }
-  }
-
-  return (
-    <div className="content-page">
-      <div className="page-header">
-        <h1 className="page-title">
-          Algorithm Runner
-        </h1>
-
-        <p className="page-subtitle">
-          Run your algorithm implementation
-          and inspect the output.
-        </p>
-      </div>
-
-      <div className="lab-layout">
-        <section className="card editor-panel">
-          <div className="editor-toolbar">
-            <div className="language-tabs">
-              {LANGUAGES.map(
-                (item) => (
-                  <button
-                    key={item.key}
-                    type="button"
-                    className={`language-tab ${
-                      language ===
-                      item.key
-                        ? "active"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      changeLanguage(
-                        item.key
-                      )
-                    }
-                  >
-                    {item.name}
-                  </button>
-                )
-              )}
-            </div>
-          </div>
-
-          <div
-            style={{
-              padding: 16,
-            }}
-          >
-            <label className="label">
-              ALGORITHM CODE
-            </label>
-
-            <textarea
-              ref={codeRef}
-              className="code-editor"
-              defaultValue={
-                DEFAULT_CODE[
-                  language
-                ]
-              }
-              spellCheck="false"
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              inputMode="text"
-            />
-
-            <div className="lab-actions">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={
-                  runAlgorithm
-                }
-                disabled={running}
-              >
-                {running
-                  ? "Running..."
-                  : "▶ Run Algorithm"}
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <aside className="lab-side">
-          <section className="card input-panel">
-            <div className="card-header">
-              <h2 className="card-title">
-                INPUT
-              </h2>
-
-              <p className="card-description">
-                Input passed to the algorithm.
-              </p>
-            </div>
-
-            <div className="card-body">
-              <textarea
-                ref={inputRef}
-                className="stdin-editor"
-                placeholder="Enter input here..."
-                spellCheck="false"
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                inputMode="text"
-              />
-            </div>
-          </section>
-
-          <section className="card output-panel">
-            <div className="card-header">
-              <h2 className="card-title">
-                OUTPUT
-              </h2>
-
-              <div
-                style={{
-                  marginTop: 8,
-                }}
-              >
-                {status ===
-                  "success" && (
-                  <span className="status success">
-                    ● Completed
-                  </span>
-                )}
-
-                {status ===
-                  "error" && (
-                  <span className="status error">
-                    ● Error
-                  </span>
-                )}
-
-                {status ===
-                  "running" && (
-                  <span className="status">
-                    ● Running
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="card-body">
-              <textarea
-                className="output-editor"
-                value={output}
-                readOnly
-                placeholder="Output will appear here..."
-              />
-            </div>
-          </section>
-        </aside>
       </div>
     </div>
   );
