@@ -15,7 +15,6 @@ import "./styles.css";
    ========================================================= */
 
 const API =
-  import.meta.env.VITE_API_URL ||
   "https://codementor-ai-backend-b276.onrender.com";
 
 /* =========================================================
@@ -98,65 +97,55 @@ const NAV_ITEMS = [
    ========================================================= */
 
 const DEFAULT_CODE = {
-  c: [
-    "#include <stdio.h>",
-    "",
-    "int main(void) {",
-    "    int a, b;",
-    "",
-    '    scanf("%d %d", &a, &b);',
-    "",
-    '    printf("%d\\n", a + b);',
-    "",
-    "    return 0;",
-    "}",
-  ].join("\n"),
+  c: `#include <stdio.h>
 
-  cpp: [
-    "#include <iostream>",
-    "using namespace std;",
-    "",
-    "int main() {",
-    "    int a, b;",
-    "",
-    "    cin >> a >> b;",
-    "",
-    "    cout << a + b << endl;",
-    "",
-    "    return 0;",
-    "}",
-  ].join("\n"),
+int main(void) {
+    int a, b;
 
-  python: [
-    "a, b = map(int, input().split())",
-    "",
-    "print(a + b)",
-  ].join("\n"),
+    scanf("%d %d", &a, &b);
 
-  java: [
-    "import java.util.Scanner;",
-    "",
-    "public class Main {",
-    "    public static void main(String[] args) {",
-    "        Scanner scanner = new Scanner(System.in);",
-    "",
-    "        int a = scanner.nextInt();",
-    "        int b = scanner.nextInt();",
-    "",
-    "        System.out.println(a + b);",
-    "    }",
-    "}",
-  ].join("\n"),
+    printf("%d\\n", a + b);
 
-  javascript: [
-    'const fs = require("fs");',
-    "",
-    'const input = fs.readFileSync(0, "utf8").trim();',
-    "",
-    'const [a, b] = input.split(/\s+/).map(Number);',
-    "",
-    "console.log(a + b);",
-  ].join("\n"),
+    return 0;
+}`,
+
+  cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    int a, b;
+
+    cin >> a >> b;
+
+    cout << a + b << endl;
+
+    return 0;
+}`,
+
+  python: `a, b = map(int, input().split())
+
+print(a + b)`,
+
+  java: `import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        int a = scanner.nextInt();
+        int b = scanner.nextInt();
+
+        System.out.println(a + b);
+    }
+}`,
+
+  javascript: `const fs = require("fs");
+
+const input = fs.readFileSync(0, "utf8").trim();
+
+const [a, b] = input.split(/\\s+/).map(Number);
+
+console.log(a + b);`,
 };
 
 const DEFAULT_ALGORITHM = {

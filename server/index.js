@@ -8,20 +8,10 @@ const fs = require("fs");
 const app = express();
 const PORT = Number(process.env.PORT || 8787);
 
-const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
-  .split(",")
-  .map((value) => value.trim())
-  .filter(Boolean);
-
 app.use(
   cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      callback(new Error("CORS origin not allowed."));
-    },
+    origin: true,
+    credentials: false,
   })
 );
 
@@ -473,12 +463,6 @@ function prepareLegacyCode(
 
   let runnable = safeString(code);
 
-  /*
-   * Judge0 uses modern compilers, so classic
-   * Turbo C/Turbo C++ source needs to be cleaned
-   * before execution.
-   */
-
   runnable = runnable.replace(
     /^\s*#include\s*[<"]conio\.h[>"]\s*\r?\n?/gim,
     ""
@@ -499,22 +483,12 @@ function prepareLegacyCode(
     "int main()"
   );
 
-  /*
-   * C++ Turbo C++ often uses iostream.h.
-   * Convert it to modern iostream for Judge0.
-   */
-
   if (language === "C++") {
     runnable = runnable.replace(
       /#include\s*[<"]iostream\.h[>"]/g,
       "#include <iostream>"
     );
   }
-
-  /*
-   * Add return 0 when main is int and
-   * the generated program does not already have it.
-   */
 
   if (
     /\bint\s+main\s*\(/.test(
