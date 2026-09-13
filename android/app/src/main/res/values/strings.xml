@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CodeMentor AI</string>
+    <string name="title_activity_main">CodeMentor AI</string>
+    <string name="package_name">com.codementorai.app</string>
+    <string name="custom_url_scheme">com.codementorai.app</string>
+</resources>
