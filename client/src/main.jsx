@@ -13,10 +13,12 @@ import "./styles.css";
 /* =========================================================
    API
    ========================================================= */
-
 const API =
-  "https://codementor-ai-backend-b276.onrender.com";
-
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1")
+    ? "http://localhost:8787"
+    : "https://codementor-ai-backend-b276.onrender.com";
 /* =========================================================
    DESKTOP APP DETECTION
    ========================================================= */
@@ -72,6 +74,11 @@ const NAV_ITEMS = [
     id: "teacher",
     label: "AI Teacher",
     icon: "🤖",
+  },
+  {
+    id: "debugger",
+    label: "AI Debugger",
+    icon: "🐞",
   },
   {
     id: "generator",
@@ -257,16 +264,25 @@ async function apiRequest(
   endpoint,
   options = {}
 ) {
+  const requestOptions = {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+    },
+  };
+
+  // Only send JSON Content-Type when a request actually has a body.
+  // This prevents the GET /api/health request from triggering
+  // an unnecessary CORS preflight during local development.
+  if (options.body) {
+    requestOptions.headers["Content-Type"] =
+      requestOptions.headers["Content-Type"] ||
+      "application/json";
+  }
+
   const response = await fetch(
     `${API}${endpoint}`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
-
-      ...options,
-    }
+    requestOptions
   );
 
   const text =
@@ -514,6 +530,13 @@ function App() {
             />
           )}
 
+          {page === "debugger" && (
+            <DebuggerPage
+              showToast={showToast}
+              openLab={openLab}
+            />
+          )}
+
           {page === "generator" && (
             <CodeGeneratorPage
               showToast={showToast}
@@ -716,6 +739,16 @@ function HomePage({
             className="btn btn-secondary"
             type="button"
             onClick={() =>
+              setPage("debugger")
+            }
+          >
+            🐞 Debug Code
+          </button>
+
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={() =>
               setPage("generator")
             }
           >
@@ -751,7 +784,7 @@ function HomePage({
           </div>
 
           <div className="stat-value">
-            7+
+            8+
           </div>
         </div>
 
@@ -823,13 +856,11 @@ function HomePage({
         />
 
         <FeatureCard
-          icon="▶"
-          title=""
-          text="Run algorithm implementations and inspect their output."
+          icon="🐞"
+          title="AI Code Debugger"
+          text="Find programming errors, understand why they happen, get fixes, and open corrected code in Code Lab."
           onClick={() =>
-            setPage(
-              
-            )
+            setPage("debugger")
           }
         />
       </div>
@@ -978,6 +1009,509 @@ function LearnPage({
           )
         )}
       </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   AI CODE DEBUGGER
+   ========================================================= */
+
+function DebuggerPage({
+  showToast,
+  openLab,
+}) {
+  const codeRef = useRef(null);
+
+  const [language, setLanguage] =
+    useState("C++");
+
+  const [cCppStyle, setCCppStyle] =
+    useState("modern");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [result, setResult] =
+    useState(null);
+
+  const [code, setCode] =
+    useState(DEFAULT_CODE.cpp);
+
+  async function debugCode() {
+    const sourceCode =
+      codeRef.current?.value?.trim() ||
+      code.trim();
+
+    if (!sourceCode) {
+      showToast(
+        "Paste some code to debug first."
+      );
+
+      codeRef.current?.focus();
+      return;
+    }
+
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const data = await apiRequest(
+        "/api/ai/debug-code",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            language,
+            codeStyle:
+              language === "C" ||
+              language === "C++"
+                ? cCppStyle
+                : "modern",
+            code: sourceCode,
+          }),
+        }
+      );
+
+      setResult({
+        hasErrors: Boolean(data.hasErrors),
+        summary:
+          data.summary ||
+          "Analysis completed.",
+        issues: Array.isArray(data.issues)
+          ? data.issues
+          : [],
+        correctedCode:
+          data.correctedCode ||
+          sourceCode,
+      });
+
+      showToast(
+        data.hasErrors
+          ? "Code debugging completed."
+          : "No obvious errors found."
+      );
+    } catch (error) {
+      showToast(getErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function copyCorrectedCode() {
+    if (!result?.correctedCode) {
+      showToast(
+        "No corrected code available."
+      );
+      return;
+    }
+
+    try {
+      await copyText(result.correctedCode);
+      showToast("Corrected code copied.");
+    } catch (error) {
+      showToast(getErrorMessage(error));
+    }
+  }
+
+  function sendToCodeLab() {
+    if (!result?.correctedCode) {
+      showToast(
+        "No corrected code available."
+      );
+      return;
+    }
+
+    const labLanguage =
+      LANGUAGES.find(
+        (item) => item.name === language
+      )?.key || "python";
+
+    openLab(
+      labLanguage,
+      result.correctedCode
+    );
+  }
+
+  function loadExample() {
+    const key =
+      LANGUAGES.find(
+        (item) => item.name === language
+      )?.key || "cpp";
+
+    const examples = {
+      c: `#include <stdio.h>
+
+int main(void) {
+    int a, b;
+    scanf("%d %d", &a, &b);
+    printf("%d\\n", a + b)
+    return 0;
+}`,
+      cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    int a, b;
+    cin >> a >> b;
+    cout << a + b << endl
+    return 0;
+}`,
+      python: `numbers = [1, 2, 3, 4]
+print(numbers[4])`,
+      java: `public class Main {
+    public static void main(String[] args) {
+        int a = 10;
+        System.out.println(a)
+    }
+}`,
+      javascript: `const numbers = [1, 2, 3];
+console.log(numbers[3]);
+console.log(missingVariable);`,
+    };
+
+    const nextCode =
+      examples[key] || DEFAULT_CODE[key] || "";
+
+    setCode(nextCode);
+
+    if (codeRef.current) {
+      codeRef.current.value = nextCode;
+    }
+
+    setResult(null);
+    showToast("Example code loaded.");
+  }
+
+  return (
+    <div className="content-page">
+      <div className="page-header">
+        <h1 className="page-title">
+          AI Code Debugger
+        </h1>
+
+        <p className="page-subtitle">
+          Paste your code, let AI find programming
+          errors, understand why they happen, get
+          suggested fixes, and receive corrected code.
+        </p>
+      </div>
+
+      <section className="card">
+        <div className="card-header">
+          <h2 className="card-title">
+            Debug Your Code
+          </h2>
+
+          <p className="card-description">
+            Supports C, C++, Python, Java and
+            JavaScript. C and C++ also support
+            Modern and Legacy Turbo C/Turbo C++ code.
+          </p>
+        </div>
+
+        <div className="card-body">
+          <div className="debugger-controls">
+            <div className="form-group">
+              <label
+                className="label"
+                htmlFor="debugger-language"
+              >
+                Programming Language
+              </label>
+
+              <select
+                id="debugger-language"
+                className="select"
+                value={language}
+                onChange={(event) => {
+                  const nextLanguage =
+                    event.target.value;
+
+                  setLanguage(nextLanguage);
+
+                  const key =
+                    LANGUAGES.find(
+                      (item) =>
+                        item.name === nextLanguage
+                    )?.key || "cpp";
+
+                  const nextCode =
+                    DEFAULT_CODE[key] || "";
+
+                  setCode(nextCode);
+
+                  if (codeRef.current) {
+                    codeRef.current.value = nextCode;
+                  }
+
+                  setResult(null);
+                }}
+              >
+                {LANGUAGES.map((item) => (
+                  <option
+                    key={item.key}
+                    value={item.name}
+                  >
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {(language === "C" ||
+              language === "C++") && (
+              <div className="form-group">
+                <label
+                  className="label"
+                  htmlFor="debugger-style"
+                >
+                  C/C++ Code Style
+                </label>
+
+                <select
+                  id="debugger-style"
+                  className="select"
+                  value={cCppStyle}
+                  onChange={(event) =>
+                    setCCppStyle(
+                      event.target.value
+                    )
+                  }
+                >
+                  <option value="modern">
+                    Modern Standard C/C++
+                  </option>
+
+                  <option value="legacy">
+                    Legacy Turbo C/Turbo C++
+                  </option>
+                </select>
+              </div>
+            )}
+          </div>
+
+          <label
+            className="label"
+            htmlFor="debugger-code"
+          >
+            Source Code
+          </label>
+
+          <textarea
+            id="debugger-code"
+            ref={codeRef}
+            className="code-editor debugger-editor"
+            value={code}
+            onChange={(event) => {
+              setCode(event.target.value);
+              setResult(null);
+            }}
+            spellCheck="false"
+            autoCapitalize="off"
+            autoCorrect="off"
+            placeholder="Paste your code here..."
+          />
+
+          <div className="debugger-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={debugCode}
+              disabled={loading}
+            >
+              {loading
+                ? "🐞 Debugging..."
+                : "🐞 Debug Code"}
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={loadExample}
+              disabled={loading}
+            >
+              Load Error Example
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => {
+                const key =
+                  LANGUAGES.find(
+                    (item) =>
+                      item.name === language
+                  )?.key || "cpp";
+
+                const nextCode =
+                  DEFAULT_CODE[key] || "";
+
+                setCode(nextCode);
+
+                if (codeRef.current) {
+                  codeRef.current.value = nextCode;
+                }
+
+                setResult(null);
+              }}
+              disabled={loading}
+            >
+              Reset Code
+            </button>
+          </div>
+
+          {loading && (
+            <div className="alert alert-info debugger-loading">
+              <div className="loading">
+                <span className="spinner" />
+                <span>
+                  AI is analyzing your code...
+                </span>
+              </div>
+            </div>
+          )}
+
+          {!loading && !result && (
+            <div className="empty-state debugger-ready">
+              <div className="empty-state-title">
+                Ready to debug
+              </div>
+
+              <div className="empty-state-text">
+                Paste code above and click Debug Code
+                to find errors and get a corrected version.
+              </div>
+            </div>
+          )}
+
+          {!loading && result && (
+            <div className="debugger-results">
+              <section className="card">
+                <div className="card-body">
+                  <div
+                    className={`status ${
+                      result.hasErrors
+                        ? "error"
+                        : "success"
+                    }`}
+                  >
+                    {result.hasErrors
+                      ? "● Issues Found"
+                      : "● No Obvious Errors"}
+                  </div>
+
+                  <div className="debugger-summary">
+                    {result.hasErrors
+                      ? "Debugging Summary"
+                      : "Analysis Summary"}
+                  </div>
+
+                  <p className="debugger-summary-text">
+                    {result.summary}
+                  </p>
+                </div>
+              </section>
+
+              {result.issues.length > 0 && (
+                <section className="card">
+                  <div className="card-header">
+                    <h2 className="card-title">
+                      Problems & Fixes
+                    </h2>
+                  </div>
+
+                  <div className="card-body">
+                    <div className="debugger-issues">
+                      {result.issues.map(
+                        (issue, index) => (
+                          <article
+                            className="debugger-issue"
+                            key={`${issue.line || "x"}-${index}`}
+                          >
+                            <div className="debugger-issue-header">
+                              <span className="status">
+                                Line {issue.line || "—"}
+                              </span>
+
+                              <span className="status warning">
+                                {issue.type ||
+                                  "Problem"}
+                              </span>
+                            </div>
+
+                            <div className="debugger-issue-content">
+                              <div>
+                                <strong>
+                                  Problem:
+                                </strong>{" "}
+                                {issue.problem ||
+                                  "No problem description provided."}
+                              </div>
+
+                              <div>
+                                <strong>
+                                  Why:
+                                </strong>{" "}
+                                {issue.why ||
+                                  "No explanation provided."}
+                              </div>
+
+                              <div>
+                                <strong>
+                                  Fix:
+                                </strong>{" "}
+                                {issue.fix ||
+                                  "No fix provided."}
+                              </div>
+                            </div>
+                          </article>
+                        )
+                      )}
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              <section className="card">
+                <div className="card-header">
+                  <h2 className="card-title">
+                    Corrected Code
+                  </h2>
+
+                  <p className="card-description">
+                    Review the corrected source before
+                    running it in Code Lab.
+                  </p>
+                </div>
+
+                <div className="card-body">
+                  <pre className="debugger-code-output">
+                    {result.correctedCode}
+                  </pre>
+
+                  <div className="debugger-actions">
+                    <button
+                      type="button"
+                      className="btn btn-success"
+                      onClick={copyCorrectedCode}
+                    >
+                      📋 Copy Corrected Code
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={sendToCodeLab}
+                    >
+                      💻 Open in Code Lab
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
@@ -1511,7 +2045,7 @@ function CodeGeneratorPage({
                   marginTop: 15,
                 }}
               >
-                Generating five solutions...
+                Generating solutions...
               </div>
 
               <div className="empty-state-text">
