@@ -66,6 +66,8 @@ const allowedOrigins = new Set([
   "http://127.0.0.1:5174",
   "http://127.0.0.1:5175",
   "http://127.0.0.1:5176",
+
+  "https://codementor-ai-1-1g30.onrender.com",
 ]);
 
 if (CLIENT_ORIGIN) {
