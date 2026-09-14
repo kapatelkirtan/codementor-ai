@@ -57,6 +57,7 @@ const EXE_FILE =
    ========================================================= */
 
 const allowedOrigins = new Set([
+  "http://localhost:4173",
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
@@ -66,6 +67,12 @@ const allowedOrigins = new Set([
   "http://127.0.0.1:5174",
   "http://127.0.0.1:5175",
   "http://127.0.0.1:5176",
+
+  "http://10.209.49.186:4173",
+  "http://10.209.49.186:5173",
+  "http://10.209.49.186:5174",
+  "http://10.209.49.186:5175",
+  "http://10.209.49.186:5176",
 
   "https://codementor-ai-1-1g30.onrender.com",
 ]);
@@ -91,26 +98,19 @@ app.use(
         return callback(null, true);
       }
 
-      if (
-        /^http:\/\/localhost:\d+$/.test(
-          origin
-        )
-      ) {
-        return callback(null, true);
-      }
+      if (/^http:\/\/localhost:\d+$/.test(origin)) {
+  return callback(null, true);
+}
 
-      if (
-        /^http:\/\/127\.0\.0\.1:\d+$/.test(
-          origin
-        )
-      ) {
-        return callback(null, true);
-      }
+if (/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) {
+  return callback(null, true);
+}
 
+if (/^http:\/\/10\.209\.49\.186:\d+$/.test(origin)) {
+  return callback(null, true);
+}
       return callback(
-        new Error(
-          `CORS blocked origin: ${origin}`
-        )
+        new Error(`CORS blocked origin: ${origin}`)
       );
     },
 
@@ -142,7 +142,6 @@ app.use(
     extended: true,
   })
 );
-
 /* =========================================================
    SUPPORTED LANGUAGES
    ========================================================= */
@@ -2292,7 +2291,7 @@ app.post(
 
       const answer =
         await askAI(`
-Create a programming practice problem.
+Create ONE programming practice problem.
 
 Language:
 ${language || "Python"}
@@ -2303,28 +2302,63 @@ ${level || "Beginner"}
 Topic:
 ${topic || "Basic programming"}
 
-Include:
+Return ONLY valid JSON.
+Do not use Markdown fences.
+Do not add any text before or after the JSON.
 
-Problem
-Input
-Expected Output
-Constraints
-Hint
+Use exactly this structure:
 
-Do not claim execution.
+{
+  "question": "The programming problem statement.",
+  "answer": "A clear solution or expected solution.",
+  "hint": "A useful hint without giving everything away.",
+  "explanation": "A beginner-friendly explanation of how to solve it."
+}
+
+The question should be suitable for the requested level.
+
+The answer must NOT repeat the entire question.
+
+Do not claim that the code was executed.
 `.trim());
+
+      let practice;
+
+      try {
+        practice =
+          typeof answer === "string"
+            ? JSON.parse(answer)
+            : answer;
+      } catch (parseError) {
+        console.error(
+          "Practice JSON parse failed:",
+          parseError
+        );
+
+        return res.status(500).json({
+          success: false,
+          error:
+            "Practice generator returned invalid data.",
+          raw: answer,
+        });
+      }
 
       res.json({
         success: true,
-        answer,
+        question:
+          practice.question || "",
+        answer:
+          practice.answer || "",
+        hint:
+          practice.hint || "",
+        explanation:
+          practice.explanation || "",
       });
     } catch (error) {
       console.error(error);
 
       res
-        .status(
-          error.status || 500
-        )
+        .status(error.status || 500)
         .json({
           success: false,
           error:
