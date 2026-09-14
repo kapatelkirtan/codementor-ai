@@ -18,6 +18,14 @@ const API =
   "https://codementor-ai-backend-b276.onrender.com";
 
 /* =========================================================
+   DESKTOP APP DETECTION
+   ========================================================= */
+
+const IS_DESKTOP_APP =
+  typeof window !== "undefined" &&
+  /Electron/i.test(navigator.userAgent);
+
+/* =========================================================
    CONSTANTS
    ========================================================= */
 
@@ -540,13 +548,19 @@ function App() {
         </main>
       </div>
 
-      <a
-        className="download-exe"
-        href={`${API}/downloads/CodeMentor-AI-Setup.exe`}
-        download
-      >
-        ⬇ DOWNLOAD DESKTOP EXE
-      </a>
+      {!IS_DESKTOP_APP && (
+        <a
+          className="download-exe"
+          href={`${API}/downloads/CodeMentor-AI-Setup.exe`}
+          download
+        >
+          ⬇ DOWNLOAD DESKTOP EXE
+        </a>
+      )}
+
+      <footer className="footer">
+        Made By Kirtan Ka.patel
+      </footer>
 
       {toast && (
         <div className="toast">
