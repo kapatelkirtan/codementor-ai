@@ -13,12 +13,7 @@ import "./styles.css";
 /* =========================================================
    API
    ========================================================= */
-const API =
-  typeof window !== "undefined" &&
-  (window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1")
-    ? "http://localhost:8787"
-    : "https://codementor-ai-backend-b276.onrender.com";
+const API = "http://10.209.49.186:8787";
 /* =========================================================
    DESKTOP APP DETECTION
    ========================================================= */
@@ -571,15 +566,6 @@ function App() {
         </main>
       </div>
 
-      {!IS_DESKTOP_APP && (
-        <a
-          className="download-exe"
-          href={`${API}/downloads/CodeMentor-AI-Setup.exe`}
-          download
-        >
-          ⬇ DOWNLOAD DESKTOP EXE
-        </a>
-      )}
 
       <footer className="footer">
         Made By Kirtan Ka.patel
