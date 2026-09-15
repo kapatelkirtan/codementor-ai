@@ -1355,6 +1355,16 @@ IF REAR = N - 1 THEN
 Never use:
 IF FRONT = -1 THEN
 
+23. When an overflow condition occurs and the algorithm terminates because of overflow, use EXIT immediately after the PRINT statement.
+
+Use:
+IF (REAR = N - 1) THEN
+    PRINT ("QUEUE OVERFLOW")
+    EXIT
+END IF
+
+Never use RETURN for terminating an overflow condition.
+
 Example style:
 
 Algorithm: Array Update Operation
