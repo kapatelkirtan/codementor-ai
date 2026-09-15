@@ -1341,6 +1341,20 @@ PRINT ("QUEUE OVERFLOW")
 Never use:
 PRINT "QUEUE OVERFLOW"
 
+22. Every IF condition MUST be enclosed in parentheses.
+
+Use:
+IF (REAR = N - 1) THEN
+
+Use:
+IF (FRONT = -1) THEN
+
+Never use:
+IF REAR = N - 1 THEN
+
+Never use:
+IF FRONT = -1 THEN
+
 Example style:
 
 Algorithm: Array Update Operation
