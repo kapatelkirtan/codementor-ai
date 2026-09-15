@@ -1333,6 +1333,14 @@ as algorithm comments.
 
 20. Do not return empty steps.
 
+21. Every PRINT statement MUST use parentheses around its argument.
+
+Use:
+PRINT ("QUEUE OVERFLOW")
+
+Never use:
+PRINT "QUEUE OVERFLOW"
+
 Example style:
 
 Algorithm: Array Update Operation
