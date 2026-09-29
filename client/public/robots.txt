@@ -1,4 +1,4 @@
-User-agent: *
+﻿User-agent: *
 Allow: /
 
-Sitemap: https://codementor-ai-1-1g30.onrender.com
+Sitemap: https://codementor-ai-1-1g30.onrender.com/sitemap.xml
