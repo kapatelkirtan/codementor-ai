@@ -16,13 +16,6 @@ import "./styles.css";
 const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
   ? "http://10.209.49.186:8787"
   : "https://codementor-ai-qbdx.onrender.com";
-/* =========================================================
-   DESKTOP APP DETECTION
-   ========================================================= */
-
-const IS_DESKTOP_APP =
-  typeof window !== "undefined" &&
-  /Electron/i.test(navigator.userAgent);
 
 /* =========================================================
    CONSTANTS

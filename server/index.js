@@ -39,18 +39,6 @@ const GEMINI_URL =
     GEMINI_MODEL
   )}:generateContent`;
 
-const DOWNLOAD_DIR =
-  path.join(
-    __dirname,
-    "public",
-    "downloads"
-  );
-
-const EXE_FILE =
-  path.join(
-    DOWNLOAD_DIR,
-    "CodeMentor-AI-Setup.exe"
-  );
 
 /* =========================================================
    CORS
@@ -1467,8 +1455,6 @@ app.get(
         codeDebugger:
           true,
 
-        desktopExeDownload:
-          true,
 
         geminiRetry:
           true,
@@ -1539,8 +1525,6 @@ app.get(
         runAlgorithm:
           "/api/algorithm/run",
 
-        exe:
-          "/downloads/CodeMentor-AI-Setup.exe",
       },
 
       timestamp:
@@ -3063,54 +3047,6 @@ app.post(
             "Algorithm execution failed.",
         });
     }
-  }
-);
-
-/* =========================================================
-   DESKTOP EXE DOWNLOAD
-   ========================================================= */
-
-if (
-  !fs.existsSync(
-    DOWNLOAD_DIR
-  )
-) {
-  fs.mkdirSync(
-    DOWNLOAD_DIR,
-    {
-      recursive: true,
-    }
-  );
-}
-
-app.use(
-  "/downloads",
-  express.static(
-    DOWNLOAD_DIR
-  )
-);
-
-app.get(
-  "/api/downloads/exe",
-  (req, res) => {
-    if (
-      !fs.existsSync(
-        EXE_FILE
-      )
-    ) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          error:
-            "Desktop EXE has not been uploaded to the server yet.",
-        });
-    }
-
-    res.download(
-      EXE_FILE,
-      "CodeMentor-AI-Setup.exe"
-    );
   }
 );
 
