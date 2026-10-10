@@ -778,16 +778,6 @@ function HomePage({
             ✓
           </div>
         </div>
-
-        <div className="stat-card">
-          <div className="stat-label">
-            Desktop App
-          </div>
-
-          <div className="stat-value">
-            EXE
-          </div>
-        </div>
       </div>
 
       <div className="grid grid-3">
