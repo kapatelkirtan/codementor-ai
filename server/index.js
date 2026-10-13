@@ -63,6 +63,7 @@ const allowedOrigins = new Set([
   "http://10.209.49.186:5176",
 
   "https://codementor-ai-1-1g30.onrender.com",
+  "https://codementor-ai.ventuox.com",
 ]);
 
 if (CLIENT_ORIGIN) {
