@@ -1,4 +1,4 @@
-﻿require("dotenv").config();
+require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
@@ -452,13 +452,11 @@ async function askAI(
   options = {}
 ) {
   if (!GEMINI_API_KEY) {
-    const error =
-      new Error(
-        "GEMINI_API_KEY is not configured."
-      );
+    const error = new Error(
+      "GEMINI_API_KEY is not configured."
+    );
 
     error.status = 503;
-
     throw error;
   }
 
@@ -466,12 +464,10 @@ async function askAI(
     options.maxAttempts || 5;
 
   const temperature =
-    options.temperature ??
-    0.12;
+    options.temperature ?? 0.12;
 
   const maxOutputTokens =
-    options.maxOutputTokens ||
-    12000;
+    options.maxOutputTokens || 12000;
 
   let lastError = null;
 
@@ -481,81 +477,72 @@ async function askAI(
     attempt++
   ) {
     try {
-      const response =
-        await fetch(
-          `${GEMINI_URL}?key=${encodeURIComponent(
-            GEMINI_API_KEY
-          )}`,
-          {
-            method: "POST",
+      const response = await fetch(
+        `${GEMINI_URL}?key=${encodeURIComponent(
+          GEMINI_API_KEY
+        )}`,
+        {
+          method: "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          signal: options.timeoutMs
+            ? AbortSignal.timeout(options.timeoutMs)
+            : undefined,
+
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [
+                {
+                  text: SYSTEM_PROMPT,
+                },
+              ],
             },
 
-            body: JSON.stringify({
-              systemInstruction: {
+            contents: [
+              {
+                role: "user",
                 parts: [
                   {
-                    text:
-                      SYSTEM_PROMPT,
+                    text: instruction,
                   },
                 ],
               },
+            ],
 
-              contents: [
-                {
-                  role: "user",
+            generationConfig: {
+              temperature,
+              maxOutputTokens,
+            },
+          }),
+        }
+      );
 
-                  parts: [
-                    {
-                      text:
-                        instruction,
-                    },
-                  ],
-                },
-              ],
-
-              generationConfig: {
-                temperature,
-                maxOutputTokens,
-              },
-            }),
-          }
-        );
-
-      const raw =
-        await response.text();
+      const raw = await response.text();
 
       let data = null;
 
       try {
-        data =
-          JSON.parse(raw);
+        data = JSON.parse(raw);
       } catch (_) {}
 
       if (!response.ok) {
-        const error =
-          new Error(
-            data?.error?.message ||
-              raw ||
-              `Gemini request failed with status ${response.status}`
-          );
+        const error = new Error(
+          data?.error?.message ||
+            raw ||
+            `Gemini request failed with status ${response.status}`
+        );
 
-        error.status =
-          response.status;
-
+        error.status = response.status;
         throw error;
       }
 
       const text =
         data?.candidates?.[0]
           ?.content?.parts
-          ?.map(
-            (part) =>
-              part.text || ""
-          )
+          ?.map((part) => part.text || "")
           .join("") || "";
 
       if (!text.trim()) {
@@ -566,24 +553,34 @@ async function askAI(
 
       return text.trim();
     } catch (error) {
-      lastError = error;
+      const timedOut =
+        error?.name === "TimeoutError" ||
+        error?.name === "AbortError";
+
+      lastError = timedOut
+        ? Object.assign(
+            new Error(
+              "Gemini request timed out. Please try again."
+            ),
+            { status: 504 }
+          )
+        : error;
 
       const retryable =
+        timedOut ||
         [
           429,
           500,
           502,
           503,
           504,
-        ].includes(
-          error.status
-        );
+        ].includes(error.status);
 
       if (
         !retryable ||
         attempt >= maxAttempts
       ) {
-        throw error;
+        throw lastError;
       }
 
       await sleep(
@@ -601,9 +598,7 @@ async function askAI(
 
   throw (
     lastError ||
-    new Error(
-      "AI request failed."
-    )
+    new Error("AI request failed.")
   );
 }
 
@@ -1548,11 +1543,7 @@ app.post(
         question,
       } = req.body || {};
 
-      if (
-        !safeString(
-          question
-        ).trim()
-      ) {
+      if (!safeString(question).trim()) {
         return res
           .status(400)
           .json({
@@ -1562,8 +1553,8 @@ app.post(
           });
       }
 
-      const answer =
-        await askAI(`
+      const answer = await askAI(
+        `
 Programming language:
 ${language || "General programming"}
 
@@ -1580,7 +1571,12 @@ If code is requested, provide complete code.
 Use meaningful comments in code.
 
 Do not claim execution.
-`.trim());
+`.trim(),
+        {
+          maxAttempts: 2,
+          timeoutMs: 30000,
+        }
+      );
 
       res.json({
         success: true,
@@ -1590,9 +1586,7 @@ Do not claim execution.
       console.error(error);
 
       res
-        .status(
-          error.status || 500
-        )
+        .status(error.status || 500)
         .json({
           success: false,
           error:
