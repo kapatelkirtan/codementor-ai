@@ -472,11 +472,22 @@ async function askAI(
   let lastError = null;
 
   for (
-    let attempt = 1;
-    attempt <= maxAttempts;
-    attempt++
-  ) {
-    try {
+  let attempt = 1;
+  attempt <= maxAttempts;
+  attempt++
+) {
+  const attemptStartedAt = Date.now();
+  const raw = await response.text();
+
+console.log(
+  `[Gemini] Attempt ${attempt}/${maxAttempts} | HTTP ${response.status} | ${Date.now() - attemptStartedAt} ms`
+);
+
+let data = null;
+  try {
+console.warn(
+  `[Gemini] Attempt ${attempt}/${maxAttempts} failed after ${Date.now() - attemptStartedAt} ms | Status: ${error?.status || "none"} | Error: ${error?.name || "Error"}`
+);
       const response = await fetch(
         `${GEMINI_URL}?key=${encodeURIComponent(
           GEMINI_API_KEY
