@@ -1605,7 +1605,180 @@ Do not claim execution.
     }
   }
 );
+app.post(
+  "/api/ai/teach/stream",
+  async (req, res) => {
+    const startedAt = Date.now();
 
+    try {
+      if (!GEMINI_API_KEY) {
+        return res.status(503).json({
+          success: false,
+          error: "GEMINI_API_KEY is not configured.",
+        });
+      }
+
+      const {
+        language,
+        level,
+        question,
+      } = req.body || {};
+
+      if (!safeString(question).trim()) {
+        return res.status(400).json({
+          success: false,
+          error: "Enter a programming question.",
+        });
+      }
+
+      const prompt = `
+Programming language:
+${language || "General programming"}
+
+Student level:
+${level || "Beginner"}
+
+Student question:
+${safeString(question).trim()}
+
+Give a clear, beginner-friendly answer in concise sections.
+If code is requested, provide complete code with meaningful comments.
+Do not claim execution.
+`.trim();
+
+      const streamUrl =
+        `${GEMINI_URL.replace(
+          ":generateContent",
+          ":streamGenerateContent"
+        )}?alt=sse`;
+
+      const upstream = await fetch(streamUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": GEMINI_API_KEY,
+        },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [
+              {
+                text: SYSTEM_PROMPT,
+              },
+            ],
+          },
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: prompt,
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.12,
+            maxOutputTokens: 2048,
+          },
+        }),
+      });
+
+      if (!upstream.ok) {
+        const raw = await upstream.text();
+        let message = raw;
+
+        try {
+          const data = JSON.parse(raw);
+          message = data?.error?.message || raw;
+        } catch (_) {}
+
+        console.error(
+          `[Gemini stream] HTTP ${upstream.status} after ${Date.now() - startedAt} ms`
+        );
+
+        return res.status(upstream.status).json({
+          success: false,
+          error: message || "Gemini request failed.",
+        });
+      }
+
+      if (!upstream.body) {
+        return res.status(502).json({
+          success: false,
+          error: "Gemini returned no response stream.",
+        });
+      }
+
+      res.status(200);
+      res.setHeader(
+        "Content-Type",
+        "text/event-stream; charset=utf-8"
+      );
+      res.setHeader(
+        "Cache-Control",
+        "no-cache, no-transform"
+      );
+      res.setHeader("X-Accel-Buffering", "no");
+      res.flushHeaders();
+
+      let firstChunk = true;
+
+      for await (const chunk of upstream.body) {
+        if (res.destroyed) {
+          break;
+        }
+
+        if (firstChunk) {
+          firstChunk = false;
+          console.log(
+            `[Gemini stream] First chunk after ${Date.now() - startedAt} ms`
+          );
+        }
+
+        if (!res.write(chunk)) {
+          await new Promise((resolve) => {
+            res.once("drain", resolve);
+          });
+        }
+      }
+
+      if (!res.destroyed) {
+        res.end();
+      }
+
+      console.log(
+        `[Gemini stream] Finished after ${Date.now() - startedAt} ms`
+      );
+    } catch (error) {
+      console.error(
+        `[Gemini stream] Failed after ${Date.now() - startedAt} ms`,
+        error
+      );
+
+      if (res.headersSent) {
+        if (!res.destroyed) {
+          res.write(
+            `\n\nevent: error\ndata: ${JSON.stringify({
+              error:
+                error.message ||
+                "AI Teacher streaming failed.",
+            })}\n\n`
+          );
+          res.end();
+        }
+
+        return;
+      }
+
+      return res.status(error.status || 500).json({
+        success: false,
+        error:
+          error.message ||
+          "AI Teacher streaming failed.",
+      });
+    }
+  }
+);
 /* =========================================================
    AI DEBUGGER
    ========================================================= */
