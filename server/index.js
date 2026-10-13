@@ -1553,8 +1553,9 @@ app.post(
           });
       }
 
-      const answer = await askAI(
-        `
+     
+const answer = await askAI(
+  `
 Programming language:
 ${language || "General programming"}
 
@@ -1564,18 +1565,18 @@ ${level || "Beginner"}
 Student question:
 ${question}
 
-Teach the concept clearly and step by step.
-
-If code is requested, provide complete code.
-
+Give a clear, beginner-friendly answer using short sections.
+For ordinary questions, aim for 150–300 words.
+If code is requested, provide complete working code and a brief explanation.
+Avoid unnecessary introductions and repeated information.
 Use meaningful comments in code.
-
 Do not claim execution.
 `.trim(),
-        {
-          maxAttempts: 2,
-        }
-      );
+  {
+    maxAttempts: 2,
+    maxOutputTokens: 2048,
+  }
+);
 
 
       res.json({
