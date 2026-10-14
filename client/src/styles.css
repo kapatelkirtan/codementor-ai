@@ -1054,22 +1054,22 @@ textarea.stdin-editor {
   display: flex;
   flex-direction: column;
 
-  min-height: 620px;
+  height: min(680px, calc(100vh - 220px));
+  min-height: 420px;
   overflow: hidden;
 }
 
 .chat-messages {
-  flex: 1;
+  flex: 1 1 0;
 
   display: flex;
   flex-direction: column;
 
   gap: 15px;
 
-  min-height: 360px;
-  max-height: 650px;
-
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 
   padding: 20px;
 
@@ -1877,13 +1877,15 @@ code {
     min-height: 135px;
   }
 
-  .chat-container {
-    min-height: 560px;
-  }
+ .chat-container {
+  height: calc(100vh - 220px);
+  min-height: 420px;
+}
 
-  .chat-messages {
-    max-height: 55vh;
-  }
+.chat-messages {
+  min-height: 0;
+  max-height: none;
+}
 
   .chat-message {
     max-width: 94%;
