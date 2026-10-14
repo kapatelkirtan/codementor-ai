@@ -15,7 +15,7 @@ import "./styles.css";
    ========================================================= */
 const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
   ? "http://10.209.49.186:8787"
-  : "https://codementor-ai-qbdx.onrender.com";
+  : "https://codementor-ai-backend-b276.onrender.com";
 
 /* =========================================================
    CONSTANTS
@@ -1523,71 +1523,219 @@ function TeacherPage({
   }, [messages]);
 
   async function askTeacher() {
-    const question =
-      inputRef.current?.value?.trim();
+  const question =
+    inputRef.current?.value?.trim();
 
-    if (!question || loading) {
-      return;
+  if (!question || loading) {
+    return;
+  }
+
+  inputRef.current.value = "";
+
+  setMessages((current) => [
+    ...current,
+    {
+      role: "user",
+      text: question,
+    },
+  ]);
+
+  setLoading(true);
+
+  let assistantMessageCreated = false;
+  let accumulated = "";
+
+  try {
+    const response = await fetch(
+      `${API}/api/ai/teach/stream`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question,
+          level,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const raw = await response.text();
+      let message = raw;
+
+      try {
+        const data = JSON.parse(raw);
+        message =
+          data?.error ||
+          data?.message ||
+          raw;
+      } catch (_) {}
+
+      throw new Error(
+        message ||
+          `Request failed with HTTP ${response.status}`
+      );
     }
 
-    inputRef.current.value = "";
+    if (!response.body) {
+      throw new Error(
+        "Streaming is not supported by this browser."
+      );
+    }
 
     setMessages((current) => [
       ...current,
       {
-        role: "user",
-        text: question,
+        role: "assistant",
+        text: "",
       },
     ]);
 
-    setLoading(true);
+    assistantMessageCreated = true;
 
-    try {
-      const data =
-        await apiRequest(
-          "/api/ai/teach",
-          {
-            method: "POST",
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
 
-            body: JSON.stringify({
-              question,
-              level,
-            }),
+    let buffer = "";
+
+    function processEvent(eventBlock) {
+      const data = eventBlock
+        .split(/\r?\n/)
+        .filter((line) => line.startsWith("data:"))
+        .map((line) => line.slice(5).trim())
+        .join("\n");
+
+      if (!data || data === "[DONE]") {
+        return;
+      }
+
+      let payload;
+
+      try {
+        payload = JSON.parse(data);
+      } catch (_) {
+        throw new Error(
+          "Received an invalid streaming response."
+        );
+      }
+
+      if (payload?.error) {
+        throw new Error(
+          payload.error.message ||
+            String(payload.error)
+        );
+      }
+
+      const delta =
+        payload?.candidates?.[0]
+          ?.content?.parts
+          ?.map((part) => part.text || "")
+          .join("") || "";
+
+      if (delta) {
+        accumulated += delta;
+
+        setMessages((current) => {
+          const next = [...current];
+          const lastIndex = next.length - 1;
+
+          if (
+            lastIndex >= 0 &&
+            next[lastIndex].role === "assistant"
+          ) {
+            next[lastIndex] = {
+              ...next[lastIndex],
+              text: accumulated,
+            };
           }
+
+          return next;
+        });
+      }
+    }
+
+    while (true) {
+      const { value, done } = await reader.read();
+
+      if (done) {
+        break;
+      }
+
+      buffer += decoder.decode(value, {
+        stream: true,
+      });
+
+      let separator;
+
+      while (
+        (separator = /\r?\n\r?\n/.exec(buffer))
+      ) {
+        const eventBlock = buffer.slice(
+          0,
+          separator.index
         );
 
-      const answer =
-        data.answer ||
-        data.response ||
-        "No answer was returned.";
+        buffer = buffer.slice(
+          separator.index + separator[0].length
+        );
 
-      setMessages((current) => [
-        ...current,
-        {
-          role: "assistant",
-          text: answer,
-        },
-      ]);
-    } catch (error) {
-      const message =
-        getErrorMessage(error);
-
-      setMessages((current) => [
-        ...current,
-        {
-          role: "assistant",
-          text:
-            `Error: ${message}`,
-        },
-      ]);
-
-      showToast(
-        "AI Teacher request failed."
-      );
-    } finally {
-      setLoading(false);
+        processEvent(eventBlock);
+      }
     }
+
+    buffer += decoder.decode();
+
+    if (buffer.trim()) {
+      processEvent(buffer);
+    }
+
+    if (!accumulated.trim()) {
+      throw new Error(
+        "Gemini returned an empty response."
+      );
+    }
+  } catch (error) {
+    const message = getErrorMessage(error);
+
+    setMessages((current) => {
+      const next = [...current];
+      const lastIndex = next.length - 1;
+
+      if (
+        assistantMessageCreated &&
+        lastIndex >= 0 &&
+        next[lastIndex].role === "assistant"
+      ) {
+        const previousText =
+          next[lastIndex].text || "";
+
+        next[lastIndex] = {
+          ...next[lastIndex],
+          text: previousText
+            ? `${previousText}\n\nError: ${message}`
+            : `Error: ${message}`,
+        };
+
+        return next;
+      }
+
+      return [
+        ...next,
+        {
+          role: "assistant",
+          text: `Error: ${message}`,
+        },
+      ];
+    });
+
+    showToast(
+      "AI Teacher request failed."
+    );
+  } finally {
+    setLoading(false);
   }
+}
 
   function handleKeyDown(event) {
     if (
