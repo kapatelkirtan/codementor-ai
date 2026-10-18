@@ -1,4 +1,4 @@
-const CACHE_NAME = "codementor-ai-shell-v1";
+const CACHE_NAME = "codementor-ai-shell-v2";
 const APP_SHELL = ["/", "/favicon.png", "/app-icon.svg", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
