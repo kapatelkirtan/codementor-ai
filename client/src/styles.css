@@ -2101,6 +2101,7 @@ code {
 
 .topbar-install-button {
   flex: 0 0 auto;
+  width: auto;
   white-space: nowrap;
   border-color: rgba(79, 140, 255, 0.38);
 }
