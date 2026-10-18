@@ -1,5 +1,5 @@
 const CACHE_NAME = "codementor-ai-shell-v1";
-const APP_SHELL = ["/", "/favicon.png", "/manifest.webmanifest"];
+const APP_SHELL = ["/", "/favicon.png", "/app-icon.svg", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -48,7 +48,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   // Cache built, versioned frontend assets after their first successful fetch.
-  if (url.pathname.startsWith("/assets/") || url.pathname === "/favicon.png" || url.pathname === "/manifest.webmanifest") {
+  if (url.pathname.startsWith("/assets/") || url.pathname === "/favicon.png" || url.pathname === "/app-icon.svg" || url.pathname === "/manifest.webmanifest") {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) return cached;
