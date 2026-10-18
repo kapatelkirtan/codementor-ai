@@ -958,7 +958,7 @@ function HomePage({
         </div>
 
         <p className="app-install-tip">
-          Tip : download this website as app from edge browser for lockscreen background music play....
+          Tip : download this website as app from edge browser for better experience....
         </p>
       </section>
 
