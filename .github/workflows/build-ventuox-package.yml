@@ -39,6 +39,8 @@ jobs:
           test -f client/dist/manifest.webmanifest
           test -f client/dist/sw.js
           test -f client/dist/favicon.png
+          test -f client/dist/.htaccess
+          test -f client/dist/VENTUOX-UPLOAD-README.txt
           test -f client/dist/assets/$(find client/dist/assets -maxdepth 1 -name '*.js' -printf '%f\n' | head -n 1)
 
       - name: Upload ready-to-deploy website files
