@@ -439,6 +439,15 @@ function App() {
   const [isBackendOnline, setIsBackendOnline] =
     useState(null);
 
+  const [installPromptEvent, setInstallPromptEvent] =
+    useState(null);
+
+  const [showInstallHelp, setShowInstallHelp] =
+    useState(false);
+
+  const [isAppInstalled, setIsAppInstalled] =
+    useState(false);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -459,6 +468,60 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const standalone =
+      window.matchMedia?.("(display-mode: standalone)")?.matches ||
+      window.navigator.standalone === true;
+
+    if (standalone) {
+      setIsAppInstalled(true);
+    }
+
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      setInstallPromptEvent(event);
+    };
+
+    const handleAppInstalled = () => {
+      setIsAppInstalled(true);
+      setInstallPromptEvent(null);
+      setShowInstallHelp(false);
+      setToast("CodeMentor AI was installed.");
+      window.setTimeout(() => setToast(""), 2800);
+    };
+
+    window.addEventListener(
+      "beforeinstallprompt",
+      handleBeforeInstallPrompt
+    );
+
+    window.addEventListener(
+      "appinstalled",
+      handleAppInstalled
+    );
+
+    if (
+      "serviceWorker" in navigator &&
+      (window.isSecureContext || window.location.hostname === "localhost")
+    ) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {
+        // Installation guidance remains available if SW registration fails.
+      });
+    }
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+
+      window.removeEventListener(
+        "appinstalled",
+        handleAppInstalled
+      );
+    };
+  }, []);
+
   const showToast =
     useCallback((message) => {
       setToast(message);
@@ -467,6 +530,27 @@ function App() {
         setToast("");
       }, 2800);
     }, []);
+
+  const handleInstallApp = useCallback(async () => {
+    if (isAppInstalled || !installPromptEvent) {
+      setShowInstallHelp(true);
+      return;
+    }
+
+    try {
+      await installPromptEvent.prompt();
+      const choice = await installPromptEvent.userChoice;
+      setInstallPromptEvent(null);
+
+      if (choice?.outcome === "accepted") {
+        showToast("Install accepted. Follow any remaining browser prompts.");
+      } else {
+        showToast("Install cancelled. You can try again anytime.");
+      }
+    } catch (_) {
+      setShowInstallHelp(true);
+    }
+  }, [installPromptEvent, isAppInstalled, showToast]);
 
   const openLab = useCallback(
     (language, code) => {
@@ -493,6 +577,8 @@ function App() {
         backendOnline={
           isBackendOnline
         }
+        onDownloadApp={handleInstallApp}
+        appInstalled={isAppInstalled}
       />
 
       <div className="main-layout">
@@ -505,6 +591,8 @@ function App() {
           {page === "home" && (
             <HomePage
               setPage={setPage}
+              onDownloadApp={handleInstallApp}
+              appInstalled={isAppInstalled}
             />
           )}
 
@@ -566,11 +654,112 @@ function App() {
         Made By Kirtan Ka.patel
       </footer>
 
+      {showInstallHelp && (
+        <InstallHelpModal
+          onClose={() => setShowInstallHelp(false)}
+        />
+      )}
+
       {toast && (
         <div className="toast">
           {toast}
         </div>
       )}
+    </div>
+  );
+}
+
+/* =========================================================
+   APP INSTALL HELP
+   ========================================================= */
+
+function InstallHelpModal({ onClose }) {
+  const userAgent = navigator.userAgent || "";
+  const isIOS =
+    /iPad|iPhone|iPod/i.test(userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/i.test(userAgent);
+  const isEmbeddedBrowser =
+    /FBAN|FBAV|Instagram|WhatsApp|Line\//i.test(userAgent);
+
+  return (
+    <div
+      className="install-guide-backdrop"
+      role="presentation"
+      onClick={onClose}
+    >
+      <section
+        className="install-guide card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="install-guide-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="install-guide-close"
+          onClick={onClose}
+          aria-label="Close installation instructions"
+        >
+          ×
+        </button>
+
+        <div className="install-guide-icon" aria-hidden="true">
+          ⬇
+        </div>
+
+        <h2 id="install-guide-title">
+          Install CodeMentor AI
+        </h2>
+
+        <p className="install-guide-intro">
+          This button opens the install prompt when your browser supports it.
+          Otherwise, follow the steps for your device below.
+        </p>
+
+        <ol className="install-guide-steps">
+          {isIOS ? (
+            <>
+              <li>Open this website in <strong>Safari</strong>.</li>
+              <li>Tap the <strong>Share</strong> icon.</li>
+              <li>Choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</li>
+            </>
+          ) : isAndroid ? (
+            <>
+              <li>Open this page directly in an up-to-date browser such as <strong>Chrome</strong> or <strong>Edge</strong>.</li>
+              <li>Open the browser menu (<strong>⋮</strong>).</li>
+              <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, then confirm.</li>
+            </>
+          ) : (
+            <>
+              <li>Open the browser menu (<strong>⋮</strong> or <strong>…</strong>).</li>
+              <li>Choose <strong>Install CodeMentor AI</strong> or the browser's <strong>Install page as app</strong> option.</li>
+              <li>Confirm the browser's installation prompt.</li>
+            </>
+          )}
+        </ol>
+
+        {isEmbeddedBrowser && (
+          <p className="alert alert-warning">
+            This appears to be an in-app browser. Open the page in your device's
+            full browser first, then follow the steps above.
+          </p>
+        )}
+
+        <p className="install-guide-note">
+          Browsers require your permission before installing a website. This
+          creates an app shortcut/PWA; it does not silently download an APK.
+          AI and code-running features still need an internet connection.
+        </p>
+
+        <button
+          type="button"
+          className="btn btn-primary install-guide-done"
+          onClick={onClose}
+        >
+          Got it
+        </button>
+      </section>
     </div>
   );
 }
@@ -583,6 +772,8 @@ function TopBar({
   page,
   onHome,
   backendOnline,
+  onDownloadApp,
+  appInstalled,
 }) {
   return (
     <header className="topbar">
@@ -611,6 +802,15 @@ function TopBar({
             Learn • Code • Practice
           </div>
         </div>
+      </button>
+
+      <button
+        type="button"
+        className="btn btn-secondary btn-small topbar-install-button"
+        onClick={onDownloadApp}
+        aria-label="Install CodeMentor AI as an app"
+      >
+        {appInstalled ? "✓ App Installed" : "⬇ Download App"}
       </button>
 
       <div className="topbar-status">
@@ -686,6 +886,8 @@ function Sidebar({
 
 function HomePage({
   setPage,
+  onDownloadApp,
+  appInstalled,
 }) {
   return (
     <div className="content-page">
@@ -744,6 +946,14 @@ function HomePage({
             }
           >
             💻 Open Code Lab
+          </button>
+
+          <button
+            className="btn btn-primary btn-install-app"
+            type="button"
+            onClick={onDownloadApp}
+          >
+            {appInstalled ? "✓ App Installed" : "📲 Download App"}
           </button>
         </div>
       </section>
