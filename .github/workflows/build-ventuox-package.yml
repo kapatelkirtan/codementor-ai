@@ -1,0 +1,50 @@
+name: Build Ventuox upload package
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "client/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/build-ventuox-package.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build static website for Ventuox
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out latest CodeMentor AI
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build:web
+
+      - name: Verify installable website files
+        run: |
+          test -f client/dist/index.html
+          test -f client/dist/manifest.webmanifest
+          test -f client/dist/sw.js
+          test -f client/dist/favicon.png
+          test -f client/dist/assets/$(find client/dist/assets -maxdepth 1 -name '*.js' -printf '%f\n' | head -n 1)
+
+      - name: Upload ready-to-deploy website files
+        uses: actions/upload-artifact@v4
+        with:
+          name: codementor-ai-ventuox-upload
+          path: client/dist/
+          if-no-files-found: error
+          retention-days: 7
