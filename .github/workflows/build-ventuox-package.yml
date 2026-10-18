@@ -33,15 +33,16 @@ jobs:
       - name: Build frontend
         run: npm run build:web
 
-      - name: Verify installable website files
+      - name: Verify complete website package
         run: |
           test -f client/dist/index.html
+          test -f client/dist/index.php
           test -f client/dist/manifest.webmanifest
           test -f client/dist/sw.js
           test -f client/dist/favicon.png
-          test -f client/dist/.htaccess
           test -f client/dist/VENTUOX-UPLOAD-README.txt
-          test -f client/dist/assets/$(find client/dist/assets -maxdepth 1 -name '*.js' -printf '%f\n' | head -n 1)
+          test -n "$(find client/dist/assets -maxdepth 1 -name '*.js' -print -quit)"
+          test -n "$(find client/dist/assets -maxdepth 1 -name '*.css' -print -quit)"
 
       - name: Upload ready-to-deploy website files
         uses: actions/upload-artifact@v4
@@ -50,4 +51,3 @@ jobs:
           path: client/dist/
           if-no-files-found: error
           retention-days: 7
-          include-hidden-files: true
