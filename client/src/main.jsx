@@ -504,7 +504,12 @@ function App() {
       "serviceWorker" in navigator &&
       (window.isSecureContext || window.location.hostname === "localhost")
     ) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {
+      const appBase = import.meta.env.BASE_URL || "/";
+      const appBaseUrl = new URL(appBase, window.location.href);
+      const serviceWorkerUrl = new URL("sw.js", appBaseUrl);
+      navigator.serviceWorker.register(serviceWorkerUrl.href, {
+        scope: appBaseUrl.pathname,
+      }).catch(() => {
         // Installation guidance remains available if SW registration fails.
       });
     }
