@@ -956,6 +956,10 @@ function HomePage({
             {appInstalled ? "✓ App Installed" : "📲 Download App"}
           </button>
         </div>
+
+        <p className="app-install-tip">
+          Tip : download this website as app from edge browser for lockscreen background music play....
+        </p>
       </section>
 
       <div className="stats-grid">
