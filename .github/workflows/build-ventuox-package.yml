@@ -50,3 +50,4 @@ jobs:
           path: client/dist/
           if-no-files-found: error
           retention-days: 7
+          include-hidden-files: true
