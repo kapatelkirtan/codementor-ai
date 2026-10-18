@@ -1,5 +1,15 @@
-const CACHE_NAME = "codementor-ai-shell-v2";
-const APP_SHELL = ["/", "/favicon.png", "/app-icon.svg", "/manifest.webmanifest"];
+const CACHE_NAME = "codementor-ai-shell-v3";
+const APP_ROOT = new URL("./", self.location.href);
+const APP_ROOT_URL = APP_ROOT.href;
+const ASSETS_PATH = new URL("assets/", APP_ROOT).pathname;
+const FAVICON_PATH = new URL("favicon.png", APP_ROOT).pathname;
+const MANIFEST_PATH = new URL("manifest.webmanifest", APP_ROOT).pathname;
+
+const APP_SHELL = [
+  APP_ROOT_URL,
+  new URL("favicon.png", APP_ROOT).href,
+  new URL("manifest.webmanifest", APP_ROOT).href
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -24,12 +34,10 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
-
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-
-  // Leave API requests and third-party resources online-only.
+  // Keep API requests and cross-origin resources online-only.
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === "navigate") {
@@ -38,21 +46,23 @@ self.addEventListener("fetch", (event) => {
         .then((response) => {
           if (response.ok) {
             const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put("/", copy));
+            caches.open(CACHE_NAME).then((cache) => cache.put(APP_ROOT_URL, copy));
           }
           return response;
         })
-        .catch(() => caches.match("/").then((cached) => cached || Response.error()))
+        .catch(() => caches.match(APP_ROOT_URL).then((cached) => cached || Response.error()))
     );
     return;
   }
 
-  // Cache built, versioned frontend assets after their first successful fetch.
-  if (url.pathname.startsWith("/assets/") || url.pathname === "/favicon.png" || url.pathname === "/app-icon.svg" || url.pathname === "/manifest.webmanifest") {
+  if (
+    url.pathname.startsWith(ASSETS_PATH) ||
+    url.pathname === FAVICON_PATH ||
+    url.pathname === MANIFEST_PATH
+  ) {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) return cached;
-
         return fetch(request).then((response) => {
           if (response.ok) {
             const copy = response.clone();
