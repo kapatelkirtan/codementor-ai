@@ -1,23 +1,20 @@
 {
   "id": "./",
   "name": "CodeMentor AI",
-  "short_name": "CodeMentor",
+  "short_name": "CodeMentor AI",
   "description": "Learn programming, generate code, practice algorithms, and run code with CodeMentor AI.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ],
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "any",
   "background_color": "#07111f",
   "theme_color": "#07111f",
   "icons": [
     {
-      "src": "favicon.png",
-      "sizes": "1254x1254",
-      "type": "image/png",
+      "src": "app-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
       "purpose": "any"
     }
   ],
