@@ -1,13 +1,17 @@
-const CACHE_NAME = "codementor-ai-shell-v7";
+const CACHE_NAME = "codementor-ai-shell-v8";
 const APP_ROOT = new URL("./", self.location.href);
 const APP_ROOT_URL = APP_ROOT.href;
 const ASSETS_PATH = new URL("assets/", APP_ROOT).pathname;
 const FAVICON_PATH = new URL("favicon.png", APP_ROOT).pathname;
+const ICON_192_PATH = new URL("icon-192.png", APP_ROOT).pathname;
+const ICON_512_PATH = new URL("icon-512.png", APP_ROOT).pathname;
 const MANIFEST_PATH = new URL("manifest.webmanifest", APP_ROOT).pathname;
 
 const APP_SHELL = [
   APP_ROOT_URL,
   new URL("favicon.png", APP_ROOT).href,
+  new URL("icon-192.png", APP_ROOT).href,
+  new URL("icon-512.png", APP_ROOT).href,
   new URL("manifest.webmanifest", APP_ROOT).href
 ];
 
@@ -58,6 +62,8 @@ self.addEventListener("fetch", (event) => {
   if (
     url.pathname.startsWith(ASSETS_PATH) ||
     url.pathname === FAVICON_PATH ||
+    url.pathname === ICON_192_PATH ||
+    url.pathname === ICON_512_PATH ||
     url.pathname === MANIFEST_PATH
   ) {
     event.respondWith(
