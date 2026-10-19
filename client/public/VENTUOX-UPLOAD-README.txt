@@ -1,16 +1,16 @@
-CodeMentor AI — Ventuox website upload instructions
+CodeMentor AI — Install App button and Ventuox upload instructions
 
-This ZIP is a complete, freshly built static website package from the current GitHub main branch. It includes the Download App buttons in the top navigation and homepage, along with the matching JavaScript/CSS assets and PWA install files.
+This complete static website package includes the updated Download App button and installation guidance. In supported browsers it requests the browser's PWA installation prompt. If the browser does not expose an install prompt, the button explains the available device/browser steps and can copy the site URL for opening in Microsoft Edge or Google Chrome.
 
-IMPORTANT: Upload the CONTENTS of this ZIP directly into your Ventuox Website Root. Do not upload the ZIP as a single file and do not put these files inside an extra nested folder.
+IMPORTANT: A website cannot silently force-install itself or bypass browser/device approval. The PWA install prompt is controlled by the browser. Browsers that do not support PWA installation may only be able to add a home-screen shortcut or open the website normally.
 
-Before replacing files:
-1. Make a backup of your current website files, especially index.html, index.php, assets/, manifest.webmanifest, sw.js and favicon.png.
-2. Upload all files from this ZIP into the website root, allowing matching files to be overwritten.
-3. Replace/update the assets/ directory with the assets/ files from this ZIP. index.html refers to the hashed JavaScript and CSS filenames in this build, so the matching assets must be uploaded too.
-4. Keep your existing .htaccess, .well-known, cgi-bin, backend files/settings, environment files, database files and other unrelated hosting files. Do not delete the whole hosting directory.
-5. Visit https://codementor-ai.ventuox.com/ and do a hard refresh (Ctrl+F5 on Windows). If it still looks old, test in an InPrivate/Incognito window and clear the browser cache/site data for this site.
+UPLOAD:
+1. Back up your current website files.
+2. Upload the CONTENTS of this ZIP directly into the Ventuox Website Root; do not upload the ZIP as a nested folder.
+3. Overwrite matching files and replace/update the assets/ directory using the matching assets from this same ZIP.
+4. Keep your existing .htaccess, .well-known, cgi-bin, backend/environment/database settings, and unrelated hosting files. Do not delete the entire hosting directory.
+5. Visit https://codementor-ai.ventuox.com/ and hard-refresh with Ctrl+F5. If it looks old, test in an InPrivate/Incognito window or clear the site's browser cache/site data.
 
-This build reuses the existing CodeMentor AI brand logo for the website and installed web-app icon. The Download App buttons open the browser install prompt when supported; otherwise, they show installation guidance. Browser installation creates a website app/PWA shortcut, not an APK. AI and code-running features still depend on the separately hosted backend and an internet connection.
+The manifest references app-icon.svg at the required 192x192 and 512x512 scalable icon sizes, as well as the existing favicon. The service-worker cache has been versioned so clients can replace old cached app-shell files.
 
-If you previously installed CodeMentor AI, refresh the website first, then remove the old shortcut/app and install it again if the browser continues showing cached branding or metadata.
+If an older app shortcut is already installed and the icon or app metadata remains stale after upload, remove the old shortcut/app and install again from the refreshed site. AI and code execution still require an internet connection and the separately hosted backend.

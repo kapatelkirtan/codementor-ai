@@ -537,20 +537,31 @@ function App() {
     }, []);
 
   const handleInstallApp = useCallback(async () => {
-    if (isAppInstalled || !installPromptEvent) {
+    // Installation can only be requested after a real user action. Browsers
+    // that don't expose this API use the platform-specific guide instead.
+    if (isAppInstalled) {
       setShowInstallHelp(true);
       return;
     }
 
+    const promptEvent = installPromptEvent;
+    if (!promptEvent) {
+      setShowInstallHelp(true);
+      return;
+    }
+
+    // A BeforeInstallPromptEvent can only be used once; clear it before prompting
+    // so rapid repeated taps cannot reuse a consumed event.
+    setInstallPromptEvent(null);
+
     try {
-      await installPromptEvent.prompt();
-      const choice = await installPromptEvent.userChoice;
-      setInstallPromptEvent(null);
+      await promptEvent.prompt();
+      const choice = await promptEvent.userChoice;
 
       if (choice?.outcome === "accepted") {
-        showToast("Install accepted. Follow any remaining browser prompts.");
+        showToast("CodeMentor AI install started. Follow your browser's prompts.");
       } else {
-        showToast("Install cancelled. You can try again anytime.");
+        showToast("Install was cancelled. You can try again from this button.");
       }
     } catch (_) {
       setShowInstallHelp(true);
@@ -662,6 +673,12 @@ function App() {
       {showInstallHelp && (
         <InstallHelpModal
           onClose={() => setShowInstallHelp(false)}
+          appInstalled={isAppInstalled}
+          onCopyLink={() => {
+            copyText(window.location.href)
+              .then(() => showToast("Website link copied. Open it in a browser that supports app installation."))
+              .catch(() => showToast("Copy failed. Copy the website address from your browser's address bar."));
+          }}
         />
       )}
 
@@ -678,12 +695,18 @@ function App() {
    APP INSTALL HELP
    ========================================================= */
 
-function InstallHelpModal({ onClose }) {
+function InstallHelpModal({ onClose, appInstalled, onCopyLink }) {
   const userAgent = navigator.userAgent || "";
   const isIOS =
     /iPad|iPhone|iPod/i.test(userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const isAndroid = /Android/i.test(userAgent);
+  const isMacSafari =
+    /Macintosh|Mac OS X/i.test(userAgent) &&
+    /Safari/i.test(userAgent) &&
+    !/(Chrome|Chromium|Edg|OPR|Firefox)/i.test(userAgent);
+  const isFirefoxDesktop =
+    /Firefox/i.test(userAgent) && !isAndroid && !isIOS;
   const isEmbeddedBrowser =
     /FBAN|FBAV|Instagram|WhatsApp|Line\//i.test(userAgent);
 
@@ -718,31 +741,46 @@ function InstallHelpModal({ onClose }) {
         </h2>
 
         <p className="install-guide-intro">
-          This button opens the install prompt when your browser supports it.
-          Otherwise, follow the steps for your device below.
+          {appInstalled
+            ? "CodeMentor AI already appears to be installed on this device."
+            : "This button opens the install prompt when your browser provides one. If it does not, use the device-specific steps below."}
         </p>
 
-        <ol className="install-guide-steps">
-          {isIOS ? (
-            <>
-              <li>Open this website in <strong>Safari</strong>.</li>
-              <li>Tap the <strong>Share</strong> icon.</li>
-              <li>Choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</li>
-            </>
-          ) : isAndroid ? (
-            <>
-              <li>Open this page directly in an up-to-date browser such as <strong>Chrome</strong> or <strong>Edge</strong>.</li>
-              <li>Open the browser menu (<strong>⋮</strong>).</li>
-              <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, then confirm.</li>
-            </>
-          ) : (
-            <>
-              <li>Open the browser menu (<strong>⋮</strong> or <strong>…</strong>).</li>
-              <li>Choose <strong>Install CodeMentor AI</strong> or the browser's <strong>Install page as app</strong> option.</li>
-              <li>Confirm the browser's installation prompt.</li>
-            </>
-          )}
-        </ol>
+        {!appInstalled && (
+          <ol className="install-guide-steps">
+            {isIOS ? (
+              <>
+                <li>Open this page in <strong>Safari</strong> if it is not already open there.</li>
+                <li>Tap the <strong>Share</strong> icon.</li>
+                <li>Choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</li>
+              </>
+            ) : isAndroid ? (
+              <>
+                <li>Open this website directly in <strong>Chrome</strong> or <strong>Microsoft Edge</strong> for the most reliable install flow.</li>
+                <li>Tap the browser menu (<strong>⋮</strong>).</li>
+                <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, then approve the browser prompt.</li>
+              </>
+            ) : isMacSafari ? (
+              <>
+                <li>In Safari, open the <strong>File</strong> menu.</li>
+                <li>Choose <strong>Add to Dock</strong>.</li>
+                <li>Confirm to add CodeMentor AI as a web app.</li>
+              </>
+            ) : isFirefoxDesktop ? (
+              <>
+                <li>This desktop browser does not support installing PWAs from a web manifest.</li>
+                <li>Copy the website link below and open it in <strong>Microsoft Edge</strong> or <strong>Google Chrome</strong>.</li>
+                <li>Use the <strong>Download App</strong> button or the browser menu's <strong>Install page as app</strong> option.</li>
+              </>
+            ) : (
+              <>
+                <li>Open the browser menu (<strong>⋮</strong> or <strong>…</strong>).</li>
+                <li>Look for <strong>Install app</strong>, <strong>Install this site as an app</strong>, or <strong>Add to Home screen</strong>.</li>
+                <li>If your browser has no install option, copy the website link below and open it in an up-to-date <strong>Edge</strong> or <strong>Chrome</strong> browser.</li>
+              </>
+            )}
+          </ol>
+        )}
 
         {isEmbeddedBrowser && (
           <p className="alert alert-warning">
@@ -752,17 +790,25 @@ function InstallHelpModal({ onClose }) {
         )}
 
         <p className="install-guide-note">
-          Browsers require your permission before installing a website. This
-          creates an app shortcut/PWA; it does not silently download an APK.
-          AI and code-running features still need an internet connection.
+          A website cannot silently force-install itself as an app. Your browser or device must approve the installation. This creates a website app/PWA or home-screen shortcut, not an APK. AI and code-running features still need an internet connection.
         </p>
+
+        {!appInstalled && (
+          <button
+            type="button"
+            className="btn btn-secondary install-guide-done"
+            onClick={onCopyLink}
+          >
+            Copy Website Link
+          </button>
+        )}
 
         <button
           type="button"
           className="btn btn-primary install-guide-done"
           onClick={onClose}
         >
-          Got it
+          {appInstalled ? "Close" : "Got it"}
         </button>
       </section>
     </div>
