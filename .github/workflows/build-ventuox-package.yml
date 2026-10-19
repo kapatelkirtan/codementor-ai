@@ -40,10 +40,10 @@ jobs:
           test -f client/dist/manifest.webmanifest
           test -f client/dist/sw.js
           test -f client/dist/favicon.png
-          test -f client/dist/app-icon.svg
           python -m json.tool client/dist/manifest.webmanifest > /dev/null
-          grep -q '"sizes": "192x192"' client/dist/manifest.webmanifest
-          grep -q '"sizes": "512x512"' client/dist/manifest.webmanifest
+          grep -q '"src": "favicon.png"' client/dist/manifest.webmanifest
+          ! grep -q 'app-icon.svg' client/dist/manifest.webmanifest
+          test ! -f client/dist/app-icon.svg
           test -f client/dist/VENTUOX-UPLOAD-README.txt
           test -n "$(find client/dist/assets -maxdepth 1 -name '*.js' -print -quit)"
           test -n "$(find client/dist/assets -maxdepth 1 -name '*.css' -print -quit)"
