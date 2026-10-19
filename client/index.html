@@ -21,6 +21,17 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://codementor-ai.ventuox.com/" />
   <link rel="canonical" href="https://codementor-ai.ventuox.com/" />
+  <!-- Capture PWA installation events before the React bundle starts. -->
+  <script>
+    window.__codementorInstallPrompt = null;
+    window.addEventListener("beforeinstallprompt", function (event) {
+      event.preventDefault();
+      window.__codementorInstallPrompt = event;
+    });
+    window.addEventListener("appinstalled", function () {
+      window.__codementorInstallPrompt = null;
+    });
+  </script>
 </head>
 <body>
   <div id="root"></div>

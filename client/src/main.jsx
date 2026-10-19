@@ -479,12 +479,16 @@ function App() {
 
     const handleBeforeInstallPrompt = (event) => {
       event.preventDefault();
+      // Keep a copy outside React state too, in case the install event fires
+      // before the app's first effect has subscribed.
+      window.__codementorInstallPrompt = event;
       setInstallPromptEvent(event);
     };
 
     const handleAppInstalled = () => {
       setIsAppInstalled(true);
       setInstallPromptEvent(null);
+      window.__codementorInstallPrompt = null;
       setShowInstallHelp(false);
       setToast("CodeMentor AI was installed.");
       window.setTimeout(() => setToast(""), 2800);
@@ -499,6 +503,11 @@ function App() {
       "appinstalled",
       handleAppInstalled
     );
+
+    // The browser can dispatch beforeinstallprompt before React effects run.
+    if (window.__codementorInstallPrompt) {
+      setInstallPromptEvent(window.__codementorInstallPrompt);
+    }
 
     if (
       "serviceWorker" in navigator &&
@@ -544,24 +553,28 @@ function App() {
       return;
     }
 
-    const promptEvent = installPromptEvent;
+    const promptEvent =
+      installPromptEvent || window.__codementorInstallPrompt || null;
+
     if (!promptEvent) {
+      // Browsers without beforeinstallprompt cannot be forced to install a PWA.
+      // Show the exact browser steps instead of pretending a download started.
       setShowInstallHelp(true);
       return;
     }
 
-    // A BeforeInstallPromptEvent can only be used once; clear it before prompting
-    // so rapid repeated taps cannot reuse a consumed event.
+    // A BeforeInstallPromptEvent can only be used once.
     setInstallPromptEvent(null);
+    window.__codementorInstallPrompt = null;
 
     try {
       await promptEvent.prompt();
       const choice = await promptEvent.userChoice;
 
       if (choice?.outcome === "accepted") {
-        showToast("CodeMentor AI install started. Follow your browser's prompts.");
+        showToast("Choose Install in your browser's dialog to finish adding CodeMentor AI.");
       } else {
-        showToast("Install was cancelled. You can try again from this button.");
+        setShowInstallHelp(true);
       }
     } catch (_) {
       setShowInstallHelp(true);
