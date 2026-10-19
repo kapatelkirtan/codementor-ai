@@ -27,6 +27,18 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Install image tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+
+      - name: Generate standard-size PWA install icons
+        run: |
+          convert client/public/favicon.png -strip -resize 192x192! client/public/icon-192.png
+          convert client/public/favicon.png -strip -resize 512x512! client/public/icon-512.png
+          test "$(identify -format '%wx%h' client/public/icon-192.png)" = "192x192"
+          test "$(identify -format '%wx%h' client/public/icon-512.png)" = "512x512"
+
       - name: Install locked dependencies
         run: npm ci
 
@@ -40,10 +52,11 @@ jobs:
           test -f client/dist/manifest.webmanifest
           test -f client/dist/sw.js
           test -f client/dist/favicon.png
+          test -f client/dist/icon-192.png
+          test -f client/dist/icon-512.png
           python -m json.tool client/dist/manifest.webmanifest > /dev/null
-          grep -q '"src": "favicon.png"' client/dist/manifest.webmanifest
-          ! grep -q 'app-icon.svg' client/dist/manifest.webmanifest
-          test ! -f client/dist/app-icon.svg
+          grep -q '"src": "icon-192.png"' client/dist/manifest.webmanifest
+          grep -q '"src": "icon-512.png"' client/dist/manifest.webmanifest
           test -f client/dist/VENTUOX-UPLOAD-README.txt
           test -n "$(find client/dist/assets -maxdepth 1 -name '*.js' -print -quit)"
           test -n "$(find client/dist/assets -maxdepth 1 -name '*.css' -print -quit)"
